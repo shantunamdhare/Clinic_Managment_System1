@@ -220,7 +220,7 @@
                     </div>
                     <div class="form-group">
                         <span class="input-icon">&#x1F464;</span>
-                        <select name="role" class="form-select" required>
+                        <select name="role" id="registerRoleSelect" class="form-select" required onchange="toggleDoctorFields()">
                             <option value="" disabled selected>Select Role</option>
                             <option value="Admin">Admin</option>
                             <option value="Doctor">Doctor</option>
@@ -231,6 +231,28 @@
                             <option value="Staff">Staff</option>
                         </select>
                     </div>
+                    
+                    <!-- Doctor specific fields (hidden by default) -->
+                    <div id="doctorFields" style="display: none; background: rgba(37,99,235,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(37,99,235,0.3);">
+                        <p style="font-size: 0.8rem; color: #2563eb; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Doctor Details</p>
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <span class="input-icon">&#x260E;</span>
+                            <input type="text" name="phone" id="doctorPhone" class="form-input" placeholder="Phone Number">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <span class="input-icon">&#x1F3E5;</span>
+                            <input type="text" name="specialization" id="doctorSpecialization" class="form-input" placeholder="Specialization (e.g. Cardiologist)">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <span class="input-icon">&#x23F1;</span>
+                            <input type="number" name="experience" id="doctorExperience" class="form-input" placeholder="Years of Experience">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <span class="input-icon">&#x1FAAA;</span>
+                            <input type="text" name="licenseId" id="doctorLicenseId" class="form-input" placeholder="Medical License ID">
+                        </div>
+                    </div>
+
                     <div class="terms-row">
                         <input type="checkbox" name="terms" required>
                         <span>I agree to the <a href="#">Terms &amp; Conditions</a></span>
@@ -244,6 +266,32 @@
             </div>
         </div>
     </section>
+
+    <script>
+        function toggleDoctorFields() {
+            var roleSelect = document.getElementById("registerRoleSelect");
+            var doctorFields = document.getElementById("doctorFields");
+            var phoneInput = document.getElementById("doctorPhone");
+            var specInput = document.getElementById("doctorSpecialization");
+            var expInput = document.getElementById("doctorExperience");
+            var licInput = document.getElementById("doctorLicenseId");
+
+            if (roleSelect.value === "Doctor") {
+                doctorFields.style.display = "block";
+                phoneInput.required = true;
+                specInput.required = true;
+                expInput.required = true;
+                licInput.required = true;
+            } else {
+                doctorFields.style.display = "none";
+                phoneInput.required = false;
+                specInput.required = false;
+                expInput.required = false;
+                licInput.required = false;
+            }
+        }
+    </script>
+
 
     <!-- ==================== STATS SECTION ==================== -->
     <section class="stats-section" id="stats">
