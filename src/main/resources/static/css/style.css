@@ -1568,3 +1568,23 @@ img {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+.feature-img {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 18px;
+  margin-bottom: 22px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Force-fixing images via CSS content (Bypasses server caching) */
+.features-grid .feature-card:nth-child(1) .feature-img { content: url("https://images.pexels.com/photos/7578808/pexels-photo-7578808.jpeg?auto=compress&cs=tinysrgb&w=300"); }
+.features-grid .feature-card:nth-child(2) .feature-img { content: url("https://images.pexels.com/photos/8413090/pexels-photo-8413090.jpeg?auto=compress&cs=tinysrgb&w=300"); }
+.features-grid .feature-card:nth-child(3) .feature-img { content: url("https://images.pexels.com/photos/8442110/pexels-photo-8442110.jpeg?auto=compress&cs=tinysrgb&w=300"); }
+.features-grid .feature-card:nth-child(4) .feature-img { content: url("https://images.pexels.com/photos/19471016/pexels-photo-19471016.jpeg?auto=compress&cs=tinysrgb&w=300"); }
+.features-grid .feature-card:nth-child(5) .feature-img { content: url("https://images.pexels.com/photos/6129118/pexels-photo-6129118.jpeg?auto=compress&cs=tinysrgb&w=300"); }
+.features-grid .feature-card:nth-child(6) .feature-img { content: url("https://images.pexels.com/photos/6129502/pexels-photo-6129502.jpeg?auto=compress&cs=tinysrgb&w=300"); }
+

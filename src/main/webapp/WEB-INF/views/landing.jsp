@@ -178,37 +178,37 @@
         <div class="features-grid">
     
           <div class="feature-card">
-            <div class="icon">📅</div>
+            <img src="https://images.pexels.com/photos/7578808/pexels-photo-7578808.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Appointment Management" class="feature-img" />
             <h3>Appointment Management</h3>
             <p>Schedule, track and manage patient appointments efficiently.</p>
           </div>
     
           <div class="feature-card">
-            <div class="icon">👤</div>
+            <img src="https://images.pexels.com/photos/8413090/pexels-photo-8413090.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Patient Records" class="feature-img" />
             <h3>Patient Records</h3>
             <p>Maintain complete patient history, reports and profiles.</p>
           </div>
     
           <div class="feature-card">
-            <div class="icon">🧪</div>
+            <img src="https://images.pexels.com/photos/8442110/pexels-photo-8442110.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Lab Integration" class="feature-img" />
             <h3>Lab Integration</h3>
             <p>Manage test requests, results and lab workflows efficiently.</p>
           </div>
     
           <div class="feature-card">
-            <div class="icon">💊</div>
+            <img src="https://images.pexels.com/photos/19471016/pexels-photo-19471016.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Pharmacy Management" class="feature-img" />
             <h3>Pharmacy Management</h3>
             <p>Handle medicines, prescriptions and stock tracking.</p>
           </div>
     
           <div class="feature-card">
-            <div class="icon">💳</div>
+            <img src="https://images.pexels.com/photos/6129118/pexels-photo-6129118.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Billing & Payments" class="feature-img" />
             <h3>Billing & Payments</h3>
             <p>Generate invoices and manage payments securely.</p>
           </div>
     
           <div class="feature-card">
-            <div class="icon">👥</div>
+            <img src="https://images.pexels.com/photos/6129502/pexels-photo-6129502.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Staff Management" class="feature-img" />
             <h3>Staff Management</h3>
             <p>Manage staff roles, schedules and daily operations.</p>
           </div>
