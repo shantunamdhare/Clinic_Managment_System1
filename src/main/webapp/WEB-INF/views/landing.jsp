@@ -127,6 +127,7 @@
                                 <option value="Lab">Lab</option>
                                 <option value="Pharmacy">Pharmacy</option>
                                 <option value="Staff">Staff</option>
+                                <option value="Delivery">Delivery Boy</option>
                             </select>
                         </div>
                         <div class="form-row">
@@ -220,7 +221,7 @@
                     </div>
                     <div class="form-group">
                         <span class="input-icon">&#x1F464;</span>
-                        <select name="role" class="form-select" required>
+                        <select name="role" id="roleSelect" class="form-select" required onchange="toggleLabFields()">
                             <option value="" disabled selected>Select Role</option>
                             <option value="Admin">Admin</option>
                             <option value="Doctor">Doctor</option>
@@ -229,8 +230,44 @@
                             <option value="Lab">Lab</option>
                             <option value="Pharmacy">Pharmacy</option>
                             <option value="Staff">Staff</option>
+                            <option value="Delivery">Delivery Boy</option>
                         </select>
                     </div>
+
+                    <!-- LAB SPECIFIC FIELDS -->
+                    <div id="labFields" style="display: none;">
+                        <div class="form-group" style="margin-top: 15px;">
+                            <span class="input-icon">&#x1F3EC;</span>
+                            <select name="labType" class="form-select">
+                                <option value="In-House">In-House Lab</option>
+                                <option value="External">External Lab</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <span class="input-icon">&#x1F3E5;</span>
+                            <input type="text" name="labName" class="form-input" placeholder="Laboratory Name">
+                        </div>
+                        <div class="form-group">
+                            <span class="input-icon">&#x1F4CD;</span>
+                            <input type="text" name="labAddress" class="form-input" placeholder="Laboratory Address">
+                        </div>
+                        <div class="form-group">
+                            <span class="input-icon">&#x1F3AB;</span>
+                            <input type="text" name="labId" class="form-input" placeholder="Laboratory ID (e.g. LAB1001)">
+                        </div>
+                    </div>
+
+                    <script>
+                        function toggleLabFields() {
+                            const role = document.getElementById('roleSelect').value;
+                            const labFields = document.getElementById('labFields');
+                            if (role === 'Lab') {
+                                labFields.style.display = 'block';
+                            } else {
+                                labFields.style.display = 'none';
+                            }
+                        }
+                    </script>
                     <div class="terms-row">
                         <input type="checkbox" name="terms" required>
                         <span>I agree to the <a href="#">Terms &amp; Conditions</a></span>
