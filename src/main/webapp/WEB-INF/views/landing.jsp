@@ -555,6 +555,28 @@
                 labId.required = true;
             }
         }
+
+        // Hero Background Slider Logic
+        const heroImages = [
+            "/hero-slider/hero1.jpg",
+            "/hero-slider/hero2.jpg",
+            "/hero-slider/hero3.jpg",
+            "/hero-slider/hero4.jpg",
+            "/hero-slider/hero5.jpg"
+        ];
+        let currentHero = 0;
+        const heroSection = document.getElementById('hero');
+
+        function changeHeroBackground() {
+            currentHero = (currentHero + 1) % heroImages.length;
+            heroSection.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url(${heroImages[currentHero]})`;
+        }
+
+        // Initialize first background
+        heroSection.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url(${heroImages[0]})`;
+        
+        // Start slider
+        setInterval(changeHeroBackground, 1000);
     </script>
 </body>
 </html>

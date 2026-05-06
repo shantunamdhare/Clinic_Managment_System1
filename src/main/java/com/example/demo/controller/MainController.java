@@ -2,8 +2,14 @@ package com.example.demo.controller;
 
 import com.example.demo.model.Patient;
 import com.example.demo.model.User;
+import com.example.demo.model.Appointment;
+import com.example.demo.model.Availability;
 import com.example.demo.repository.PatientRepository;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.repository.AppointmentRepository;
+import com.example.demo.repository.AvailabilityRepository;
+import com.example.demo.repository.VisitRepository;
+import com.example.demo.repository.LabRequestRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -28,6 +35,18 @@ public class MainController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AppointmentRepository appointmentRepository;
+
+    @Autowired
+    private AvailabilityRepository availabilityRepository;
+
+    @Autowired
+    private VisitRepository visitRepository;
+
+    @Autowired
+    private LabRequestRepository labRequestRepository;
 
     // ========================
     // Landing Page
@@ -151,7 +170,78 @@ public class MainController {
     // Dashboard Routes
     // ========================
     @GetMapping("/admin-dashboard")
-    public String adminDashboard() {
+    public String adminDashboard(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null || !"Admin".equalsIgnoreCase(user.getRole())) {
+            return "redirect:/";
+        }
+        model.addAttribute("user", user);
+
+        LocalDate today = LocalDate.now();
+        LocalDate monthStart = today.withDayOfMonth(1);
+
+        // Patient stats
+        long totalPatients = patientRepository.count();
+        model.addAttribute("totalPatients", totalPatients);
+
+        // Appointment stats
+        long totalAppointments = appointmentRepository.count();
+        long todayAppointments = appointmentRepository.countByAppointmentDate(today);
+        long monthAppointments = appointmentRepository.countByAppointmentDateBetween(monthStart, today);
+        long pendingAppointments = appointmentRepository.countByStatus("Pending");
+        long completedAppointments = appointmentRepository.countByStatus("Completed");
+        long cancelledAppointments = appointmentRepository.countByStatus("Cancelled");
+        model.addAttribute("totalAppointments", totalAppointments);
+        model.addAttribute("todayAppointments", todayAppointments);
+        model.addAttribute("monthAppointments", monthAppointments);
+        model.addAttribute("pendingAppointments", pendingAppointments);
+        model.addAttribute("completedAppointments", completedAppointments);
+        model.addAttribute("cancelledAppointments", cancelledAppointments);
+
+        // User / Staff stats
+        long totalDoctors = userRepository.countByRole("Doctor");
+        long totalStaff = userRepository.countByRole("Staff");
+        long totalReceptionists = userRepository.countByRole("Receptionist");
+        long totalLabUsers = userRepository.countByRole("Lab");
+        long totalPharmacy = userRepository.countByRole("Pharmacy");
+        long totalDelivery = userRepository.countByRole("Delivery");
+        long totalUsers = userRepository.count();
+        model.addAttribute("totalDoctors", totalDoctors);
+        model.addAttribute("totalStaff", totalStaff);
+        model.addAttribute("totalReceptionists", totalReceptionists);
+        model.addAttribute("totalLabUsers", totalLabUsers);
+        model.addAttribute("totalPharmacy", totalPharmacy);
+        model.addAttribute("totalDelivery", totalDelivery);
+        model.addAttribute("totalUsers", totalUsers);
+
+        // Doctor availability today
+        List<Availability> todayAvailability = availabilityRepository.findByAvailableDateOrderByStartTimeAsc(today);
+        model.addAttribute("todayAvailability", todayAvailability);
+
+        // Doctors list
+        List<User> doctors = userRepository.findByRole("Doctor");
+        model.addAttribute("doctors", doctors);
+
+        // All staff (non-admin users)
+        List<User> allUsers = userRepository.findAll();
+        model.addAttribute("allUsers", allUsers);
+
+        // Recent appointments
+        List<Appointment> recentAppointments = appointmentRepository.findTop10ByOrderByAppointmentDateDescAppointmentTimeDesc();
+        model.addAttribute("recentAppointments", recentAppointments);
+
+        // Today's appointments
+        List<Appointment> todayAppointmentsList = appointmentRepository.findByAppointmentDateOrderByAppointmentTimeAsc(today);
+        model.addAttribute("todayAppointmentsList", todayAppointmentsList);
+
+        // Visits count
+        long totalVisits = visitRepository.count();
+        model.addAttribute("totalVisits", totalVisits);
+
+        // Lab request stats
+        long pendingLabRequests = labRequestRepository.count();
+        model.addAttribute("pendingLabRequests", pendingLabRequests);
+
         return "admin-dashboard";
     }
 
@@ -161,7 +251,10 @@ public class MainController {
     }
 
     @GetMapping("/receptionist-dashboard")
-    public String receptionistDashboard() {
+    public String receptionistDashboard(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null || !"Receptionist".equalsIgnoreCase(user.getRole())) return "redirect:/";
+        model.addAttribute("user", user);
         return "receptionist-dashboard";
     }
 
@@ -182,7 +275,10 @@ public class MainController {
     }
 
     @GetMapping("/pharmacy-dashboard")
-    public String pharmacyDashboard() {
+    public String pharmacyDashboard(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null || !"Pharmacy".equalsIgnoreCase(user.getRole())) return "redirect:/";
+        model.addAttribute("user", user);
         return "pharmacy-dashboard";
     }
 
@@ -193,13 +289,15 @@ public class MainController {
             return "redirect:/";
         }
         model.addAttribute("user", user);
-        // Delivery boy sees patients whose samples need to be picked up or are in transit
         model.addAttribute("tasks", patientRepository.findAll()); 
         return "delivery-dashboard";
     }
 
     @GetMapping("/staff-dashboard")
-    public String staffDashboard() {
+    public String staffDashboard(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null || !"Staff".equalsIgnoreCase(user.getRole())) return "redirect:/";
+        model.addAttribute("user", user);
         return "staff-dashboard";
     }
 
@@ -284,6 +382,80 @@ public class MainController {
             redirectAttributes.addFlashAttribute("successMessage", "Delivery status updated to: " + status);
         }
         return "redirect:/delivery-dashboard";
+    }
+
+    @PostMapping("/admin/update-attendance")
+    public String updateAttendance(
+            @RequestParam Long userId,
+            @RequestParam String status,
+            @RequestParam(required = false) String checkIn,
+            @RequestParam(required = false) String checkOut,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        
+        User admin = (User) session.getAttribute("user");
+        if (admin == null || !"Admin".equalsIgnoreCase(admin.getRole())) return "redirect:/";
+
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isPresent()) {
+            User staff = optionalUser.get();
+            staff.setAttendanceStatus(status);
+            if ("Absent".equalsIgnoreCase(status)) {
+                staff.setCheckInTime(null);
+                staff.setCheckOutTime(null);
+            } else {
+                if (checkIn != null) staff.setCheckInTime(checkIn);
+                if (checkOut != null) staff.setCheckOutTime(checkOut);
+            }
+            userRepository.save(staff);
+            redirectAttributes.addFlashAttribute("successMessage", "Attendance updated for " + staff.getFullName());
+        }
+        return "redirect:/admin-dashboard";
+    }
+
+    @PostMapping("/admin/assign-shift")
+    public String assignShift(
+            @RequestParam Long userId,
+            @RequestParam String shiftType,
+            @RequestParam String shiftDate,
+            @RequestParam String startTime,
+            @RequestParam String endTime,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        
+        User admin = (User) session.getAttribute("user");
+        if (admin == null || !"Admin".equalsIgnoreCase(admin.getRole())) return "redirect:/";
+
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isPresent()) {
+            User staff = optionalUser.get();
+            // Concatenate into a readable string: "Day Shift (2026-05-06, 09:00 - 17:00)"
+            String fullShiftInfo = shiftType + " (" + shiftDate + ", " + startTime + " - " + endTime + ")";
+            staff.setShiftTiming(fullShiftInfo);
+            userRepository.save(staff);
+            redirectAttributes.addFlashAttribute("successMessage", "Shift assigned to " + staff.getFullName());
+        }
+        return "redirect:/admin-dashboard";
+    }
+
+    @PostMapping("/admin/update-performance")
+    public String updatePerformance(
+            @RequestParam Long userId,
+            @RequestParam Integer rating,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        
+        User admin = (User) session.getAttribute("user");
+        if (admin == null || !"Admin".equalsIgnoreCase(admin.getRole())) return "redirect:/";
+
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isPresent()) {
+            User staff = optionalUser.get();
+            staff.setPerformanceRating(rating);
+            userRepository.save(staff);
+            redirectAttributes.addFlashAttribute("successMessage", "Performance rating updated for " + staff.getFullName());
+        }
+        return "redirect:/admin-dashboard";
     }
 
     // ========================

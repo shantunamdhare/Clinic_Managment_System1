@@ -257,7 +257,31 @@
                     <div style="background: linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.7)), url('/img/lab_banner.png') center/cover no-repeat; padding: 48px; border-radius: 24px; margin-bottom: 32px; display: flex; align-items: center; color: white; box-shadow: 0 10px 30px -10px rgba(79, 70, 229, 0.3);">
                         <div style="max-width: 500px;">
                             <h2 style="font-size: 28px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px;">Welcome back, ${not empty user.fullName ? user.fullName : 'Technician'}!</h2>
-                            <p style="font-size: 15px; opacity: 0.9; line-height: 1.6; margin-bottom: 24px;">Your modern workspace is ready. You currently have ${patients.size()} pending requests to process and manage today.</p>
+                            <p style="font-size: 15px; opacity: 0.9; line-height: 1.6; margin-bottom: 12px;">Your modern workspace is ready. You currently have ${patients.size()} pending requests to process and manage today.</p>
+                            
+                            <!-- Staff Stats Bar (Managed by Admin) -->
+                            <div style="display:flex; gap:15px; margin-bottom:24px; background:rgba(255,255,255,0.1); padding:12px; border-radius:12px; backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.15);">
+                                <div style="flex:1;">
+                                    <div style="font-size:9px; font-weight:800; text-transform:uppercase; color:rgba(255,255,255,0.6); margin-bottom:2px;">Attendance</div>
+                                    <div style="font-size:12px; font-weight:700;">${user.attendanceStatus != null ? user.attendanceStatus : 'Not Marked'}</div>
+                                </div>
+                                <div style="flex:1; border-left:1px solid rgba(255,255,255,0.1); padding-left:15px;">
+                                    <div style="font-size:9px; font-weight:800; text-transform:uppercase; color:rgba(255,255,255,0.6); margin-bottom:2px;">Shift</div>
+                                    <div style="font-size:12px; font-weight:700;">${user.shiftTiming != null ? user.shiftTiming : 'N/A'}</div>
+                                </div>
+                                <div style="flex:1; border-left:1px solid rgba(255,255,255,0.1); padding-left:15px;">
+                                    <div style="font-size:9px; font-weight:800; text-transform:uppercase; color:rgba(255,255,255,0.6); margin-bottom:2px;">Performance</div>
+                                    <div style="font-size:12px; font-weight:700; color:#fbbf24;">
+                                        <c:choose>
+                                            <c:when test="${user.performanceRating != null}">
+                                                <c:forEach begin="1" end="${user.performanceRating}">&#x2B50;</c:forEach>
+                                            </c:when>
+                                            <c:otherwise>Pending</c:otherwise>
+                                        </c:choose>
+                                    </div>
+                                </div>
+                            </div>
+
                             <button class="btn-primary" style="background: white; color: var(--primary); padding: 12px 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" onclick="openNewRequestModal()">
                                 <span class="material-symbols-outlined" style="font-size: 20px;">add_circle</span>
                                 Quick Request

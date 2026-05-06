@@ -34,6 +34,13 @@ public class User {
     private Integer experience;
     private String licenseId;
 
+    // Staff Management fields
+    private String attendanceStatus; // Present, Absent, Pending
+    private String checkInTime;
+    private String checkOutTime;
+    private String shiftTiming; // e.g., 09 AM - 05 PM
+    private Integer performanceRating; // 1-5
+
     public User() {
     }
 
@@ -152,5 +159,45 @@ public class User {
 
     public void setLicenseId(String licenseId) {
         this.licenseId = licenseId;
+    }
+
+    public String getAttendanceStatus() {
+        return attendanceStatus;
+    }
+
+    public void setAttendanceStatus(String attendanceStatus) {
+        this.attendanceStatus = attendanceStatus;
+    }
+
+    public String getCheckInTime() {
+        return checkInTime;
+    }
+
+    public void setCheckInTime(String checkInTime) {
+        this.checkInTime = checkInTime;
+    }
+
+    public String getCheckOutTime() {
+        return checkOutTime;
+    }
+
+    public void setCheckOutTime(String checkOutTime) {
+        this.checkOutTime = checkOutTime;
+    }
+
+    public String getShiftTiming() {
+        return shiftTiming;
+    }
+
+    public void setShiftTiming(String shiftTiming) {
+        this.shiftTiming = shiftTiming;
+    }
+
+    public Integer getPerformanceRating() {
+        return performanceRating;
+    }
+
+    public void setPerformanceRating(Integer performanceRating) {
+        this.performanceRating = performanceRating;
     }
 }

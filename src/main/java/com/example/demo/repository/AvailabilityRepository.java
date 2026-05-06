@@ -16,4 +16,7 @@ public interface AvailabilityRepository extends JpaRepository<Availability, Long
     // Check for overlapping slots
     boolean existsByDoctorAndAvailableDateAndStartTimeLessThanAndEndTimeGreaterThan(
             User doctor, LocalDate date, LocalTime endTime, LocalTime startTime);
+
+    // Admin dashboard: doctors available today
+    List<Availability> findByAvailableDateOrderByStartTimeAsc(LocalDate date);
 }
