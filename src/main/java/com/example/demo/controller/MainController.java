@@ -62,6 +62,10 @@ public class MainController {
             @RequestParam(required = false) String licenseId,
             @RequestParam(required = false) String deliveryPhone,
             @RequestParam(required = false) String vehicleType,
+            @RequestParam(required = false) String pharmacyName,
+            @RequestParam(required = false) String pharmacyAddress,
+            @RequestParam(required = false) String pharmacyLicense,
+            @RequestParam(required = false) String gender,
             RedirectAttributes redirectAttributes) {
 
         if (!password.equals(confirmPassword)) {
@@ -92,7 +96,13 @@ public class MainController {
         } else if ("Delivery".equalsIgnoreCase(role)) {
             user.setPhone(deliveryPhone);
             user.setVehicleType(vehicleType);
+        } else if ("Pharmacy".equalsIgnoreCase(role)) {
+            user.setPharmacyName(pharmacyName);
+            user.setPharmacyAddress(pharmacyAddress);
+            user.setPharmacyLicense(pharmacyLicense);
         }
+
+        user.setGender(gender);
 
         userRepository.save(user);
         redirectAttributes.addFlashAttribute("registerSuccess", "Registration successful! Please login.");
@@ -249,13 +259,7 @@ public class MainController {
         return "patient-dashboard";
     }
 
-    @GetMapping("/pharmacy-dashboard")
-    public String pharmacyDashboard(HttpSession session, Model model) {
-        User user = (User) session.getAttribute("user");
-        if (user == null || !"Pharmacy".equals(user.getRole())) return "redirect:/";
-        model.addAttribute("user", user);
-        return "pharmacy-dashboard";
-    }
+
 
     @GetMapping("/staff-dashboard")
     public String staffDashboard(HttpSession session, Model model) {

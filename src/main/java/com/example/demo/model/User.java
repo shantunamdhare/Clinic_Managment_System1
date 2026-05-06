@@ -37,6 +37,16 @@ public class User {
     // Delivery specific fields
     private String vehicleType;
 
+    // Pharmacy specific fields
+    private String pharmacyName;
+    private String pharmacyAddress;
+    private String pharmacyLicense;
+
+    // Profile Image
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String profileImage;
+
     public User() {
     }
 
@@ -162,5 +172,47 @@ public class User {
 
     public void setVehicleType(String vehicleType) {
         this.vehicleType = vehicleType;
+    }
+
+    public String getPharmacyName() {
+        return pharmacyName;
+    }
+
+    public void setPharmacyName(String pharmacyName) {
+        this.pharmacyName = pharmacyName;
+    }
+
+    public String getPharmacyAddress() {
+        return pharmacyAddress;
+    }
+
+    public void setPharmacyAddress(String pharmacyAddress) {
+        this.pharmacyAddress = pharmacyAddress;
+    }
+
+    public String getPharmacyLicense() {
+        return pharmacyLicense;
+    }
+
+    public void setPharmacyLicense(String pharmacyLicense) {
+        this.pharmacyLicense = pharmacyLicense;
+    }
+
+    public String getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
+
+    private String gender;
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 }
