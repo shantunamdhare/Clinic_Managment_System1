@@ -231,6 +231,35 @@
                                         <input type="text" name="vehicleType" id="vehicleType" class="form-input" placeholder="Vehicle Type (e.g. Bike, Van)">
                                     </div>
                                 </div>
+                                <!-- Pharmacy specific fields (hidden by default) -->
+                                <div id="pharmacyFields" style="display: none; background: rgba(37,99,235,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(37,99,235,0.3);">
+                                    <p style="font-size: 0.8rem; color: #2563eb; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Pharmacy Details</p>
+                                    <div class="form-group" style="margin-bottom: 10px;">
+                                        <span class="input-icon">&#x1F3E5;</span>
+                                        <input type="text" name="pharmacyName" class="form-input" placeholder="Pharmacy Name">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 10px;">
+                                        <span class="input-icon">&#x1F4CD;</span>
+                                        <input type="text" name="pharmacyAddress" class="form-input" placeholder="Pharmacy Address">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <span class="input-icon">&#x1F4DC;</span>
+                                        <input type="text" name="pharmacyLicense" class="form-input" placeholder="Pharmacy License ID">
+                                    </div>
+                                </div>
+
+                                <!-- Gender Selection -->
+                                <div class="form-group" style="margin-bottom: 15px;">
+                                    <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 8px; font-weight: 600;">Select Gender</p>
+                                    <div style="display: flex; gap: 20px;">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: #475569;">
+                                            <input type="radio" name="gender" value="Male" required style="accent-color: #4f46e5;"> Male
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: #475569;">
+                                            <input type="radio" name="gender" value="Female" required style="accent-color: #4f46e5;"> Female
+                                        </label>
+                                    </div>
+                                </div>
 
                                 <!-- Staff specific fields -->
                                 <div id="staffFields" style="display: none; background: rgba(37,99,235,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(37,99,235,0.3);">
@@ -246,6 +275,8 @@
                                     <div class="form-group" style="margin-bottom: 0;">
                                         <span class="input-icon">&#x1F3E5;</span>
                                         <input type="text" name="hospitalName" id="hospitalName" class="form-input" placeholder="Hospital/Clinic Name">
+                                    </div>
+                                </div>
                                     </div>
                                 </div>
 
@@ -544,9 +575,7 @@
     <script>
         function toggleRoleFields() {
             var roleSelect = document.getElementById("registerRoleSelect");
-            var doctorFields = document.getElementById("doctorFields");
-            var labFields = document.getElementById("labFields");
-            var deliveryFields = document.getElementById("deliveryFields");
+            var pharmacyFields = document.getElementById("pharmacyFields");
             var staffFields = document.getElementById("staffFields");
             
             var doctorPhone = document.getElementById("doctorPhone");
@@ -569,6 +598,7 @@
             if(doctorFields) doctorFields.style.display = "none";
             if(labFields) labFields.style.display = "none";
             if(deliveryFields) deliveryFields.style.display = "none";
+            if(pharmacyFields) pharmacyFields.style.display = "none";
             if(staffFields) staffFields.style.display = "none";
             
             // Reset required status
@@ -600,6 +630,8 @@
                 if(labName) labName.required = true;
                 if(labAddr) labAddr.required = true;
                 if(labId) labId.required = true;
+            } else if (roleSelect.value === "Pharmacy") {
+                if(pharmacyFields) pharmacyFields.style.display = "block";
             } else if (roleSelect.value === "Delivery") {
                 if(deliveryFields) {
                     deliveryFields.style.display = "block";

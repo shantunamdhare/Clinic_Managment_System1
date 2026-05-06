@@ -1,21 +1,14 @@
 package com.example.demo.config;
 
-import com.example.demo.model.Patient;
-import com.example.demo.model.User;
-import com.example.demo.model.LabRequest;
-import com.example.demo.model.LabTest;
-import com.example.demo.repository.PatientRepository;
-import com.example.demo.repository.UserRepository;
-import com.example.demo.repository.LabRequestRepository;
-import com.example.demo.repository.LabTestRepository;
-import com.example.demo.repository.AttendanceRepository;
-import com.example.demo.repository.StaffShiftRepository;
+import com.example.demo.model.*;
+import com.example.demo.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -24,17 +17,19 @@ import java.util.Optional;
 public class DataInitializer {
 
     @Bean
-    public CommandLineRunner initData(PatientRepository patientRepository,
-            UserRepository userRepository,
-            LabRequestRepository labRequestRepo,
-            LabTestRepository labTestRepo,
-            AttendanceRepository attendanceRepo,
-            StaffShiftRepository staffShiftRepo,
-            PasswordEncoder passwordEncoder) {
+    public CommandLineRunner initData(PatientRepository patientRepository, 
+                                     UserRepository userRepository, 
+                                     LabRequestRepository labRequestRepo,
+                                     LabTestRepository labTestRepo,
+                                     MedicineRepository medicineRepo,
+                                     InvoiceRepository invoiceRepo,
+                                     StaffShiftRepository shiftRepo,
+                                     StaffAttendanceRepository attendanceRepo,
+                                     PasswordEncoder passwordEncoder) {
         return args -> {
             // Clearing existing staff data as requested for a fresh start
             attendanceRepo.deleteAll();
-            staffShiftRepo.deleteAll();
+            shiftRepo.deleteAll();
 
             // 1. Initialize Roles / Users
             seedUser(userRepository, passwordEncoder, "admin@gmail.com", "admin123", "Admin", "System Admin");
@@ -87,8 +82,8 @@ public class DataInitializer {
                 p1.setName("Emily Johnson");
                 p1.setPatientId("PID-5042");
                 p1.setGender("Female");
-                p1.setDateOfBirth(LocalDate.of(1995, 5, 10));
-                p1.setContactNumber("9876543210");
+                p1.setDateOfBirth(LocalDate.of(1995, 8, 15));
+                p1.setContactNumber("+91 98765 43210");
                 p1.setTestType("Complete Blood Count (CBC)");
                 p1.setPriority("High");
                 p1.setDeliveryStatus("Pending Pickup");
@@ -105,6 +100,57 @@ public class DataInitializer {
                 patientRepository.save(p2);
                 
                 System.out.println(">> Sample patients initialized.");
+            }
+            
+            // Initialize Pharmacy Medicines
+            if (medicineRepo.count() == 0) {
+                medicineRepo.save(new Medicine("Paracetamol 500mg", "Tablet", "GSK", 100, 20.0, LocalDate.now().plusYears(2), "BT-001"));
+                medicineRepo.save(new Medicine("Amoxicillin 250mg", "Capsule", "Pfizer", 5, 150.0, LocalDate.now().plusMonths(1), "BT-002")); // Low stock & Expiring
+                medicineRepo.save(new Medicine("Cough Syrup", "Syrup", "Abbott", 50, 85.0, LocalDate.now().plusMonths(6), "BT-003"));
+                medicineRepo.save(new Medicine("Insulin Glargine", "Injection", "Sanofi", 12, 1200.0, LocalDate.now().plusDays(15), "BT-004")); // Expiring
+                System.out.println(">> Sample medicines initialized.");
+            }
+
+            // Initialize Pharmacy Staff user
+            Optional<User> existingPharmacist = userRepository.findByEmail("pharmacist@gmail.com");
+            if (existingPharmacist.isEmpty()) {
+                User pharmacist = new User();
+                pharmacist.setFullName("Arjun Sharma");
+                pharmacist.setEmail("pharmacist@gmail.com");
+                pharmacist.setPassword(passwordEncoder.encode("1234"));
+                pharmacist.setRole("Pharmacy");
+                userRepository.save(pharmacist);
+                
+                // Add shift
+                StaffShift shift = new StaffShift();
+                shift.setStaff(pharmacist);
+                shift.setDayOfWeek("Monday");
+                shift.setStartTime(java.time.LocalTime.of(9, 0));
+                shift.setEndTime(java.time.LocalTime.of(17, 0));
+                shiftRepo.save(shift);
+                
+                // Add attendance
+                StaffAttendance attendance = new StaffAttendance();
+                attendance.setStaff(pharmacist);
+                attendance.setDate(LocalDate.now());
+                attendance.setCheckIn(java.time.LocalTime.of(8, 55));
+                attendance.setStatus("Present");
+                attendanceRepo.save(attendance);
+                
+                System.out.println(">> Pharmacy staff and shifts initialized.");
+
+                // Initialize Sample Invoice
+                if (invoiceRepo.count() == 0 && !patientRepository.findAll().isEmpty()) {
+                    Patient p = patientRepository.findAll().get(0);
+                    Invoice inv = new Invoice();
+                    inv.setPatient(p);
+                    inv.setTotalAmount(500.0);
+                    inv.setPaymentMethod("Cash");
+                    inv.setPaymentStatus("Paid");
+                    inv.setInvoiceNumber("INV-SAMPLE-001");
+                    inv.setInvoiceDate(LocalDateTime.now());
+                    invoiceRepo.save(inv);
+                }
             }
             
             System.out.println(">> Database initialization complete and stable.");
