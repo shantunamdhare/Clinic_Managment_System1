@@ -1,13 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.LabRequest;
-import com.example.demo.model.LabTest;
-import com.example.demo.model.Patient;
-import com.example.demo.model.User;
-import com.example.demo.repository.PatientRepository;
-import com.example.demo.repository.UserRepository;
-import com.example.demo.repository.LabRequestRepository;
-import com.example.demo.repository.LabTestRepository;
+import com.example.demo.model.*;
+import com.example.demo.repository.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -32,10 +28,25 @@ public class MainController {
     private PatientRepository patientRepository;
 
     @Autowired
-    private LabRequestRepository labRequestRepo;
+    private LabRequestRepository labRequestRepository;
 
     @Autowired
     private LabTestRepository labTestRepo;
+
+    @Autowired
+    private AppointmentRepository appointmentRepository;
+
+    @Autowired
+    private AvailabilityRepository availabilityRepository;
+
+    @Autowired
+    private VisitRepository visitRepository;
+
+    @Autowired
+    private AttendanceRepository attendanceRepo;
+
+    @Autowired
+    private StaffShiftRepository staffShiftRepo;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -66,16 +77,19 @@ public class MainController {
             @RequestParam(required = false) String pharmacyAddress,
             @RequestParam(required = false) String pharmacyLicense,
             @RequestParam(required = false) String gender,
+            @RequestParam(required = false) String staffPhone,
+            @RequestParam(required = false) String staffId,
+            @RequestParam(required = false) String hospitalName,
             RedirectAttributes redirectAttributes) {
 
         if (!password.equals(confirmPassword)) {
             redirectAttributes.addFlashAttribute("registerError", "Passwords do not match!");
-            return "redirect:/#register-section";
+            return "redirect:/#login-section";
         }
 
         if (userRepository.existsByEmail(email)) {
             redirectAttributes.addFlashAttribute("registerError", "Email already registered!");
-            return "redirect:/#register-section";
+            return "redirect:/#login-section";
         }
 
         User user = new User();
@@ -83,6 +97,7 @@ public class MainController {
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
         user.setRole(role);
+
         if ("Lab".equalsIgnoreCase(role)) {
             user.setLabName(labName);
             user.setLabAddress(labAddress);
@@ -100,13 +115,17 @@ public class MainController {
             user.setPharmacyName(pharmacyName);
             user.setPharmacyAddress(pharmacyAddress);
             user.setPharmacyLicense(pharmacyLicense);
+        } else if ("Staff".equalsIgnoreCase(role)) {
+            user.setPhone(staffPhone);
+            user.setStaffId(staffId);
+            user.setHospitalName(hospitalName);
         }
 
         user.setGender(gender);
 
         userRepository.save(user);
         redirectAttributes.addFlashAttribute("registerSuccess", "Registration successful! Please login.");
-        return "redirect:/";
+        return "redirect:/#login-section";
     }
 
     @PostMapping("/login")
@@ -139,24 +158,128 @@ public class MainController {
         return "redirect:/";
     }
 
+    @GetMapping("/admin-dashboard")
+    public String adminDashboard(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null || !"Admin".equalsIgnoreCase(user.getRole())) {
+            return "redirect:/";
+        }
+        model.addAttribute("user", user);
+
+        LocalDate today = LocalDate.now();
+        LocalDate monthStart = today.withDayOfMonth(1);
+
+        // Patient stats
+        long totalPatients = patientRepository.count();
+        model.addAttribute("totalPatients", totalPatients);
+
+        // Appointment stats
+        long totalAppointments = appointmentRepository.count();
+        long todayAppointments = appointmentRepository.countByAppointmentDate(today);
+        long monthAppointments = appointmentRepository.countByAppointmentDateBetween(monthStart, today);
+        long pendingAppointments = appointmentRepository.countByStatus("Pending");
+        long completedAppointments = appointmentRepository.countByStatus("Completed");
+        long cancelledAppointments = appointmentRepository.countByStatus("Cancelled");
+        model.addAttribute("totalAppointments", totalAppointments);
+        model.addAttribute("todayAppointments", todayAppointments);
+        model.addAttribute("monthAppointments", monthAppointments);
+        model.addAttribute("pendingAppointments", pendingAppointments);
+        model.addAttribute("completedAppointments", completedAppointments);
+        model.addAttribute("cancelledAppointments", cancelledAppointments);
+
+        // User / Staff stats
+        long totalDoctors = userRepository.countByRole("Doctor");
+        long totalStaff = userRepository.countByRole("Staff");
+        long totalReceptionists = userRepository.countByRole("Receptionist");
+        long totalLabUsers = userRepository.countByRole("Lab");
+        long totalPharmacy = userRepository.countByRole("Pharmacy");
+        long totalDelivery = userRepository.countByRole("Delivery");
+        long totalUsers = userRepository.count();
+        model.addAttribute("totalDoctors", totalDoctors);
+        model.addAttribute("totalStaff", totalStaff);
+        model.addAttribute("totalReceptionists", totalReceptionists);
+        model.addAttribute("totalLabUsers", totalLabUsers);
+        model.addAttribute("totalPharmacy", totalPharmacy);
+        model.addAttribute("totalDelivery", totalDelivery);
+        model.addAttribute("totalUsers", totalUsers);
+
+        // Doctor availability today
+        List<Availability> todayAvailability = availabilityRepository.findByAvailableDateOrderByStartTimeAsc(today);
+        model.addAttribute("todayAvailability", todayAvailability);
+
+        // Doctors list
+        List<User> doctors = userRepository.findByRole("Doctor");
+        model.addAttribute("doctors", doctors);
+
+        // All staff (non-admin users)
+        List<User> allUsers = userRepository.findAll();
+        model.addAttribute("allUsers", allUsers);
+
+        // Recent appointments
+        List<Appointment> recentAppointments = appointmentRepository.findTop10ByOrderByAppointmentDateDescAppointmentTimeDesc();
+        model.addAttribute("recentAppointments", recentAppointments);
+
+        // Today's appointments
+        List<Appointment> todayAppointmentsList = appointmentRepository.findByAppointmentDateOrderByAppointmentTimeAsc(today);
+        model.addAttribute("todayAppointmentsList", todayAppointmentsList);
+
+        // Visits count
+        long totalVisits = visitRepository.count();
+        model.addAttribute("totalVisits", totalVisits);
+
+        // Lab request stats
+        long pendingLabRequests = labRequestRepository.count();
+        model.addAttribute("pendingLabRequests", pendingLabRequests);
+
+        return "admin-dashboard";
+    }
+
+    @GetMapping("/receptionist-dashboard")
+    public String receptionistDashboard(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null || !"Receptionist".equalsIgnoreCase(user.getRole())) return "redirect:/";
+        model.addAttribute("user", user);
+        return "receptionist-dashboard";
+    }
+
+    @GetMapping("/patient-dashboard")
+    public String patientDashboard(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null || !"Patient".equalsIgnoreCase(user.getRole())) return "redirect:/";
+        model.addAttribute("user", user);
+        return "patient-dashboard";
+    }
+
     @GetMapping("/lab-dashboard")
     public String labDashboard(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
-        if (user == null || !"Lab".equals(user.getRole())) return "redirect:/";
+        if (user == null || !"Lab".equalsIgnoreCase(user.getRole())) return "redirect:/";
         
         model.addAttribute("user", user);
         model.addAttribute("patients", patientRepository.findAll());
         model.addAttribute("deliveryPartners", userRepository.findByRole("Delivery"));
         model.addAttribute("allTests", labTestRepo.findAll());
-        model.addAttribute("doctorRequests", labRequestRepo.findByStatus("Pending"));
+        model.addAttribute("doctorRequests", labRequestRepository.findByStatus("Pending"));
+        
+        // Add shifts and attendance for Lab users
+        model.addAttribute("shifts", staffShiftRepo.findByUser(user));
+        model.addAttribute("attendanceRecords", attendanceRepo.findByUser(user));
         
         return "lab-dashboard";
+    }
+
+    @GetMapping("/pharmacy-dashboard")
+    public String pharmacyDashboard(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null || !"Pharmacy".equalsIgnoreCase(user.getRole())) return "redirect:/";
+        model.addAttribute("user", user);
+        return "pharmacy-dashboard";
     }
 
     @GetMapping("/delivery-dashboard")
     public String deliveryDashboard(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
-        if (user == null || !"Delivery".equals(user.getRole())) return "redirect:/";
+        if (user == null || !"Delivery".equalsIgnoreCase(user.getRole())) return "redirect:/";
         
         String fullName = user.getFullName();
         model.addAttribute("user", user);
@@ -165,6 +288,18 @@ public class MainController {
                              p.getDeliveryAssignedTo().trim().equalsIgnoreCase(fullName.trim()))
                 .collect(Collectors.toList()));
         return "delivery-dashboard";
+    }
+
+    @GetMapping("/staff-dashboard")
+    public String staffDashboard(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null || !"Staff".equalsIgnoreCase(user.getRole())) return "redirect:/";
+        
+        model.addAttribute("user", user);
+        model.addAttribute("attendances", attendanceRepo.findByUser(user));
+        model.addAttribute("shifts", staffShiftRepo.findByUser(user));
+        
+        return "staff-dashboard";
     }
 
     @PostMapping("/assign-delivery")
@@ -226,57 +361,165 @@ public class MainController {
 
     @PostMapping("/process-lab-request")
     public String processRequest(@RequestParam Long id, RedirectAttributes redirectAttributes) {
-        Optional<LabRequest> r = labRequestRepo.findById(id);
+        Optional<LabRequest> r = labRequestRepository.findById(id);
         if (r.isPresent()) {
             r.get().setStatus("Processed");
-            labRequestRepo.save(r.get());
+            labRequestRepository.save(r.get());
             redirectAttributes.addFlashAttribute("successMessage", "Request accepted!");
         }
         return "redirect:/lab-dashboard";
     }
 
-    @GetMapping("/admin-dashboard")
-    public String adminDashboard(HttpSession session, Model model) {
+    @PostMapping("/mark-attendance")
+    public String markAttendance(
+            @RequestParam String date,
+            @RequestParam String time,
+            HttpSession session, 
+            RedirectAttributes redirectAttributes) {
         User user = (User) session.getAttribute("user");
-        if (user == null || !"Admin".equals(user.getRole())) return "redirect:/";
-        model.addAttribute("user", user);
-        return "admin-dashboard";
+        if (user == null) return "redirect:/";
+
+        try {
+            LocalDateTime checkInDateTime = LocalDateTime.parse(date + "T" + time);
+            Attendance attendance = new Attendance();
+            attendance.setUser(user);
+            attendance.setCheckIn(checkInDateTime);
+            attendance.setStatus("Present");
+            attendanceRepo.save(attendance);
+            redirectAttributes.addFlashAttribute("successMessage", "Attendance marked successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Invalid date or time format!");
+        }
+
+        if ("Lab".equalsIgnoreCase(user.getRole())) return "redirect:/lab-dashboard";
+        return "redirect:/staff-dashboard";
     }
 
-    @GetMapping("/receptionist-dashboard")
-    public String receptionistDashboard(HttpSession session, Model model) {
+    @PostMapping("/update-attendance")
+    public String updateAttendance(
+            @RequestParam Long id,
+            @RequestParam String date,
+            @RequestParam String time,
+            HttpSession session, 
+            RedirectAttributes redirectAttributes) {
         User user = (User) session.getAttribute("user");
-        if (user == null || !"Receptionist".equals(user.getRole())) return "redirect:/";
-        model.addAttribute("user", user);
-        return "receptionist-dashboard";
+        if (user == null) return "redirect:/";
+
+        Optional<Attendance> optionalAttendance = attendanceRepo.findById(id);
+        if (optionalAttendance.isPresent()) {
+            Attendance attendance = optionalAttendance.get();
+            if (attendance.getUser().getId().equals(user.getId())) {
+                try {
+                    LocalDateTime checkOutDateTime = LocalDateTime.parse(date + "T" + time);
+                    attendance.setCheckOut(checkOutDateTime);
+                    attendanceRepo.save(attendance);
+                    redirectAttributes.addFlashAttribute("successMessage", "Attendance updated successfully!");
+                } catch (Exception e) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Invalid date or time format!");
+                }
+            }
+        }
+        if ("Lab".equalsIgnoreCase(user.getRole())) return "redirect:/lab-dashboard";
+        return "redirect:/staff-dashboard";
     }
 
-    @GetMapping("/patient-dashboard")
-    public String patientDashboard(HttpSession session, Model model) {
+    @PostMapping("/delete-attendance")
+    public String deleteAttendance(@RequestParam Long id, HttpSession session, RedirectAttributes redirectAttributes) {
         User user = (User) session.getAttribute("user");
-        if (user == null || !"Patient".equals(user.getRole())) return "redirect:/";
-        model.addAttribute("user", user);
-        return "patient-dashboard";
-    }
+        if (user == null) return "redirect:/";
 
-
-
-    @GetMapping("/staff-dashboard")
-    public String staffDashboard(HttpSession session, Model model) {
-        User user = (User) session.getAttribute("user");
-        if (user == null || !"Staff".equals(user.getRole())) return "redirect:/";
-        model.addAttribute("user", user);
-        return "staff-dashboard";
+        Optional<Attendance> att = attendanceRepo.findById(id);
+        if (att.isPresent() && att.get().getUser().getId().equals(user.getId())) {
+            if (!att.get().isVerified()) {
+                attendanceRepo.delete(att.get());
+                redirectAttributes.addFlashAttribute("successMessage", "Attendance record deleted successfully!");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "Cannot delete a verified record!");
+            }
+        }
+        if ("Lab".equalsIgnoreCase(user.getRole())) return "redirect:/lab-dashboard";
+        return "redirect:/staff-dashboard";
     }
 
     @GetMapping("/doctor-dashboard")
     public String doctorDashboard(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
         if (user == null || !"Doctor".equalsIgnoreCase(user.getRole())) return "redirect:/";
-        
-        // This will lead to the view doctor-dashboard.jsp
         model.addAttribute("doctor", user);
         return "doctor-dashboard";
+    }
+
+    @PostMapping("/admin/update-attendance")
+    public String adminUpdateAttendance(
+            @RequestParam Long userId,
+            @RequestParam String status,
+            @RequestParam(required = false) String checkIn,
+            @RequestParam(required = false) String checkOut,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        
+        User admin = (User) session.getAttribute("user");
+        if (admin == null || !"Admin".equalsIgnoreCase(admin.getRole())) return "redirect:/";
+
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isPresent()) {
+            User staff = optionalUser.get();
+            staff.setAttendanceStatus(status);
+            if ("Absent".equalsIgnoreCase(status)) {
+                staff.setCheckInTime(null);
+                staff.setCheckOutTime(null);
+            } else {
+                if (checkIn != null && !checkIn.isEmpty()) staff.setCheckInTime(checkIn);
+                if (checkOut != null && !checkOut.isEmpty()) staff.setCheckOutTime(checkOut);
+            }
+            userRepository.save(staff);
+            redirectAttributes.addFlashAttribute("successMessage", "Attendance updated for " + staff.getFullName());
+        }
+        return "redirect:/admin-dashboard";
+    }
+
+    @PostMapping("/admin/assign-shift")
+    public String assignShift(
+            @RequestParam Long userId,
+            @RequestParam String shiftType,
+            @RequestParam String shiftDate,
+            @RequestParam String startTime,
+            @RequestParam String endTime,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        
+        User admin = (User) session.getAttribute("user");
+        if (admin == null || !"Admin".equalsIgnoreCase(admin.getRole())) return "redirect:/";
+
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isPresent()) {
+            User staff = optionalUser.get();
+            String fullShiftInfo = shiftType + " (" + shiftDate + ", " + startTime + " - " + endTime + ")";
+            staff.setShiftTiming(fullShiftInfo);
+            userRepository.save(staff);
+            redirectAttributes.addFlashAttribute("successMessage", "Shift assigned to " + staff.getFullName());
+        }
+        return "redirect:/admin-dashboard";
+    }
+
+    @PostMapping("/admin/update-performance")
+    public String updatePerformance(
+            @RequestParam Long userId,
+            @RequestParam Integer rating,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        
+        User admin = (User) session.getAttribute("user");
+        if (admin == null || !"Admin".equalsIgnoreCase(admin.getRole())) return "redirect:/";
+
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isPresent()) {
+            User staff = optionalUser.get();
+            staff.setPerformanceRating(rating);
+            userRepository.save(staff);
+            redirectAttributes.addFlashAttribute("successMessage", "Performance rating updated for " + staff.getFullName());
+        }
+        return "redirect:/admin-dashboard";
     }
 
     private String redirectToDashboard(String role) {

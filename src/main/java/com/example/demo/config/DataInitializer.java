@@ -9,6 +9,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @Configuration
@@ -25,14 +27,19 @@ public class DataInitializer {
                                      StaffAttendanceRepository attendanceRepo,
                                      PasswordEncoder passwordEncoder) {
         return args -> {
-            // Data is now persistent. No more clearing on startup.
-            // labRequestRepo.deleteAll();
-            // labTestRepo.deleteAll();
-            // patientRepository.deleteAll();
+            // Clearing existing staff data as requested for a fresh start
+            attendanceRepo.deleteAll();
+            shiftRepo.deleteAll();
 
-            // Initialize Lab User
-            Optional<User> existingUser = userRepository.findByEmail("shyam@gmail.com");
-            if (existingUser.isEmpty()) {
+            // 1. Initialize Roles / Users
+            seedUser(userRepository, passwordEncoder, "admin@gmail.com", "admin123", "Admin", "System Admin");
+            seedUser(userRepository, passwordEncoder, "doctor@gmail.com", "1234", "Doctor", "Dr. Emily Chen");
+            seedUser(userRepository, passwordEncoder, "receptionist@gmail.com", "1234", "Receptionist", "Sarah Receptionist");
+            seedUser(userRepository, passwordEncoder, "pharmacy@gmail.com", "1234", "Pharmacy", "John Pharmacist");
+            seedUser(userRepository, passwordEncoder, "delivery@gmail.com", "1234", "Delivery", "Mike Delivery");
+            
+            // Lab User with specific details
+            if (userRepository.findByEmail("shyam@gmail.com").isEmpty()) {
                 User labUser = new User();
                 labUser.setFullName("Shyam");
                 labUser.setEmail("shyam@gmail.com");
@@ -45,46 +52,31 @@ public class DataInitializer {
                 userRepository.save(labUser);
             }
 
-            // Initialize Delivery Partner
-            Optional<User> existingDelivery = userRepository.findByEmail("delivery@gmail.com");
-            if (existingDelivery.isEmpty()) {
-                User deliveryUser = new User();
-                deliveryUser.setFullName("John Logistics");
-                deliveryUser.setEmail("delivery@gmail.com");
-                deliveryUser.setPassword(passwordEncoder.encode("1234"));
-                deliveryUser.setRole("Delivery");
-                deliveryUser.setPhone("+91 9876543210");
-                userRepository.save(deliveryUser);
-            }
-
-            // Create a dummy doctor if not exists
-            Optional<User> existingDoctor = userRepository.findByEmail("doctor@gmail.com");
-            User doctor;
-            if (existingDoctor.isEmpty()) {
-                doctor = new User();
-                doctor.setFullName("Dr. Emily Chen");
-                doctor.setEmail("doctor@gmail.com");
-                doctor.setPassword(passwordEncoder.encode("1234"));
-                doctor.setRole("Doctor");
-                userRepository.save(doctor);
-            } else {
-                doctor = existingDoctor.get();
-            }
-
-            // Initialize Lab Tests only if they don't exist
+            // 2. Initialize Lab Tests
             if (labTestRepo.count() == 0) {
-                LabTest test1 = new LabTest();
-                test1.setName("Lipid Profile");
-                labTestRepo.save(test1);
-                
-                LabTest test2 = new LabTest();
-                test2.setName("Complete Blood Count (CBC)");
-                labTestRepo.save(test2);
-                
-                System.out.println(">> Sample tests initialized.");
+                List<String> defaultTests = Arrays.asList(
+                        "Complete Blood Count (CBC)",
+                        "Basic Metabolic Panel (BMP)",
+                        "Comprehensive Metabolic Panel (CMP)",
+                        "Lipid Panel",
+                        "Thyroid Stimulating Hormone (TSH)",
+                        "Urinalysis",
+                        "Hemoglobin A1C",
+                        "Liver Function Test (LFT)",
+                        "Vitamin D Test",
+                        "Iron Panel",
+                        "Lipid Profile"
+                );
+
+                for (String testName : defaultTests) {
+                    LabTest test = new LabTest();
+                    test.setName(testName);
+                    labTestRepo.save(test);
+                }
+                System.out.println(">> Default Lab Tests seeded successfully!");
             }
 
-            // Initialize Patients only if they don't exist
+            // 3. Initialize Patients
             if (patientRepository.count() == 0) {
                 Patient p1 = new Patient();
                 p1.setName("Emily Johnson");
@@ -96,6 +88,16 @@ public class DataInitializer {
                 p1.setPriority("High");
                 p1.setDeliveryStatus("Pending Pickup");
                 patientRepository.save(p1);
+                
+                Patient p2 = new Patient();
+                p2.setName("Robert Wilson");
+                p2.setPatientId("PID-6021");
+                p2.setGender("Male");
+                p2.setDateOfBirth(LocalDate.of(1982, 11, 22));
+                p2.setContactNumber("9988776655");
+                p2.setPriority("Normal");
+                p2.setDeliveryStatus("Not Required");
+                patientRepository.save(p2);
                 
                 System.out.println(">> Sample patients initialized.");
             }
@@ -151,7 +153,24 @@ public class DataInitializer {
                 }
             }
             
-            System.out.println(">> Database ready and stable.");
+            System.out.println(">> Database initialization complete and stable.");
         };
+    }
+
+    private void seedUser(UserRepository repo, PasswordEncoder encoder, String email, String password, String role, String name) {
+        if (repo.findByEmail(email).isEmpty()) {
+            User user = new User();
+            user.setFullName(name);
+            user.setEmail(email);
+            user.setPassword(encoder.encode(password));
+            user.setRole(role);
+            if ("Doctor".equals(role)) {
+                user.setSpecialization("General Physician");
+            } else if ("Delivery".equals(role)) {
+                user.setPhone("+91 9876543210");
+            }
+            repo.save(user);
+            System.out.println(">> Created " + role + ": " + email);
+        }
     }
 }

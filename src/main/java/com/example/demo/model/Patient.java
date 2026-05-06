@@ -31,6 +31,8 @@ public class Patient {
 
     private String lastVisit;
 
+    private Integer age;
+
     // Delivery Boy Workflow Fields
     private String deliveryStatus; // Pending Pickup, In Transit, Delivered, Received
     private String deliveryAssignedTo;
@@ -41,8 +43,7 @@ public class Patient {
     private String estimatedTime;
     private String currentLocation;
     
-    // Additional fields from doctor branch
-    private Integer age;
+    // Additional fields
     private String contact;
 
     // Test Request specific fields

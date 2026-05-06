@@ -33,6 +33,13 @@ public class User {
     private String specialization;
     private Integer experience;
     private String licenseId;
+
+    // Staff Management fields
+    private String attendanceStatus; // Present, Absent, Pending
+    private String checkInTime;
+    private String checkOutTime;
+    private String shiftTiming; // e.g., 09 AM - 05 PM
+    private Integer performanceRating; // 1-5
     
     // Delivery specific fields
     private String vehicleType;
@@ -46,6 +53,12 @@ public class User {
     @Lob
     @Column(columnDefinition = "LONGTEXT")
     private String profileImage;
+
+    // Staff specific fields
+    private String staffId;
+    private String hospitalName;
+
+    private String gender;
 
     public User() {
     }
@@ -62,6 +75,7 @@ public class User {
         this.labType = labType;
     }
 
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -166,6 +180,46 @@ public class User {
         this.licenseId = licenseId;
     }
 
+    public String getAttendanceStatus() {
+        return attendanceStatus;
+    }
+
+    public void setAttendanceStatus(String attendanceStatus) {
+        this.attendanceStatus = attendanceStatus;
+    }
+
+    public String getCheckInTime() {
+        return checkInTime;
+    }
+
+    public void setCheckInTime(String checkInTime) {
+        this.checkInTime = checkInTime;
+    }
+
+    public String getCheckOutTime() {
+        return checkOutTime;
+    }
+
+    public void setCheckOutTime(String checkOutTime) {
+        this.checkOutTime = checkOutTime;
+    }
+
+    public String getShiftTiming() {
+        return shiftTiming;
+    }
+
+    public void setShiftTiming(String shiftTiming) {
+        this.shiftTiming = shiftTiming;
+    }
+
+    public Integer getPerformanceRating() {
+        return performanceRating;
+    }
+
+    public void setPerformanceRating(Integer performanceRating) {
+        this.performanceRating = performanceRating;
+    }
+
     public String getVehicleType() {
         return vehicleType;
     }
@@ -206,13 +260,27 @@ public class User {
         this.profileImage = profileImage;
     }
 
-    private String gender;
-
     public String getGender() {
         return gender;
     }
 
     public void setGender(String gender) {
         this.gender = gender;
+    }
+
+    public String getStaffId() {
+        return staffId;
+    }
+
+    public void setStaffId(String staffId) {
+        this.staffId = staffId;
+    }
+
+    public String getHospitalName() {
+        return hospitalName;
+    }
+
+    public void setHospitalName(String hospitalName) {
+        this.hospitalName = hospitalName;
     }
 }

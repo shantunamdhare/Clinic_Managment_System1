@@ -237,9 +237,7 @@
                         </table>
                     </div>
                 </div>
-            </div>
-
-            <!-- Staff & Shifts Section -->
+                      <!-- Staff & Shifts Section -->
             <div id="section-staff" class="section">
                 <div class="grid-card">
                     <div class="card-header"><h2><i class="fas fa-users-cog"></i> Pharmacy Staff, Shifts & Attendance</h2></div>
@@ -278,6 +276,39 @@
                                         </c:forEach>
                                     </tbody>
                                 </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal Stats (From Admin) -->
+                <div class="grid-card" style="margin-top: 24px;">
+                    <div class="card-header"><h2><i class="fas fa-user-chart"></i> Your Personal Performance (Admin Assigned)</h2></div>
+                    <div class="card-body">
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                            <div style="background: #f8fafc; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0;">
+                                <h4 style="color: #4f46e5; font-size: 11px; text-transform: uppercase; margin-bottom: 5px;">Today's Status</h4>
+                                <div style="font-size: 18px; font-weight: 700;">
+                                    <c:choose>
+                                        <c:when test="${user.attendanceStatus == 'Present'}"><span class="badge-pill badge-success">Present</span></c:when>
+                                        <c:otherwise><span class="badge-pill" style="background:#f1f5f9; color:#64748b;">${user.attendanceStatus != null ? user.attendanceStatus : 'Not Marked'}</span></c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </div>
+                            <div style="background: #f8fafc; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0;">
+                                <h4 style="color: #4f46e5; font-size: 11px; text-transform: uppercase; margin-bottom: 5px;">Your Shift</h4>
+                                <div style="font-size: 14px; font-weight: 700; color: #4f46e5;">${user.shiftTiming != null ? user.shiftTiming : 'Not Assigned'}</div>
+                            </div>
+                            <div style="background: #f8fafc; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0;">
+                                <h4 style="color: #4f46e5; font-size: 11px; text-transform: uppercase; margin-bottom: 5px;">Performance</h4>
+                                <div style="color: #fbbf24; font-size: 20px;">
+                                    <c:choose>
+                                        <c:when test="${user.performanceRating != null}">
+                                            <c:forEach begin="1" end="${user.performanceRating}">⭐</c:forEach>
+                                        </c:when>
+                                        <c:otherwise><span style="font-size: 12px; color: #64748b;">No Rating</span></c:otherwise>
+                                    </c:choose>
+                                </div>
                             </div>
                         </div>
                     </div>

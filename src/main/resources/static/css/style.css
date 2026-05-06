@@ -1569,6 +1569,15 @@ img {
   }
 }
 
+.hero {
+  min-height: 560px;
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: background-image 0.8s ease-in-out;
+}
+
 .feature-img {
   width: 90px;
   height: 90px;
