@@ -1,11 +1,8 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
-<<<<<<< HEAD
 import java.time.LocalDate;
-=======
 import java.util.List;
->>>>>>> d47752b02d36ead22b434ee0b50971579c4440d6
 
 @Entity
 @Table(name = "patients")
@@ -18,7 +15,6 @@ public class Patient {
     @Column(nullable = false)
     private String name;
 
-<<<<<<< HEAD
     @Column(nullable = false)
     private String patientId; // e.g., PID-1001
 
@@ -44,6 +40,15 @@ public class Patient {
     private String destinationHospital;
     private String estimatedTime;
     private String currentLocation;
+    
+    // Additional fields from doctor branch
+    private Integer age;
+    private String contact;
+
+    // Test Request specific fields
+    private String testType;
+    private String priority; // Low, Medium, High
+    private String collectionType; // Home, Walk-in
 
     public Patient() {
         this.deliveryStatus = "Pending Pickup";
@@ -75,13 +80,6 @@ public class Patient {
         this.deliveryAssignedTo = deliveryAssignedTo;
         this.pickupLocation = pickupLocation;
     }
-=======
-    private Integer age;
-
-    private String gender;
-
-    private String contact;
->>>>>>> d47752b02d36ead22b434ee0b50971579c4440d6
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -90,18 +88,15 @@ public class Patient {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-<<<<<<< HEAD
     public String getPatientId() { return patientId; }
     public void setPatientId(String patientId) { this.patientId = patientId; }
-=======
+
     public Integer getAge() { return age; }
     public void setAge(Integer age) { this.age = age; }
->>>>>>> d47752b02d36ead22b434ee0b50971579c4440d6
 
     public String getGender() { return gender; }
     public void setGender(String gender) { this.gender = gender; }
 
-<<<<<<< HEAD
     public LocalDate getDateOfBirth() { return dateOfBirth; }
     public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
 
@@ -137,8 +132,16 @@ public class Patient {
 
     public String getCurrentLocation() { return currentLocation; }
     public void setCurrentLocation(String currentLocation) { this.currentLocation = currentLocation; }
-=======
+
     public String getContact() { return contact; }
     public void setContact(String contact) { this.contact = contact; }
->>>>>>> d47752b02d36ead22b434ee0b50971579c4440d6
+
+    public String getTestType() { return testType; }
+    public void setTestType(String testType) { this.testType = testType; }
+
+    public String getPriority() { return priority; }
+    public void setPriority(String priority) { this.priority = priority; }
+
+    public String getCollectionType() { return collectionType; }
+    public void setCollectionType(String collectionType) { this.collectionType = collectionType; }
 }
