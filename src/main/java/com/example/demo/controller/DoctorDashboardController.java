@@ -40,8 +40,11 @@ public class DoctorDashboardController {
     // -------------------------------------------------------
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
-        User doctor = getLoggedInDoctor(session);
-        if (doctor == null) return "redirect:/";
+        User doctorSession = getLoggedInDoctor(session);
+        if (doctorSession == null) return "redirect:/";
+        
+        // Refresh from DB to avoid detached entity issues
+        User doctor = userRepository.findById(doctorSession.getId()).orElse(doctorSession);
 
         long totalPatients = patientRepo.count();
         long todayAppointments = appointmentRepo.countByDoctorAndAppointmentDate(doctor, LocalDate.now());
@@ -94,8 +97,9 @@ public class DoctorDashboardController {
     // -------------------------------------------------------
     @GetMapping("/appointments")
     public String appointments(HttpSession session, Model model) {
-        User doctor = getLoggedInDoctor(session);
-        if (doctor == null) return "redirect:/";
+        User doctorSession = getLoggedInDoctor(session);
+        if (doctorSession == null) return "redirect:/";
+        User doctor = userRepository.findById(doctorSession.getId()).orElse(doctorSession);
 
         List<Appointment> appointments = appointmentRepo.findByDoctorAndAppointmentDate(doctor, LocalDate.now());
         model.addAttribute("doctor", doctor);
@@ -119,8 +123,9 @@ public class DoctorDashboardController {
     @GetMapping("/patients")
     public String patients(@RequestParam(required = false) String search,
                            HttpSession session, Model model) {
-        User doctor = getLoggedInDoctor(session);
-        if (doctor == null) return "redirect:/";
+        User doctorSession = getLoggedInDoctor(session);
+        if (doctorSession == null) return "redirect:/";
+        User doctor = userRepository.findById(doctorSession.getId()).orElse(doctorSession);
 
         List<Patient> patients;
         if (search != null && !search.isBlank()) {
@@ -170,6 +175,12 @@ public class DoctorDashboardController {
         p.setAge(age);
         p.setGender(gender);
         p.setContact(contact);
+        p.setContactNumber(contact);
+        
+        // Generate missing mandatory fields
+        p.setPatientId("PID-" + (int)(Math.random() * 9000 + 1000));
+        p.setDateOfBirth(LocalDate.now().minusYears(age)); // Approximate DOB from age
+        
         patientRepo.save(p);
         ra.addFlashAttribute("success", "Patient added successfully.");
         return "redirect:/doctor/patients";
@@ -180,8 +191,9 @@ public class DoctorDashboardController {
     // -------------------------------------------------------
     @GetMapping("/emr")
     public String emrForm(HttpSession session, Model model) {
-        User doctor = getLoggedInDoctor(session);
-        if (doctor == null) return "redirect:/";
+        User doctorSession = getLoggedInDoctor(session);
+        if (doctorSession == null) return "redirect:/";
+        User doctor = userRepository.findById(doctorSession.getId()).orElse(doctorSession);
 
         model.addAttribute("doctor", doctor);
         model.addAttribute("patients", patientRepo.findAll());
@@ -223,8 +235,9 @@ public class DoctorDashboardController {
     @GetMapping("/prescriptions")
     public String prescriptions(@RequestParam(required = false) Long visitId,
                                 HttpSession session, Model model) {
-        User doctor = getLoggedInDoctor(session);
-        if (doctor == null) return "redirect:/";
+        User doctorSession = getLoggedInDoctor(session);
+        if (doctorSession == null) return "redirect:/";
+        User doctor = userRepository.findById(doctorSession.getId()).orElse(doctorSession);
 
         List<Visit> recentVisits = visitRepo.findByDoctorOrderByVisitDateDesc(doctor);
         model.addAttribute("doctor", doctor);
@@ -283,8 +296,9 @@ public class DoctorDashboardController {
     // -------------------------------------------------------
     @GetMapping("/lab-requests")
     public String labRequests(HttpSession session, Model model) {
-        User doctor = getLoggedInDoctor(session);
-        if (doctor == null) return "redirect:/";
+        User doctorSession = getLoggedInDoctor(session);
+        if (doctorSession == null) return "redirect:/";
+        User doctor = userRepository.findById(doctorSession.getId()).orElse(doctorSession);
 
         model.addAttribute("doctor", doctor);
         model.addAttribute("patients", patientRepo.findAll());
@@ -329,8 +343,9 @@ public class DoctorDashboardController {
     // -------------------------------------------------------
     @GetMapping("/lab-reports")
     public String labReports(HttpSession session, Model model) {
-        User doctor = getLoggedInDoctor(session);
-        if (doctor == null) return "redirect:/";
+        User doctorSession = getLoggedInDoctor(session);
+        if (doctorSession == null) return "redirect:/";
+        User doctor = userRepository.findById(doctorSession.getId()).orElse(doctorSession);
 
         List<LabReport> reports = labReportRepo.findByRequest_Doctor(doctor);
         model.addAttribute("doctor", doctor);
@@ -338,13 +353,26 @@ public class DoctorDashboardController {
         return "doctor/lab-reports";
     }
 
+    @GetMapping("/reports/view/{id}")
+    public String viewReport(@PathVariable Long id, HttpSession session, Model model) {
+        User doctor = getLoggedInDoctor(session);
+        if (doctor == null) return "redirect:/";
+        
+        labReportRepo.findById(id).ifPresent(report -> {
+            model.addAttribute("report", report);
+            model.addAttribute("doctor", doctor);
+        });
+        return "doctor/report-view";
+    }
+
     // -------------------------------------------------------
     // Availability
     // -------------------------------------------------------
     @GetMapping("/availability")
     public String availability(HttpSession session, Model model) {
-        User doctor = getLoggedInDoctor(session);
-        if (doctor == null) return "redirect:/";
+        User doctorSession = getLoggedInDoctor(session);
+        if (doctorSession == null) return "redirect:/";
+        User doctor = userRepository.findById(doctorSession.getId()).orElse(doctorSession);
 
         List<Availability> slots = availabilityRepo.findByDoctorOrderByAvailableDateAscStartTimeAsc(doctor);
         model.addAttribute("doctor", doctor);

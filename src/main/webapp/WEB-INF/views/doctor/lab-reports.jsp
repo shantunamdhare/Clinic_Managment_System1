@@ -43,6 +43,9 @@
 <div class="main-content">
     <div class="topbar">
         <h5><i class="fas fa-file-alt me-2" style="color:#2563eb"></i> Lab Reports</h5>
+        <a href="/logout" class="btn btn-outline-danger btn-sm" style="border-radius: 20px; padding: 5px 15px; font-weight: 600;">
+            <i class="fas fa-sign-out-alt me-1"></i> Logout
+        </a>
     </div>
     <div class="content-area">
         <div class="panel">
@@ -66,11 +69,9 @@
                                         <td>${r.request.test.name}</td>
                                         <td>${r.result}</td>
                                         <td>
-                                            <c:if test="${not empty r.filePath}">
-                                                <a href="${r.filePath}" target="_blank" class="btn-sm-action btn-print">
-                                                    <i class="fas fa-download"></i> PDF
-                                                </a>
-                                            </c:if>
+                                            <a href="/doctor/reports/view/${r.id}" target="_blank" class="btn-sm-action btn-print">
+                                                <i class="fas fa-file-pdf"></i> View / PDF
+                                            </a>
                                         </td>
                                     </tr>
                                 </c:forEach>

@@ -46,7 +46,12 @@
 <div class="main-content">
     <div class="topbar">
         <h5><i class="fas fa-calendar-check me-2" style="color:#2563eb"></i> Today's Appointments</h5>
-        <span class="date-badge"><i class="fas fa-calendar me-1"></i> <%=java.time.LocalDate.now()%></span>
+        <div class="d-flex align-items-center gap-3">
+            <span class="date-badge"><i class="fas fa-calendar me-1"></i> <%=java.time.LocalDate.now()%></span>
+            <a href="/logout" class="btn btn-outline-danger btn-sm" style="border-radius: 20px; padding: 5px 15px; font-weight: 600;">
+                <i class="fas fa-sign-out-alt me-1"></i> Logout
+            </a>
+        </div>
     </div>
     <div class="content-area">
 

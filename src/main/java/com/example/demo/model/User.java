@@ -22,11 +22,21 @@ public class User {
     @Column(nullable = false)
     private String role;
 
-<<<<<<< HEAD
     private String labName;
     private String labAddress;
     private String labId;
     private String labType; // In-House or External
+
+    // Doctor specific fields
+    private String phone;
+    private String specialization;
+    private Integer experience;
+    private String licenseId;
+    
+    // Receptionist / General Staff fields
+    private String govIdNumber;
+    private String gender;
+    private String address;
 
     public User() {
     }
@@ -42,16 +52,6 @@ public class User {
         this.labId = labId;
         this.labType = labType;
     }
-
-=======
-    // Doctor specific fields
-    private String phone;
-    private String specialization;
-    private Integer experience;
-    private String licenseId;
-
-    // Getters and Setters
->>>>>>> d47752b02d36ead22b434ee0b50971579c4440d6
     public Long getId() {
         return id;
     }
@@ -92,7 +92,6 @@ public class User {
         this.role = role;
     }
 
-<<<<<<< HEAD
     public String getLabName() {
         return labName;
     }
@@ -123,7 +122,8 @@ public class User {
 
     public void setLabType(String labType) {
         this.labType = labType;
-=======
+    }
+
     public String getPhone() {
         return phone;
     }
@@ -154,6 +154,5 @@ public class User {
 
     public void setLicenseId(String licenseId) {
         this.licenseId = licenseId;
->>>>>>> d47752b02d36ead22b434ee0b50971579c4440d6
     }
 }

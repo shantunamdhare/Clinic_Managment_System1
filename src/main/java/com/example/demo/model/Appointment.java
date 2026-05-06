@@ -26,7 +26,13 @@ public class Appointment {
     @Column(nullable = false)
     private LocalTime appointmentTime;
 
-    private String status; // Pending, Completed, Cancelled
+    private String appointmentId; // e.g., APP-1001
+
+    private String department;
+
+    private Integer tokenNumber;
+
+    private String status; // Pending, Waiting, In Progress, Completed, No-show, Cancelled
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -46,4 +52,13 @@ public class Appointment {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getAppointmentId() { return appointmentId; }
+    public void setAppointmentId(String appointmentId) { this.appointmentId = appointmentId; }
+
+    public String getDepartment() { return department; }
+    public void setDepartment(String department) { this.department = department; }
+
+    public Integer getTokenNumber() { return tokenNumber; }
+    public void setTokenNumber(Integer tokenNumber) { this.tokenNumber = tokenNumber; }
 }

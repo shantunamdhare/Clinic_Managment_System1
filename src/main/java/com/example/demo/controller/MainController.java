@@ -1,9 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.Patient;
-import com.example.demo.model.User;
-import com.example.demo.repository.PatientRepository;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.model.*;
+import com.example.demo.repository.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,6 +26,12 @@ public class MainController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private LabRequestRepository labRequestRepository;
+    
+    @Autowired
+    private LabReportRepository labReportRepository;
 
     // ========================
     // Landing Page
@@ -47,17 +51,14 @@ public class MainController {
             @RequestParam String password,
             @RequestParam String confirmPassword,
             @RequestParam String role,
-<<<<<<< HEAD
             @RequestParam(required = false) String labName,
             @RequestParam(required = false) String labAddress,
             @RequestParam(required = false) String labId,
             @RequestParam(required = false) String labType,
-=======
             @RequestParam(required = false) String phone,
             @RequestParam(required = false) String specialization,
             @RequestParam(required = false) Integer experience,
             @RequestParam(required = false) String licenseId,
->>>>>>> d47752b02d36ead22b434ee0b50971579c4440d6
             RedirectAttributes redirectAttributes) {
 
         // Check if passwords match
@@ -78,20 +79,19 @@ public class MainController {
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
         user.setRole(role);
-<<<<<<< HEAD
         user.setLabName(labName);
         user.setLabAddress(labAddress);
         user.setLabId(labId);
         user.setLabType(labType);
-=======
         
         if ("Doctor".equalsIgnoreCase(role)) {
             user.setPhone(phone);
             user.setSpecialization(specialization);
             user.setExperience(experience);
             user.setLicenseId(licenseId);
+        } else if ("RECEPTIONIST".equalsIgnoreCase(role)) {
+            user.setPhone(phone);
         }
->>>>>>> d47752b02d36ead22b434ee0b50971579c4440d6
 
         userRepository.save(user);
 
@@ -107,11 +107,7 @@ public class MainController {
             @RequestParam String email,
             @RequestParam String password,
             @RequestParam String role,
-<<<<<<< HEAD
             HttpSession session,
-=======
-            jakarta.servlet.http.HttpSession session,
->>>>>>> d47752b02d36ead22b434ee0b50971579c4440d6
             RedirectAttributes redirectAttributes) {
 
         Optional<User> optionalUser = userRepository.findByEmail(email);
@@ -171,7 +167,7 @@ public class MainController {
 
     @GetMapping("/receptionist-dashboard")
     public String receptionistDashboard() {
-        return "receptionist-dashboard";
+        return "redirect:/receptionist/dashboard";
     }
 
     @GetMapping("/patient-dashboard")
@@ -187,6 +183,7 @@ public class MainController {
         }
         model.addAttribute("user", user);
         model.addAttribute("patients", patientRepository.findAll());
+        model.addAttribute("labRequests", labRequestRepository.findAll()); // Fetch all requests for now
         return "lab-dashboard";
     }
 
@@ -295,6 +292,37 @@ public class MainController {
         return "redirect:/delivery-dashboard";
     }
 
+    @PostMapping("/lab/upload-report")
+    public String uploadLabReport(
+            @RequestParam Long requestId,
+            @RequestParam String result,
+            RedirectAttributes redirectAttributes) {
+        
+        Optional<LabRequest> optRequest = labRequestRepository.findById(requestId);
+        if (optRequest.isPresent()) {
+            LabRequest request = optRequest.get();
+            
+            LabReport report = new LabReport();
+            report.setRequest(request);
+            report.setResult(result);
+            report.setReportDate(LocalDate.now());
+            // For now, we'll use a placeholder for filePath since we're not handling actual files yet
+            report.setFilePath("uploads/report_" + requestId + ".pdf");
+            
+            labReportRepository.save(report);
+            
+            // Update request status
+            request.setStatus("Completed");
+            labRequestRepository.save(request);
+            
+            redirectAttributes.addFlashAttribute("successMessage", "Lab report uploaded and shared with doctor!");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lab request not found!");
+        }
+        
+        return "redirect:/lab-dashboard";
+    }
+
     // ========================
     // Helper: Redirect to Dashboard
     // ========================
@@ -305,7 +333,7 @@ public class MainController {
             case "doctor":
                 return "redirect:/doctor/dashboard";
             case "receptionist":
-                return "redirect:/receptionist-dashboard";
+                return "redirect:/receptionist/dashboard";
             case "patient":
                 return "redirect:/patient-dashboard";
             case "lab":

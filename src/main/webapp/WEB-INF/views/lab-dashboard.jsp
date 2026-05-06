@@ -389,11 +389,41 @@
                         <div class="section-header">
                             <h2 class="section-title">All Test Requests</h2>
                         </div>
-                        <div style="padding: 40px; text-align: center; color: var(--gray-500);">
-                            <span class="material-symbols-outlined" style="font-size: 48px; margin-bottom: 16px;">experiment</span>
-                            <h3 style="color: var(--gray-800); font-size: 20px; margin-bottom: 8px;">No test requests available</h3>
-                            <p>Loading all test requests from the database...</p>
-                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Request ID</th>
+                                    <th>Patient</th>
+                                    <th>Test Name</th>
+                                    <th>Doctor</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="req" items="${labRequests}">
+                                    <tr>
+                                        <td>#REQ-${req.id}</td>
+                                        <td>${req.patient.name}</td>
+                                        <td>${req.test.name}</td>
+                                        <td>Dr. ${req.doctor.fullName}</td>
+                                        <td><span class="status-badge ${req.status == 'Pending' ? 'status-pending' : 'status-completed'}">${req.status}</span></td>
+                                        <td>
+                                            <c:if test="${req.status == 'Pending'}">
+                                                <button class="btn-action" onclick="prepareUpload(${req.id}, '${req.patient.name}', '${req.test.name}')">Upload Report</button>
+                                            </c:if>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                                <c:if test="${empty labRequests}">
+                                    <tr>
+                                        <td colspan="6" style="text-align: center; padding: 40px; color: var(--gray-500);">
+                                            No test requests found in the database.
+                                        </td>
+                                    </tr>
+                                </c:if>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -418,30 +448,26 @@
                             <h2 class="section-title">Upload New Lab Report</h2>
                         </div>
                         <div style="padding: 32px;">
-                            <form id="uploadForm" onsubmit="handleUpload(event)" style="max-width: 600px; margin: 0 auto;">
+                            <form id="uploadForm" action="/lab/upload-report" method="POST" style="max-width: 600px; margin: 0 auto;">
                                 <div class="form-group" style="margin-bottom: 24px;">
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--gray-700);">Select Patient</label>
-                                    <select class="form-select" style="padding-left: 14px;" required>
-                                        <option value="" disabled selected>Choose a patient...</option>
-                                        <c:forEach var="patient" items="${patients}">
-                                            <option value="${patient.id}">${patient.name} (${patient.patientId})</option>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--gray-700);">Select Request</label>
+                                    <select name="requestId" id="uploadRequestId" class="form-select" style="padding-left: 14px;" required>
+                                        <option value="" disabled selected>Choose a pending request...</option>
+                                        <c:forEach var="req" items="${labRequests}">
+                                            <c:if test="${req.status == 'Pending'}">
+                                                <option value="${req.id}">${req.patient.name} - ${req.test.name} (#REQ-${req.id})</option>
+                                            </c:if>
                                         </c:forEach>
                                     </select>
                                 </div>
 
                                 <div class="form-group" style="margin-bottom: 24px;">
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--gray-700);">Test Category</label>
-                                    <select class="form-select" style="padding-left: 14px;" required>
-                                        <option value="" disabled selected>Select test type...</option>
-                                        <option>Hematology</option>
-                                        <option>Biochemistry</option>
-                                        <option>Urinalysis</option>
-                                        <option>Radiology</option>
-                                    </select>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--gray-700);">Report Summary / Results</label>
+                                    <textarea name="result" class="form-select" style="padding: 12px; height: 120px; resize: none;" placeholder="Enter clinical findings and observations..." required></textarea>
                                 </div>
                                 
                                 <div class="upload-zone" id="dropZone" style="border: 2px dashed var(--gray-300); border-radius: var(--radius-lg); padding: 40px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--gray-50); margin-bottom: 24px;" onclick="document.getElementById('fileInput').click()">
-                                    <input type="file" id="fileInput" style="display: none;" accept=".pdf,.jpg,.png" onchange="showFileName(this)">
+                                    <input type="file" id="fileInput" name="reportFile" style="display: none;" accept=".pdf,.jpg,.png" onchange="showFileName(this)">
                                     <span class="material-symbols-outlined" style="font-size: 48px; color: var(--primary); margin-bottom: 12px;">cloud_upload</span>
                                     <h4 style="margin-bottom: 8px; color: var(--gray-900);">Click to upload or drag and drop</h4>
                                     <p style="font-size: 13px; color: var(--gray-500);">PDF, PNG, JPG (max. 10MB)</p>
@@ -738,7 +764,7 @@
                             <thead>
                                 <tr>
                                     <th>Patient & ID</th>
-                                    <th>Routing (Source → Destination)</th>
+                                    <th>Routing (Source  Destination)</th>
                                     <th>Delivery Executive</th>
                                     <th>Current Location</th>
                                     <th>Pickup Status</th>
@@ -1025,7 +1051,7 @@
                             <div class="info-row"><span class="label">Executive</span><span class="value">\${executive || 'N/A'}</span></div>
                             <div class="info-row"><span class="label">Contact No.</span><span class="value">\${phone || 'N/A'}</span></div>
                             <div class="info-row"><span class="label">Current Location</span><span class="value" style="color: #059669;">\${loc || 'Processing'}</span></div>
-                            <div class="info-row"><span class="label">Route</span><span class="value" style="font-size: 11px;">\${source} → \${dest}</span></div>
+                            <div class="info-row"><span class="label">Route</span><span class="value" style="font-size: 11px;">\${source}  \${dest}</span></div>
                             <div class="info-row"><span class="label">Estimated Time</span><span class="value">\${eta || 'N/A'}</span></div>
                         </div>
                         
@@ -1136,29 +1162,17 @@
             }
         }
 
+        function prepareUpload(requestId, patientName, testName) {
+            document.getElementById('uploadRequestId').value = requestId;
+            showSection('reports-section');
+        }
+
         function showFileName(input) {
             const info = document.getElementById('fileInfo');
             if (input.files && input.files[0]) {
                 info.innerText = "Selected: " + input.files[0].name;
                 info.style.display = 'block';
             }
-        }
-
-        function handleUpload(event) {
-            event.preventDefault();
-            const patient = event.target.querySelectorAll('select')[0].value;
-            const test = event.target.querySelectorAll('select')[1].value;
-            const file = document.getElementById('fileInput').files[0];
-            
-            if (!file) {
-                alert('Please select a file first!');
-                return;
-            }
-
-            alert('Uploading report for ' + patient + ' (' + test + ')... Success!');
-            event.target.reset();
-            document.getElementById('fileInfo').style.display = 'none';
-            showSection('overview');
         }
 
         function previewProfilePhoto(event) {
