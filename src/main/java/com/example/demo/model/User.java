@@ -44,6 +44,10 @@ public class User {
     // Delivery specific fields
     private String vehicleType;
 
+    // Staff specific fields
+    private String staffId;
+    private String hospitalName;
+
     public User() {
     }
 
@@ -210,5 +214,21 @@ public class User {
 
     public void setVehicleType(String vehicleType) {
         this.vehicleType = vehicleType;
+    }
+
+    public String getStaffId() {
+        return staffId;
+    }
+
+    public void setStaffId(String staffId) {
+        this.staffId = staffId;
+    }
+
+    public String getHospitalName() {
+        return hospitalName;
+    }
+
+    public void setHospitalName(String hospitalName) {
+        this.hospitalName = hospitalName;
     }
 }

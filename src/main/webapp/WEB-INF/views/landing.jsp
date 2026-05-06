@@ -232,6 +232,23 @@
                                     </div>
                                 </div>
 
+                                <!-- Staff specific fields -->
+                                <div id="staffFields" style="display: none; background: rgba(37,99,235,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(37,99,235,0.3);">
+                                    <p style="font-size: 0.8rem; color: #2563eb; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Staff Details</p>
+                                    <div class="form-group" style="margin-bottom: 10px;">
+                                        <span class="input-icon">&#x260E;</span>
+                                        <input type="text" name="staffPhone" id="staffPhone" class="form-input" placeholder="Contact Number">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 10px;">
+                                        <span class="input-icon">&#x1F3AB;</span>
+                                        <input type="text" name="staffId" id="staffId" class="form-input" placeholder="Staff Employee ID">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <span class="input-icon">&#x1F3E5;</span>
+                                        <input type="text" name="hospitalName" id="hospitalName" class="form-input" placeholder="Hospital/Clinic Name">
+                                    </div>
+                                </div>
+
                                 <div class="terms-row">
                                     <input type="checkbox" name="terms" required>
                                     <span>I agree to the <a href="#">Terms &amp; Conditions</a></span>
@@ -530,6 +547,7 @@
             var doctorFields = document.getElementById("doctorFields");
             var labFields = document.getElementById("labFields");
             var deliveryFields = document.getElementById("deliveryFields");
+            var staffFields = document.getElementById("staffFields");
             
             var doctorPhone = document.getElementById("doctorPhone");
             var doctorSpec = document.getElementById("doctorSpecialization");
@@ -543,10 +561,15 @@
             var deliveryPhone = document.getElementById("deliveryPhone");
             var vehicleType = document.getElementById("vehicleType");
 
+            var staffPhone = document.getElementById("staffPhone");
+            var staffId = document.getElementById("staffId");
+            var hospName = document.getElementById("hospitalName");
+
             // Reset visibility
             if(doctorFields) doctorFields.style.display = "none";
             if(labFields) labFields.style.display = "none";
             if(deliveryFields) deliveryFields.style.display = "none";
+            if(staffFields) staffFields.style.display = "none";
             
             // Reset required status
             if(doctorPhone) doctorPhone.required = false;
@@ -560,6 +583,10 @@
 
             if(deliveryPhone) deliveryPhone.required = false;
             if(vehicleType) vehicleType.required = false;
+
+            if(staffPhone) staffPhone.required = false;
+            if(staffId) staffId.required = false;
+            if(hospName) hospName.required = false;
 
             // Show and set required based on role
             if (roleSelect.value === "Doctor") {
@@ -578,6 +605,13 @@
                     deliveryFields.style.display = "block";
                     if(deliveryPhone) deliveryPhone.required = true;
                     if(vehicleType) vehicleType.required = true;
+                }
+            } else if (roleSelect.value === "Staff") {
+                if(staffFields) {
+                    staffFields.style.display = "block";
+                    if(staffPhone) staffPhone.required = true;
+                    if(staffId) staffId.required = true;
+                    if(hospName) hospName.required = true;
                 }
             }
         }

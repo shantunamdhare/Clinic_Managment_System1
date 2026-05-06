@@ -791,63 +791,51 @@ function showSection(sectionId, element) {
     // Hide all sections
     const sections = document.querySelectorAll('.content-section');
     sections.forEach(s => s.classList.remove('active'));
-
-    // Show the selected section
-    const targetSection = document.getElementById(sectionId);
-    if (targetSection) {
-        targetSection.classList.add('active');
-    }
-
-    // Update active class in sidebar
+    
+    // Show target section
+    document.getElementById(sectionId).classList.add('active');
+    
+    // Update nav active state
     const navItems = document.querySelectorAll('.nav-item');
     navItems.forEach(item => item.classList.remove('active'));
-    element.classList.add('active');
-    
-    // Smooth scroll to top of content
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if(element) element.classList.add('active');
 }
 
-// Modal Management
-function openAttendanceModal(id, name, status, checkIn, checkOut) {
+function openAttendanceModal(id, name, status, cin, cout) {
     document.getElementById('attUserId').value = id;
     document.getElementById('attName').innerText = name;
-    document.getElementById('attendanceModal').style.display = 'block';
-    
-    // Set existing values or defaults
-    const statusSelect = document.getElementById('attStatus');
-    statusSelect.value = (status && status !== 'null') ? status : 'Present';
-    
-    document.getElementById('attCheckIn').value = (checkIn && checkIn !== 'null') ? checkIn : '';
-    document.getElementById('attCheckOut').value = (checkOut && checkOut !== 'null') ? checkOut : '';
-    
+    document.getElementById('attStatus').value = status || 'Present';
+    document.getElementById('attCheckIn').value = cin || '';
+    document.getElementById('attCheckOut').value = cout || '';
     toggleTimeFields();
+    document.getElementById('attendanceModal').style.display = 'block';
 }
-function toggleTimeFields() {
-    const status = document.getElementById('attStatus').value;
-    const timeFields = document.getElementById('attTimeFields');
-    if (status === 'Absent') {
-        timeFields.style.display = 'none';
-    } else {
-        timeFields.style.display = 'block';
-    }
-}
+
 function openShiftModal(id, name) {
     document.getElementById('shiftUserId').value = id;
     document.getElementById('shiftName').innerText = name;
     document.getElementById('shiftModal').style.display = 'block';
 }
+
 function openPerformanceModal(id, name) {
     document.getElementById('perfUserId').value = id;
     document.getElementById('perfName').innerText = name;
     document.getElementById('performanceModal').style.display = 'block';
 }
+
 function closeModal(id) {
     document.getElementById(id).style.display = 'none';
 }
-// Close modal on outside click
+
+function toggleTimeFields() {
+    const status = document.getElementById('attStatus').value;
+    document.getElementById('attTimeFields').style.display = status === 'Absent' ? 'none' : 'block';
+}
+
+// Close modals when clicking outside
 window.onclick = function(event) {
-    if (event.target.className === 'modal') {
-        event.target.style.display = 'none';
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = "none";
     }
 }
 </script>

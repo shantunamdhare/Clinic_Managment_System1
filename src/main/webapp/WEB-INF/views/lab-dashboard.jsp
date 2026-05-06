@@ -188,6 +188,18 @@
                     <span class="material-symbols-outlined">local_shipping</span>
                     Logistics & Samples
                 </a>
+                <a href="#" class="nav-item" onclick="event.preventDefault(); showSection('attendance-section', event)">
+                    <span class="material-symbols-outlined">calendar_today</span>
+                    Attendance
+                </a>
+                <a href="#" class="nav-item" onclick="event.preventDefault(); showSection('shifts-section', event)">
+                    <span class="material-symbols-outlined">schedule</span>
+                    Shift Schedule
+                </a>
+                <a href="#" class="nav-item" onclick="event.preventDefault(); showSection('performance-section', event)">
+                    <span class="material-symbols-outlined">analytics</span>
+                    Performance
+                </a>
                 <a href="#" class="nav-item" onclick="event.preventDefault(); showSection('profile-section', event)">
                     <span class="material-symbols-outlined">person</span>
                     My Profile
@@ -1339,6 +1351,227 @@
                     </div>
                 </div>
 
+                <!-- ATTENDANCE SECTION -->
+                <div id="attendance-section" class="dashboard-section" style="display: none;">
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h2 class="section-title">My Attendance & Punctuality</h2>
+                            <div style="display: flex; gap: 12px;">
+                                <form id="presentForm" action="/mark-attendance" method="POST">
+                                    <input type="hidden" name="date" id="attDate">
+                                    <input type="hidden" name="time" id="attTime">
+                                    <button type="button" class="btn-primary" style="background: var(--success); border: none;" onclick="submitAttendance('Present')">
+                                        <span class="material-symbols-outlined">how_to_reg</span> Mark Present
+                                    </button>
+                                </form>
+                                <form id="leaveForm" action="/mark-attendance" method="POST">
+                                    <input type="hidden" name="date" id="leaveDate">
+                                    <input type="hidden" name="time" id="leaveTime">
+                                    <button type="button" class="btn-secondary" onclick="submitAttendance('Leave')">Mark Leave</button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div class="stats-grid" style="margin-top: 24px;">
+                            <div class="stat-card">
+                                <div class="stat-icon-wrapper stat-green"><span class="material-symbols-outlined">task_alt</span></div>
+                                <div class="stat-content">
+                                    <h3>${attendanceRecords.size()}</h3>
+                                    <p>Days Present</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon-wrapper stat-blue"><span class="material-symbols-outlined">schedule</span></div>
+                                <div class="stat-content">
+                                    <h3>98%</h3>
+                                    <p>On-Time Arrival</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <table class="data-table" style="margin-top: 32px;">
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="record" items="${attendanceRecords}">
+                                    <tr>
+                                        <td>
+                                            <div style="font-weight: 700; color: var(--gray-900);">${record.checkIn.toLocalDate()}</div>
+                                            <div style="font-size: 11px; color: var(--primary);">${record.checkIn.toLocalTime()}</div>
+                                        </td>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <span class="status-badge" style="background: ${record.status == 'Present' ? 'var(--success-50)' : 'var(--error-50)'}; color: ${record.status == 'Present' ? 'var(--success-700)' : 'var(--error-700)'};">
+                                                    ${record.status}
+                                                </span>
+                                                <c:if test="${record.verified}">
+                                                    <span class="status-badge" style="background: var(--primary-50); color: var(--primary); border: 1px solid var(--primary-200); font-size: 10px; display: flex; align-items: center; gap: 4px;">
+                                                        <span class="material-symbols-outlined" style="font-size: 12px;">verified</span>
+                                                        VERIFIED
+                                                    </span>
+                                                </c:if>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 12px;">
+                                                <c:choose>
+                                                    <c:when test="${not empty record.checkOut}">
+                                                        <div style="font-size: 13px; font-weight: 700; color: var(--gray-600); display: flex; align-items: center; gap: 8px;">
+                                                            <span class="material-symbols-outlined" style="font-size: 18px; color: var(--success);">task_alt</span>
+                                                            Checked Out: ${record.checkOut.toLocalTime()}
+                                                        </div>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <form id="checkoutForm_${record.id}" action="/update-attendance" method="POST" style="display: inline;">
+                                                            <input type="hidden" name="id" value="${record.id}">
+                                                            <input type="hidden" name="date" id="checkoutDate_${record.id}">
+                                                            <input type="hidden" name="time" id="checkoutTime_${record.id}">
+                                                            <button type="button" class="btn-primary" style="background: var(--error); border: none; padding: 6px 12px; font-size: 12px; display: flex; align-items: center; gap: 4px;" onclick="submitCheckout('${record.id}')">
+                                                                <span class="material-symbols-outlined" style="font-size: 16px;">logout</span> Check Out
+                                                            </button>
+                                                        </form>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                                
+                                                <c:if test="${!record.verified}">
+                                                    <form action="/delete-attendance" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this attendance record?')">
+                                                        <input type="hidden" name="id" value="${record.id}">
+                                                        <button type="submit" style="background: none; border: none; color: var(--gray-400); cursor: pointer; display: flex; align-items: center; transition: color 0.2s;" onmouseover="this.style.color='var(--error)'" onmouseout="this.style.color='var(--gray-400)'">
+                                                            <span class="material-symbols-outlined" style="font-size: 20px;">delete</span>
+                                                        </button>
+                                                    </form>
+                                                </c:if>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                                <c:if test="${empty attendanceRecords}">
+                                    <tr><td colspan="3" style="text-align:center; padding: 40px; color: var(--gray-500);">No attendance records found.</td></tr>
+                                </c:if>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- PERFORMANCE SECTION -->
+                <div id="performance-section" class="dashboard-section" style="display: none;">
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h2 class="section-title">Technician Performance Metrics</h2>
+                        </div>
+                        <div style="padding: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at center, var(--primary-50) 0%, transparent 70%);">
+                            <div style="width: 240px; height: 240px; border-radius: 50%; border: 15px solid var(--gray-100); border-top-color: var(--primary); border-right-color: var(--primary); margin: 0 auto; display: flex; align-items: center; justify-content: center; position: relative; box-shadow: var(--shadow-lg); background: white;">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 56px; font-weight: 800; color: var(--gray-900); line-height: 1;">4.9</div>
+                                    <div style="font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">Rating</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stats-grid" style="margin-top: 48px; width: 100%; max-width: 800px;">
+                                <div class="stat-card" style="background: white; border: 1px solid var(--gray-100);">
+                                    <div class="stat-icon-wrapper" style="background: var(--success-50); color: var(--success);"><span class="material-symbols-outlined">verified</span></div>
+                                    <div class="stat-content">
+                                        <h3>96%</h3>
+                                        <p>Accuracy Rate</p>
+                                    </div>
+                                </div>
+                                <div class="stat-card" style="background: white; border: 1px solid var(--gray-100);">
+                                    <div class="stat-icon-wrapper" style="background: var(--primary-50); color: var(--primary);"><span class="material-symbols-outlined">timer</span></div>
+                                    <div class="stat-content">
+                                        <h3>18m</h3>
+                                        <p>Avg. Processing</p>
+                                    </div>
+                                </div>
+                                <div class="stat-card" style="background: white; border: 1px solid var(--gray-100);">
+                                    <div class="stat-icon-wrapper" style="background: var(--warning-50); color: var(--warning);"><span class="material-symbols-outlined">thumb_up</span></div>
+                                    <div class="stat-content">
+                                        <h3>124</h3>
+                                        <p>Doctor Feedbacks</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <p style="margin-top: 32px; color: var(--gray-500); max-width: 500px; text-align: center; line-height: 1.6;">
+                                Your performance is calculated based on report turnaround time, data accuracy, and feedback from referring doctors. Keep up the excellent work!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SHIFT SCHEDULE SECTION -->
+                <div id="shifts-section" class="dashboard-section" style="display: none;">
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h2 class="section-title">My Assigned Shifts</h2>
+                            <p style="color: var(--gray-500); font-size: 13px;">View your upcoming schedule managed by the Admin.</p>
+                        </div>
+                        
+                        <div class="stats-grid" style="margin-top: 24px; grid-template-columns: 1fr 1fr 1fr;">
+                            <c:forEach var="shift" items="${shifts}">
+                                <div class="stat-card" style="flex-direction: column; align-items: flex-start; gap: 12px; padding: 24px; border: 1px solid var(--primary-100); background: var(--primary-50);">
+                                    <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                                        <span class="status-badge" style="background: var(--primary); color: white;">${shift.department}</span>
+                                        <span class="material-symbols-outlined" style="color: var(--primary);">event</span>
+                                    </div>
+                                    <h3 style="margin: 0; font-size: 20px;">${shift.startTime.toLocalTime()} - ${shift.endTime.toLocalTime()}</h3>
+                                    <p style="margin: 0; font-weight: 700; color: var(--gray-700);">${shift.startTime.toLocalDate()}</p>
+                                    <p style="margin: 0; font-size: 12px; color: var(--gray-500);">${shift.note}</p>
+                                </div>
+                            </c:forEach>
+                            <c:if test="${empty shifts}">
+                                <div style="grid-column: span 3; text-align: center; padding: 60px; background: var(--gray-50); border-radius: 20px;">
+                                    <span class="material-symbols-outlined" style="font-size: 48px; color: var(--gray-300); margin-bottom: 16px;">event_busy</span>
+                                    <h3 style="color: var(--gray-700);">No Shifts Assigned</h3>
+                                    <p style="color: var(--gray-500);">Please contact the Admin to update your shift schedule.</p>
+                                </div>
+                            </c:if>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PROFILE SECTION -->
+                <div id="profile-section" class="dashboard-section" style="display: none;">
+                    <div class="section-card" style="max-width: 800px; margin: 0 auto;">
+                        <div style="background: var(--gradient-1); height: 120px; border-radius: 16px 16px 0 0; margin: -24px -24px 60px -24px; position: relative;">
+                            <div style="position: absolute; bottom: -40px; left: 40px; display: flex; align-items: flex-end; gap: 20px;">
+                                <div style="position: relative;">
+                                    <img src="/img/lab_tech_avatar.png" id="profileImagePreview" alt="Profile" style="width: 120px; height: 120px; border-radius: 24px; border: 5px solid white; box-shadow: var(--shadow-lg); background: white;">
+                                    <label for="profilePhotoInput" style="position: absolute; bottom: -5px; right: -5px; background: var(--primary); color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid white; box-shadow: var(--shadow-md);">
+                                        <span class="material-symbols-outlined" style="font-size: 18px;">photo_camera</span>
+                                    </label>
+                                    <input type="file" id="profilePhotoInput" style="display: none;" onchange="previewProfilePhoto(event)">
+                                </div>
+                                <div style="margin-bottom: 10px;">
+                                    <h2 style="font-size: 24px; font-weight: 800; color: var(--gray-900); margin-bottom: 4px;">${user.fullName}</h2>
+                                    <p style="color: var(--gray-500); font-weight: 600;">Lab Technician</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; padding: 20px;">
+                            <div class="profile-card-static" style="background: var(--gray-50); padding: 20px; border-radius: 16px; border: 1px solid var(--gray-100);">
+                                <p style="font-size: 12px; color: var(--gray-400); font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Contact Details</p>
+                                <div style="display: flex; flex-direction: column; gap: 12px;">
+                                    <div><small style="color: var(--gray-500);">Email</small><p style="font-weight: 700; margin: 0;">${user.email}</p></div>
+                                    <div><small style="color: var(--gray-500);">Phone</small><p style="font-weight: 700; margin: 0;">${not empty user.phone ? user.phone : 'Not Provided'}</p></div>
+                                </div>
+                            </div>
+                            <div class="profile-card-static" style="background: var(--gray-50); padding: 20px; border-radius: 16px; border: 1px solid var(--gray-100);">
+                                <p style="font-size: 12px; color: var(--gray-400); font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Laboratory Details</p>
+                                <div style="display: flex; flex-direction: column; gap: 12px;">
+                                    <div><small style="color: var(--gray-500);">Hospital/Lab Name</small><p style="font-weight: 700; margin: 0;">${user.labName}</p></div>
+                                    <div><small style="color: var(--gray-500);">Lab ID</small><p style="font-weight: 700; margin: 0;">${user.labId}</p></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- NOTIFICATIONS SECTION -->
                 <div id="notifications-section" class="dashboard-section" style="display: none;">
                     <div class="section-card">
@@ -1635,7 +1868,10 @@
                     'profile-section': 'Technician Profile',
                     'notifications-section': 'System Notifications',
                     'logistics-section': 'Logistics & Sample Tracking',
-                    'doctor-requests-section': 'Incoming Doctor Prescriptions'
+                    'doctor-requests-section': 'Incoming Doctor Prescriptions',
+                    'attendance-section': 'Attendance Tracking',
+                    'shifts-section': 'My Shift Schedule',
+                    'performance-section': 'Performance Analytics'
                 };
                 
                 const titleElement = document.querySelector('.page-title');
@@ -1862,6 +2098,32 @@
                 document.body.appendChild(toast);
                 setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 3000);
             }
+        }
+
+        function submitAttendance(status) {
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
+            
+            if (status === 'Present') {
+                document.getElementById('attDate').value = dateStr;
+                document.getElementById('attTime').value = timeStr;
+                document.getElementById('presentForm').submit();
+            } else {
+                document.getElementById('leaveDate').value = dateStr;
+                document.getElementById('leaveTime').value = timeStr;
+                document.getElementById('leaveForm').submit();
+            }
+        }
+
+        function submitCheckout(recordId) {
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
+            
+            document.getElementById('checkoutDate_' + recordId).value = dateStr;
+            document.getElementById('checkoutTime_' + recordId).value = timeStr;
+            document.getElementById('checkoutForm_' + recordId).submit();
         }
     </script>
 </body>

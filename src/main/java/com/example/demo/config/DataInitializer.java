@@ -8,6 +8,8 @@ import com.example.demo.repository.PatientRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.LabRequestRepository;
 import com.example.demo.repository.LabTestRepository;
+import com.example.demo.repository.AttendanceRepository;
+import com.example.demo.repository.StaffShiftRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,12 +24,18 @@ import java.util.Optional;
 public class DataInitializer {
 
     @Bean
-    public CommandLineRunner initData(PatientRepository patientRepository, 
-                                     UserRepository userRepository, 
-                                     LabRequestRepository labRequestRepo,
-                                     LabTestRepository labTestRepo,
-                                     PasswordEncoder passwordEncoder) {
+    public CommandLineRunner initData(PatientRepository patientRepository,
+            UserRepository userRepository,
+            LabRequestRepository labRequestRepo,
+            LabTestRepository labTestRepo,
+            AttendanceRepository attendanceRepo,
+            StaffShiftRepository staffShiftRepo,
+            PasswordEncoder passwordEncoder) {
         return args -> {
+            // Clearing existing staff data as requested for a fresh start
+            attendanceRepo.deleteAll();
+            staffShiftRepo.deleteAll();
+
             // 1. Initialize Roles / Users
             seedUser(userRepository, passwordEncoder, "admin@gmail.com", "admin123", "Admin", "System Admin");
             seedUser(userRepository, passwordEncoder, "doctor@gmail.com", "1234", "Doctor", "Dr. Emily Chen");
@@ -49,7 +57,7 @@ public class DataInitializer {
                 userRepository.save(labUser);
             }
 
-            // 2. Initialize Lab Tests (Comprehensive list from DataSeeder)
+            // 2. Initialize Lab Tests
             if (labTestRepo.count() == 0) {
                 List<String> defaultTests = Arrays.asList(
                         "Complete Blood Count (CBC)",
@@ -61,7 +69,8 @@ public class DataInitializer {
                         "Hemoglobin A1C",
                         "Liver Function Test (LFT)",
                         "Vitamin D Test",
-                        "Iron Panel"
+                        "Iron Panel",
+                        "Lipid Profile"
                 );
 
                 for (String testName : defaultTests) {
