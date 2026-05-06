@@ -176,7 +176,7 @@ img {
       rgba(15, 23, 42, 0.15) 65%,
       rgba(15, 23, 42, 0.55) 100%
     ),
-    url("/bg-image.jsp?v=2");
+    url("/img/hero-bg.png");
 
   background-size: cover;
   background-position: center 10%;
@@ -1567,6 +1567,15 @@ img {
   .about-cards {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+.hero {
+  min-height: 560px;
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: background-image 0.8s ease-in-out;
 }
 
 .feature-img {
