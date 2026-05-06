@@ -998,80 +998,6 @@
                     </div>
                 </div>
 
-                <!-- PROFILE SECTION -->
-                <div id="profile-section" class="dashboard-section" style="display: none;">
-                    <div class="section-header">
-                        <h2 class="section-title">My Profile</h2>
-                    </div>
-                    
-                    <div class="stats-grid" style="grid-template-columns: 1fr 2fr; gap: 24px;">
-                        <!-- Profile Card -->
-                        <div class="section-card" style="padding: 32px; text-align: center;">
-                            <div style="position: relative; display: inline-block; margin-bottom: 16px;">
-                                <img id="profileImagePreview" src="https://api.dicebear.com/7.x/avataaars/svg?seed=${not empty user.fullName ? user.fullName : 'Sarah'}" alt="Profile" style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--primary-light); object-fit: cover;">
-                                <button onclick="document.getElementById('profilePhotoInput').click()" style="position: absolute; bottom: 0; right: 0; background: var(--primary); color: white; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s;" title="Upload Photo">
-                                    <span class="material-symbols-outlined" style="font-size: 18px;">photo_camera</span>
-                                </button>
-                                <input type="file" id="profilePhotoInput" accept="image/png, image/jpeg, image/jpg" style="display: none;" onchange="previewProfilePhoto(event)">
-                            </div>
-                            <h3 style="font-size: 20px; margin-bottom: 4px;">${not empty user.fullName ? user.fullName : 'Dr. Sarah Jenkins'}</h3>
-                            <p style="color: var(--primary); font-weight: 600; margin-bottom: 24px;">Senior Lab Technician</p>
-                            
-                            <div style="text-align: left; background: var(--gray-50); padding: 16px; border-radius: var(--radius-md);">
-                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                                    <span class="material-symbols-outlined" style="color: var(--primary);">badge</span>
-                                    <div>
-                                        <small style="display: block; color: var(--gray-500); font-size: 11px;">Lab ID</small>
-                                        <span style="font-weight: 600;">${not empty user.labId ? user.labId : 'LAB-DEFAULT'}</span>
-                                    </div>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 12px;">
-                                    <span class="material-symbols-outlined" style="color: var(--primary);">location_on</span>
-                                    <div>
-                                        <small style="display: block; color: var(--gray-500); font-size: 11px;">Lab Address</small>
-                                        <span style="font-weight: 600;">${not empty user.labAddress ? user.labAddress : 'Main Clinic Wing, 2nd Floor'}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Details Card -->
-                        <div class="section-card" style="padding: 32px;">
-                            <h3 style="font-size: 18px; margin-bottom: 24px; border-bottom: 1px solid var(--gray-100); padding-bottom: 12px;">Account Details</h3>
-                            
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
-                                <div>
-                                    <label style="display: block; color: var(--gray-500); font-size: 12px; margin-bottom: 6px;">Full Name</label>
-                                    <p style="font-weight: 600; font-size: 15px;">${not empty user.fullName ? user.fullName : 'Dr. Sarah Jenkins'}</p>
-                                </div>
-                                <div>
-                                    <label style="display: block; color: var(--gray-500); font-size: 12px; margin-bottom: 6px;">Email Address</label>
-                                    <p style="font-weight: 600; font-size: 15px;">${not empty user.email ? user.email : 'sarah.j@medicare.com'}</p>
-                                </div>
-                                <div>
-                                    <label style="display: block; color: var(--gray-500); font-size: 12px; margin-bottom: 6px;">Laboratory Name</label>
-                                    <p style="font-weight: 600; font-size: 15px;">${not empty user.labName ? user.labName : 'MediCare+ Central Lab'}</p>
-                                </div>
-                                <div>
-                                    <label style="display: block; color: var(--gray-500); font-size: 12px; margin-bottom: 6px;">Role</label>
-                                    <span class="status-badge status-progress">Lab Technician</span>
-                                </div>
-                            </div>
-                            
-                            <div style="padding: 20px; background: var(--primary-50); border: 1px dashed var(--primary-200); border-radius: var(--radius-md); margin-bottom: 24px;">
-                                <p style="font-size: 13px; color: var(--primary-700);">
-                                    <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">info</span>
-                                    Your profile information is managed by the system administrator. Contact HR if any details are incorrect.
-                                </p>
-                            </div>
-                            
-                            <button class="btn-primary" onclick="alert('Profile edit request sent to Administrator.')">
-                                <span class="material-symbols-outlined">edit</span>
-                                Request Profile Update
-                            </button>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- PATIENT RECORDS SECTION -->
                 <div id="patients-section" class="dashboard-section" style="display: none;">
@@ -1536,36 +1462,97 @@
 
                 <!-- PROFILE SECTION -->
                 <div id="profile-section" class="dashboard-section" style="display: none;">
-                    <div class="section-card" style="max-width: 800px; margin: 0 auto;">
-                        <div style="background: var(--gradient-1); height: 120px; border-radius: 16px 16px 0 0; margin: -24px -24px 60px -24px; position: relative;">
-                            <div style="position: absolute; bottom: -40px; left: 40px; display: flex; align-items: flex-end; gap: 20px;">
+                    <div class="section-card" style="max-width: 900px; margin: 0 auto; overflow: hidden;">
+                        <div style="background: linear-gradient(135deg, var(--primary), var(--primary-light)); height: 160px; position: relative;">
+                            <div style="position: absolute; bottom: -50px; left: 40px; display: flex; align-items: flex-end; gap: 24px;">
                                 <div style="position: relative;">
-                                    <img src="/img/lab_tech_avatar.png" id="profileImagePreview" alt="Profile" style="width: 120px; height: 120px; border-radius: 24px; border: 5px solid white; box-shadow: var(--shadow-lg); background: white;">
-                                    <label for="profilePhotoInput" style="position: absolute; bottom: -5px; right: -5px; background: var(--primary); color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid white; box-shadow: var(--shadow-md);">
-                                        <span class="material-symbols-outlined" style="font-size: 18px;">photo_camera</span>
+                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${user.fullName}" id="profileImagePreview" alt="Profile" style="width: 140px; height: 140px; border-radius: 24px; border: 6px solid white; box-shadow: var(--shadow-lg); background: white; object-fit: cover;">
+                                    <label for="profilePhotoInput" style="position: absolute; bottom: 5px; right: 5px; background: var(--primary); color: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid white; box-shadow: var(--shadow-md); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                                        <span class="material-symbols-outlined" style="font-size: 20px;">photo_camera</span>
                                     </label>
                                     <input type="file" id="profilePhotoInput" style="display: none;" onchange="previewProfilePhoto(event)">
                                 </div>
-                                <div style="margin-bottom: 10px;">
-                                    <h2 style="font-size: 24px; font-weight: 800; color: var(--gray-900); margin-bottom: 4px;">${user.fullName}</h2>
-                                    <p style="color: var(--gray-500); font-weight: 600;">Lab Technician</p>
+                                <div style="margin-bottom: 15px; color: var(--gray-900);">
+                                    <h2 style="font-size: 32px; font-weight: 800; margin: 0; letter-spacing: -1px;">${user.fullName}</h2>
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                                        <span class="material-symbols-outlined" style="font-size: 18px; color: var(--primary);">biotech</span>
+                                        <span style="color: var(--gray-600); font-weight: 600;">Lab Personnel | ${user.labName}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; padding: 20px;">
-                            <div class="profile-card-static" style="background: var(--gray-50); padding: 20px; border-radius: 16px; border: 1px solid var(--gray-100);">
-                                <p style="font-size: 12px; color: var(--gray-400); font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Contact Details</p>
-                                <div style="display: flex; flex-direction: column; gap: 12px;">
-                                    <div><small style="color: var(--gray-500);">Email</small><p style="font-weight: 700; margin: 0;">${user.email}</p></div>
-                                    <div><small style="color: var(--gray-500);">Phone</small><p style="font-weight: 700; margin: 0;">${not empty user.phone ? user.phone : 'Not Provided'}</p></div>
+                        <div style="padding: 80px 40px 40px 40px;">
+                            <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px;">
+                                <div>
+                                    <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
+                                        <span class="material-symbols-outlined" style="color: var(--primary);">person</span>
+                                        Personal Information
+                                    </h3>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                                        <div class="profile-field">
+                                            <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; margin-bottom: 6px;">Full Legal Name</label>
+                                            <p style="font-weight: 700; color: var(--gray-900); margin: 0;">${user.fullName}</p>
+                                        </div>
+                                        <div class="profile-field">
+                                            <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; margin-bottom: 6px;">Email Address</label>
+                                            <p style="font-weight: 700; color: var(--gray-900); margin: 0;">${user.email}</p>
+                                        </div>
+                                        <div class="profile-field">
+                                            <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; margin-bottom: 6px;">Phone Number</label>
+                                            <p style="font-weight: 700; color: var(--gray-900); margin: 0;">${not empty user.phone ? user.phone : 'Not Linked'}</p>
+                                        </div>
+                                        <div class="profile-field">
+                                            <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; margin-bottom: 6px;">Account Status</label>
+                                            <span class="status-badge" style="background: var(--success-50); color: var(--success-700); font-weight: 800;">ACTIVE</span>
+                                        </div>
+                                    </div>
+
+                                    <div style="margin-top: 40px; padding: 24px; background: var(--primary-50); border-radius: 16px; border: 1px solid var(--primary-100);">
+                                        <h4 style="margin: 0 0 12px 0; color: var(--primary-800); display: flex; align-items: center; gap: 8px;">
+                                            <span class="material-symbols-outlined" style="font-size: 20px;">security</span>
+                                            Security & Access
+                                        </h4>
+                                        <p style="font-size: 13px; color: var(--primary-700); line-height: 1.6; margin: 0 0 20px 0;">
+                                            Your account has high-level access to sensitive patient lab data. Ensure you maintain confidentiality and follow clinic security protocols.
+                                        </p>
+                                        <button class="btn-primary" style="font-size: 12px; padding: 10px 20px;" onclick="alert('Password reset link has been sent to your email.')">Change Password</button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="profile-card-static" style="background: var(--gray-50); padding: 20px; border-radius: 16px; border: 1px solid var(--gray-100);">
-                                <p style="font-size: 12px; color: var(--gray-400); font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Laboratory Details</p>
-                                <div style="display: flex; flex-direction: column; gap: 12px;">
-                                    <div><small style="color: var(--gray-500);">Hospital/Lab Name</small><p style="font-weight: 700; margin: 0;">${user.labName}</p></div>
-                                    <div><small style="color: var(--gray-500);">Lab ID</small><p style="font-weight: 700; margin: 0;">${user.labId}</p></div>
+
+                                <div>
+                                    <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
+                                        <span class="material-symbols-outlined" style="color: var(--primary);">domain</span>
+                                        Workplace Details
+                                    </h3>
+                                    <div style="background: white; border: 1px solid var(--gray-200); border-radius: 20px; padding: 24px; box-shadow: var(--shadow-sm);">
+                                        <div style="margin-bottom: 20px;">
+                                            <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; margin-bottom: 8px;">Primary Laboratory</label>
+                                            <div style="display: flex; align-items: center; gap: 12px;">
+                                                <div style="background: var(--primary-light); color: var(--primary); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                                    <span class="material-symbols-outlined">home_health</span>
+                                                </div>
+                                                <div>
+                                                    <p style="font-weight: 800; color: var(--gray-900); margin: 0;">${user.labName}</p>
+                                                    <p style="font-size: 12px; color: var(--gray-500); margin: 0;">ID: ${user.labId}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style="margin-bottom: 20px;">
+                                            <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; margin-bottom: 8px;">Location</label>
+                                            <p style="font-size: 13px; font-weight: 600; color: var(--gray-700); margin: 0;">
+                                                <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle; color: var(--primary);">location_on</span>
+                                                ${user.labAddress}
+                                            </p>
+                                        </div>
+                                        <div style="padding-top: 20px; border-top: 1px solid var(--gray-100);">
+                                            <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; margin-bottom: 8px;">Account Type</label>
+                                            <div style="display: flex; align-items: center; gap: 8px; background: var(--gray-50); padding: 8px 12px; border-radius: 10px;">
+                                                <span class="material-symbols-outlined" style="font-size: 18px; color: var(--gray-600);">badge</span>
+                                                <span style="font-weight: 700; font-size: 13px; color: var(--gray-700);">${user.role} Dashboard Access</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

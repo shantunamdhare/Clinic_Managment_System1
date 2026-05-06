@@ -8,7 +8,7 @@ echo   Starting Spring Boot Server...
 echo ============================================
 echo.
 
-cd /d "d:\Clinic Managemet System\Clinic_Managment_Sytem"
+cd /d "%~dp0"
 
 echo Checking Java installation...
 java -version 2>&1

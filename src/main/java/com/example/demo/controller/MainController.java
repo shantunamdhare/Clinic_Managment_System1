@@ -381,7 +381,7 @@ public class MainController {
             redirectAttributes.addFlashAttribute("errorMessage", "Invalid date or time format!");
         }
 
-        if ("Lab".equals(user.getRole())) return "redirect:/lab-dashboard";
+        if ("Lab".equalsIgnoreCase(user.getRole())) return "redirect:/lab-dashboard";
         return "redirect:/staff-dashboard";
     }
 
@@ -409,7 +409,7 @@ public class MainController {
                 }
             }
         }
-        if ("Lab".equals(user.getRole())) return "redirect:/lab-dashboard";
+        if ("Lab".equalsIgnoreCase(user.getRole())) return "redirect:/lab-dashboard";
         return "redirect:/staff-dashboard";
     }
 
@@ -427,7 +427,7 @@ public class MainController {
                 redirectAttributes.addFlashAttribute("errorMessage", "Cannot delete a verified record!");
             }
         }
-        if ("Lab".equals(user.getRole())) return "redirect:/lab-dashboard";
+        if ("Lab".equalsIgnoreCase(user.getRole())) return "redirect:/lab-dashboard";
         return "redirect:/staff-dashboard";
     }
 
