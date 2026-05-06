@@ -47,29 +47,26 @@ public class MainController {
             @RequestParam String password,
             @RequestParam String confirmPassword,
             @RequestParam String role,
-<<<<<<< HEAD
             @RequestParam(required = false) String labName,
             @RequestParam(required = false) String labAddress,
             @RequestParam(required = false) String labId,
             @RequestParam(required = false) String labType,
-=======
             @RequestParam(required = false) String phone,
             @RequestParam(required = false) String specialization,
             @RequestParam(required = false) Integer experience,
             @RequestParam(required = false) String licenseId,
->>>>>>> d47752b02d36ead22b434ee0b50971579c4440d6
             RedirectAttributes redirectAttributes) {
 
         // Check if passwords match
         if (!password.equals(confirmPassword)) {
             redirectAttributes.addFlashAttribute("registerError", "Passwords do not match!");
-            return "redirect:/#register-section";
+            return "redirect:/#login-section";
         }
 
         // Check if email already exists
         if (userRepository.existsByEmail(email)) {
             redirectAttributes.addFlashAttribute("registerError", "Email already registered!");
-            return "redirect:/#register-section";
+            return "redirect:/#login-section";
         }
 
         // Create and save user
@@ -78,25 +75,23 @@ public class MainController {
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
         user.setRole(role);
-<<<<<<< HEAD
-        user.setLabName(labName);
-        user.setLabAddress(labAddress);
-        user.setLabId(labId);
-        user.setLabType(labType);
-=======
         
-        if ("Doctor".equalsIgnoreCase(role)) {
+        if ("Lab".equalsIgnoreCase(role)) {
+            user.setLabName(labName);
+            user.setLabAddress(labAddress);
+            user.setLabId(labId);
+            user.setLabType(labType);
+        } else if ("Doctor".equalsIgnoreCase(role)) {
             user.setPhone(phone);
             user.setSpecialization(specialization);
             user.setExperience(experience);
             user.setLicenseId(licenseId);
         }
->>>>>>> d47752b02d36ead22b434ee0b50971579c4440d6
 
         userRepository.save(user);
 
         redirectAttributes.addFlashAttribute("registerSuccess", "Registration successful! Please login.");
-        return "redirect:/";
+        return "redirect:/#login-section";
     }
 
     // ========================
@@ -107,11 +102,7 @@ public class MainController {
             @RequestParam String email,
             @RequestParam String password,
             @RequestParam String role,
-<<<<<<< HEAD
             HttpSession session,
-=======
-            jakarta.servlet.http.HttpSession session,
->>>>>>> d47752b02d36ead22b434ee0b50971579c4440d6
             RedirectAttributes redirectAttributes) {
 
         Optional<User> optionalUser = userRepository.findByEmail(email);
@@ -151,7 +142,7 @@ public class MainController {
     // User Logout
     // ========================
     @GetMapping("/logout")
-    public String logout(jakarta.servlet.http.HttpSession session) {
+    public String logout(HttpSession session) {
         session.invalidate();
         return "redirect:/";
     }

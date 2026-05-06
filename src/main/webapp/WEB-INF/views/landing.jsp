@@ -11,7 +11,7 @@
 </head>
 <body>
     <!-- Hidden toggle for Login Card -->
-    <input type="checkbox" id="login-toggle" class="login-toggle-input" style="display:none">
+    <input type="checkbox" id="login-toggle" class="login-toggle-input" style="display:none" ${not empty registerSuccess or not empty registerError or not empty loginError ? 'checked' : ''}>
 
     <!-- ==================== HEADER ==================== -->
     <header class="header" id="header">
@@ -74,43 +74,33 @@
             <div class="hero-right" id="login-section">
                 <div class="login-card">
                     <label for="login-toggle" class="modal-close">&times;</label>
+
+                    <!-- Alert Messages -->
+                    <c:if test="${not empty registerSuccess}">
+                        <div class="alert alert-success" style="background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #c3e6cb; font-size: 0.9rem;">
+                            &#x2705; ${registerSuccess}
+                        </div>
+                    </c:if>
+                    <c:if test="${not empty registerError}">
+                        <div class="alert alert-error" style="background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #f5c6cb; font-size: 0.9rem;">
+                            &#x26A0; ${registerError}
+                        </div>
+                    </c:if>
+                    <c:if test="${not empty loginError}">
+                        <div class="alert alert-error" style="background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #f5c6cb; font-size: 0.9rem;">
+                            &#x26A0; ${loginError}
+                        </div>
+                    </c:if>
                     
                     <!-- Tab System -->
                     <div class="modal-tabs">
-                        <input type="radio" name="modal-tab" id="tab-login" checked style="display:none">
-                        <input type="radio" name="modal-tab" id="tab-register" style="display:none">
+                        <input type="radio" name="modal-tab" id="tab-login" ${empty registerError and empty registerSuccess ? 'checked' : ''} style="display:none">
+                        <input type="radio" name="modal-tab" id="tab-register" ${not empty registerError or not empty registerSuccess ? 'checked' : ''} style="display:none">
                         
                         <div class="tab-header">
                             <label for="tab-login" class="tab-btn login-tab-btn">Login</label>
                             <label for="tab-register" class="tab-btn register-tab-btn">Register</label>
                         </div>
-<<<<<<< HEAD
-                        <div class="form-group">
-                            <span class="input-icon">&#x1F512;</span>
-                            <input type="password" name="password" class="form-input" placeholder="Enter your password" required>
-                        </div>
-                        <div class="form-group">
-                            <span class="input-icon">&#x1F464;</span>
-                            <select name="role" class="form-select" required>
-                                <option value="" disabled selected>Select Your Role</option>
-                                <option value="Admin">Admin</option>
-                                <option value="Doctor">Doctor</option>
-                                <option value="Receptionist">Receptionist</option>
-                                <option value="Patient">Patient</option>
-                                <option value="Lab">Lab</option>
-                                <option value="Pharmacy">Pharmacy</option>
-                                <option value="Staff">Staff</option>
-                                <option value="Delivery">Delivery Boy</option>
-                            </select>
-                        </div>
-                        <div class="form-row">
-                            <label><input type="checkbox" name="remember"> Remember Me</label>
-                            <a href="#">Forgot Password?</a>
-                        </div>
-                        <button type="submit" class="btn-login">Login &#x27A1;</button>
-                    </form>
-=======
->>>>>>> d47752b02d36ead22b434ee0b50971579c4440d6
 
                         <!-- Login Form Content -->
                         <div class="tab-content login-content">
@@ -137,6 +127,7 @@
                                         <option value="Lab">Lab</option>
                                         <option value="Pharmacy">Pharmacy</option>
                                         <option value="Staff">Staff</option>
+                                        <option value="Delivery">Delivery Boy</option>
                                     </select>
                                 </div>
                                 <div class="form-row">
@@ -171,7 +162,7 @@
                                 </div>
                                 <div class="form-group">
                                     <span class="input-icon">&#x1F464;</span>
-                                    <select name="role" id="registerRoleSelect" class="form-select" required onchange="toggleDoctorFields()">
+                                    <select name="role" id="registerRoleSelect" class="form-select" required onchange="toggleSpecialFields()">
                                         <option value="" disabled selected>Select Your Role</option>
                                         <option value="Admin">Admin</option>
                                         <option value="Doctor">Doctor</option>
@@ -180,10 +171,11 @@
                                         <option value="Lab">Lab</option>
                                         <option value="Pharmacy">Pharmacy</option>
                                         <option value="Staff">Staff</option>
+                                        <option value="Delivery">Delivery Boy</option>
                                     </select>
                                 </div>
                                 
-                                <!-- Doctor specific fields (hidden by default) -->
+                                <!-- Doctor specific fields -->
                                 <div id="doctorFields" style="display: none; background: rgba(37,99,235,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(37,99,235,0.3);">
                                     <p style="font-size: 0.8rem; color: #2563eb; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Doctor Details</p>
                                     <div class="form-group" style="margin-bottom: 10px;">
@@ -203,6 +195,31 @@
                                         <input type="text" name="licenseId" id="doctorLicenseId" class="form-input" placeholder="Medical License ID">
                                     </div>
                                 </div>
+
+                                <!-- Lab specific fields -->
+                                <div id="labFields" style="display: none; background: rgba(142,45,226,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(142,45,226,0.3);">
+                                    <p style="font-size: 0.8rem; color: #8e2de2; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Laboratory Details</p>
+                                    <div class="form-group" style="margin-bottom: 10px;">
+                                        <span class="input-icon">&#x1F3EC;</span>
+                                        <select name="labType" id="labType" class="form-select">
+                                            <option value="In-House">In-House Lab</option>
+                                            <option value="External">External Lab</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 10px;">
+                                        <span class="input-icon">&#x1F3E5;</span>
+                                        <input type="text" name="labName" id="labName" class="form-input" placeholder="Laboratory Name">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 10px;">
+                                        <span class="input-icon">&#x1F4CD;</span>
+                                        <input type="text" name="labAddress" id="labAddress" class="form-input" placeholder="Laboratory Address">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <span class="input-icon">&#x1F3AB;</span>
+                                        <input type="text" name="labId" id="labId" class="form-input" placeholder="Laboratory ID (e.g. LAB1001)">
+                                    </div>
+                                </div>
+
                                 <div class="terms-row">
                                     <input type="checkbox" name="terms" required>
                                     <span>I agree to the <a href="#">Terms &amp; Conditions</a></span>
@@ -389,87 +406,6 @@
       </div>
     </section>
 
-
-
-<<<<<<< HEAD
-                <form action="/register" method="post">
-                    <div class="form-group">
-                        <span class="input-icon">&#x1F464;</span>
-                        <input type="text" name="fullName" class="form-input" placeholder="Full Name" required>
-                    </div>
-                    <div class="form-group">
-                        <span class="input-icon">&#x2709;</span>
-                        <input type="email" name="email" class="form-input" placeholder="Email Address" required>
-                    </div>
-                    <div class="form-group">
-                        <span class="input-icon">&#x1F512;</span>
-                        <input type="password" name="password" class="form-input" placeholder="Password" required>
-                    </div>
-                    <div class="form-group">
-                        <span class="input-icon">&#x1F512;</span>
-                        <input type="password" name="confirmPassword" class="form-input" placeholder="Confirm Password" required>
-                    </div>
-                    <div class="form-group">
-                        <span class="input-icon">&#x1F464;</span>
-                        <select name="role" id="roleSelect" class="form-select" required onchange="toggleLabFields()">
-                            <option value="" disabled selected>Select Role</option>
-                            <option value="Admin">Admin</option>
-                            <option value="Doctor">Doctor</option>
-                            <option value="Receptionist">Receptionist</option>
-                            <option value="Patient">Patient</option>
-                            <option value="Lab">Lab</option>
-                            <option value="Pharmacy">Pharmacy</option>
-                            <option value="Staff">Staff</option>
-                            <option value="Delivery">Delivery Boy</option>
-                        </select>
-                    </div>
-
-                    <!-- LAB SPECIFIC FIELDS -->
-                    <div id="labFields" style="display: none;">
-                        <div class="form-group" style="margin-top: 15px;">
-                            <span class="input-icon">&#x1F3EC;</span>
-                            <select name="labType" class="form-select">
-                                <option value="In-House">In-House Lab</option>
-                                <option value="External">External Lab</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <span class="input-icon">&#x1F3E5;</span>
-                            <input type="text" name="labName" class="form-input" placeholder="Laboratory Name">
-                        </div>
-                        <div class="form-group">
-                            <span class="input-icon">&#x1F4CD;</span>
-                            <input type="text" name="labAddress" class="form-input" placeholder="Laboratory Address">
-                        </div>
-                        <div class="form-group">
-                            <span class="input-icon">&#x1F3AB;</span>
-                            <input type="text" name="labId" class="form-input" placeholder="Laboratory ID (e.g. LAB1001)">
-                        </div>
-                    </div>
-
-                    <script>
-                        function toggleLabFields() {
-                            const role = document.getElementById('roleSelect').value;
-                            const labFields = document.getElementById('labFields');
-                            if (role === 'Lab') {
-                                labFields.style.display = 'block';
-                            } else {
-                                labFields.style.display = 'none';
-                            }
-                        }
-                    </script>
-                    <div class="terms-row">
-                        <input type="checkbox" name="terms" required>
-                        <span>I agree to the <a href="#">Terms &amp; Conditions</a></span>
-                    </div>
-                    <button type="submit" class="btn-register">Register &#x27A1;</button>
-                </form>
-
-                <div class="login-link">
-                    Already have an account? <a href="#login-section">Login</a>
-                </div>
-            </div>
-=======
     <!-- ==================== HOW IT WORKS SECTION ==================== -->
     <section id="how-it-works" class="how-section">
       <div class="how-container">
@@ -518,7 +454,6 @@
             <p>System generates invoice and manages payments securely.</p>
           </div>
     
->>>>>>> d47752b02d36ead22b434ee0b50971579c4440d6
         </div>
     
       </div>
@@ -558,6 +493,7 @@
     
       </div>
     </section>
+
     <footer class="footer" id="footer">
         <div class="footer-left">
             &copy; 2024 MediCare+ Clinic Management System. All rights reserved.
@@ -577,13 +513,34 @@
     </footer>
 
     <script>
-        function toggleDoctorFields() {
+        function toggleSpecialFields() {
             var roleSelect = document.getElementById("registerRoleSelect");
             var doctorFields = document.getElementById("doctorFields");
+            var labFields = document.getElementById("labFields");
+            
+            // Doctor Inputs
             var phoneInput = document.getElementById("doctorPhone");
             var specInput = document.getElementById("doctorSpecialization");
             var expInput = document.getElementById("doctorExperience");
             var licInput = document.getElementById("doctorLicenseId");
+            
+            // Lab Inputs
+            var labName = document.getElementById("labName");
+            var labAddr = document.getElementById("labAddress");
+            var labId = document.getElementById("labId");
+
+            // Reset all
+            doctorFields.style.display = "none";
+            labFields.style.display = "none";
+            
+            phoneInput.required = false;
+            specInput.required = false;
+            expInput.required = false;
+            licInput.required = false;
+            
+            labName.required = false;
+            labAddr.required = false;
+            labId.required = false;
 
             if (roleSelect.value === "Doctor") {
                 doctorFields.style.display = "block";
@@ -591,12 +548,11 @@
                 specInput.required = true;
                 expInput.required = true;
                 licInput.required = true;
-            } else {
-                doctorFields.style.display = "none";
-                phoneInput.required = false;
-                specInput.required = false;
-                expInput.required = false;
-                licInput.required = false;
+            } else if (roleSelect.value === "Lab") {
+                labFields.style.display = "block";
+                labName.required = true;
+                labAddr.required = true;
+                labId.required = true;
             }
         }
     </script>
