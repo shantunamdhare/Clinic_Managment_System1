@@ -593,7 +593,7 @@
                     <c:when test="${not empty allUsers}">
                         <table class="data-table">
                             <thead>
-                                <tr><th>Name</th><th>Role</th><th>Attendance</th><th>Shift</th><th>Action</th></tr>
+                                <tr><th>Name</th><th>Role</th><th>Attendance</th><th>Check-In</th><th>Check-Out</th><th>Shift</th><th>Action</th></tr>
                             </thead>
                             <tbody>
                                 <c:forEach var="u" items="${allUsers}">
@@ -618,6 +618,8 @@
                                                 <c:otherwise><span class="badge badge-pending">Pending</span></c:otherwise>
                                             </c:choose>
                                         </td>
+                                        <td>${u.checkInTime != null && u.checkInTime != 'null' ? u.checkInTime : '--:--'}</td>
+                                        <td>${u.checkOutTime != null && u.checkOutTime != 'null' ? u.checkOutTime : '--:--'}</td>
                                         <td><span class="badge badge-role" style="background:rgba(255,255,255,0.05);">${u.shiftTiming != null ? u.shiftTiming : 'Not Assigned'}</span></td>
                                         <td>
                                             <div style="display:flex; gap:5px;">
@@ -639,31 +641,8 @@
                         </div>
                     </c:otherwise>
                 </c:choose>
-                    <table class="data-table">
-                        <thead>
-                            <tr><th>Name</th><th>Role</th><th>Check-In</th><th>Check-Out</th><th>Status</th></tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach var="u" items="${allUsers}">
-                                <c:if test="${u.role != 'Admin' && u.role != 'Doctor' && u.role != 'Delivery' && u.attendanceStatus != null}">
-                                <tr>
-                                    <td>${u.fullName}</td>
-                                    <td>${u.role}</td>
-                                    <td>${u.checkInTime != null ? u.checkInTime : '--:--'}</td>
-                                    <td>${u.checkOutTime != null ? u.checkOutTime : '--:--'}</td>
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${u.attendanceStatus == 'Present'}"><span class="badge badge-completed">Present</span></c:when>
-                                            <c:when test="${u.attendanceStatus == 'Absent'}"><span class="badge badge-cancelled">Absent</span></c:when>
-                                            <c:otherwise><span class="badge badge-pending">Pending</span></c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                </tr>
-                                </c:if>
-                            </c:forEach>
-                        </tbody>
-                    </table>
                 </div>
+
 
                 <div class="card">
                     <div class="card-header">

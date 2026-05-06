@@ -29,10 +29,14 @@ public class DoctorDashboardController {
     @Autowired private UserRepository userRepository;
 
     // -------------------------------------------------------
-    // Helper: Get Logged-in Doctor from Session
+    // Helper: Get Logged-in User from Session (Harmonized)
     // -------------------------------------------------------
     private User getLoggedInDoctor(HttpSession session) {
-        return (User) session.getAttribute("loggedInDoctor");
+        User user = (User) session.getAttribute("user");
+        if (user != null && "Doctor".equalsIgnoreCase(user.getRole())) {
+            return user;
+        }
+        return null;
     }
 
     // -------------------------------------------------------
@@ -83,7 +87,7 @@ public class DoctorDashboardController {
             userRepository.save(dbDoctor);
             
             // Update session
-            session.setAttribute("loggedInDoctor", dbDoctor);
+            session.setAttribute("user", dbDoctor);
             ra.addFlashAttribute("success", "Profile updated successfully.");
         }
         return "redirect:/doctor/profile";

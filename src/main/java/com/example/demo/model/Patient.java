@@ -2,6 +2,7 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "patients")
@@ -41,6 +42,14 @@ public class Patient {
     private String destinationHospital;
     private String estimatedTime;
     private String currentLocation;
+    
+    // Additional fields
+    private String contact;
+
+    // Test Request specific fields
+    private String testType;
+    private String priority; // Low, Medium, High
+    private String collectionType; // Home, Walk-in
 
     public Patient() {
         this.deliveryStatus = "Pending Pickup";
@@ -124,4 +133,16 @@ public class Patient {
 
     public String getCurrentLocation() { return currentLocation; }
     public void setCurrentLocation(String currentLocation) { this.currentLocation = currentLocation; }
+
+    public String getContact() { return contact; }
+    public void setContact(String contact) { this.contact = contact; }
+
+    public String getTestType() { return testType; }
+    public void setTestType(String testType) { this.testType = testType; }
+
+    public String getPriority() { return priority; }
+    public void setPriority(String priority) { this.priority = priority; }
+
+    public String getCollectionType() { return collectionType; }
+    public void setCollectionType(String collectionType) { this.collectionType = collectionType; }
 }

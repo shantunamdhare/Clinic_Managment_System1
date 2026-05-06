@@ -40,6 +40,9 @@ public class User {
     private String checkOutTime;
     private String shiftTiming; // e.g., 09 AM - 05 PM
     private Integer performanceRating; // 1-5
+    
+    // Delivery specific fields
+    private String vehicleType;
 
     public User() {
     }
@@ -199,5 +202,13 @@ public class User {
 
     public void setPerformanceRating(Integer performanceRating) {
         this.performanceRating = performanceRating;
+    }
+
+    public String getVehicleType() {
+        return vehicleType;
+    }
+
+    public void setVehicleType(String vehicleType) {
+        this.vehicleType = vehicleType;
     }
 }

@@ -162,7 +162,7 @@
                                 </div>
                                 <div class="form-group">
                                     <span class="input-icon">&#x1F464;</span>
-                                    <select name="role" id="registerRoleSelect" class="form-select" required onchange="toggleSpecialFields()">
+                                    <select name="role" id="registerRoleSelect" class="form-select" required onchange="toggleRoleFields()">
                                         <option value="" disabled selected>Select Your Role</option>
                                         <option value="Admin">Admin</option>
                                         <option value="Doctor">Doctor</option>
@@ -191,7 +191,6 @@
                                         <input type="number" name="experience" id="doctorExperience" class="form-input" placeholder="Years of Experience">
                                     </div>
                                     <div class="form-group" style="margin-bottom: 0;">
-                                        <span class="input-icon">&#x1FAAA;</span>
                                         <input type="text" name="licenseId" id="doctorLicenseId" class="form-input" placeholder="Medical License ID">
                                     </div>
                                 </div>
@@ -217,6 +216,19 @@
                                     <div class="form-group" style="margin-bottom: 0;">
                                         <span class="input-icon">&#x1F3AB;</span>
                                         <input type="text" name="labId" id="labId" class="form-input" placeholder="Laboratory ID (e.g. LAB1001)">
+                                    </div>
+                                </div>
+
+                                <!-- Delivery specific fields -->
+                                <div id="deliveryFields" style="display: none; background: rgba(37,99,235,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(37,99,235,0.3);">
+                                    <p style="font-size: 0.8rem; color: #2563eb; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Delivery Boy Details</p>
+                                    <div class="form-group" style="margin-bottom: 10px;">
+                                        <span class="input-icon">&#x260E;</span>
+                                        <input type="text" name="deliveryPhone" id="deliveryPhone" class="form-input" placeholder="Contact Number (WhatsApp)">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <span class="input-icon">&#x1F6B2;</span>
+                                        <input type="text" name="vehicleType" id="vehicleType" class="form-input" placeholder="Vehicle Type (e.g. Bike, Van)">
                                     </div>
                                 </div>
 
@@ -513,46 +525,60 @@
     </footer>
 
     <script>
-        function toggleSpecialFields() {
+        function toggleRoleFields() {
             var roleSelect = document.getElementById("registerRoleSelect");
             var doctorFields = document.getElementById("doctorFields");
             var labFields = document.getElementById("labFields");
+            var deliveryFields = document.getElementById("deliveryFields");
             
-            // Doctor Inputs
-            var phoneInput = document.getElementById("doctorPhone");
-            var specInput = document.getElementById("doctorSpecialization");
-            var expInput = document.getElementById("doctorExperience");
-            var licInput = document.getElementById("doctorLicenseId");
-            
-            // Lab Inputs
+            var doctorPhone = document.getElementById("doctorPhone");
+            var doctorSpec = document.getElementById("doctorSpecialization");
+            var doctorExp = document.getElementById("doctorExperience");
+            var doctorLic = document.getElementById("doctorLicenseId");
+
             var labName = document.getElementById("labName");
             var labAddr = document.getElementById("labAddress");
             var labId = document.getElementById("labId");
 
-            // Reset all
-            doctorFields.style.display = "none";
-            labFields.style.display = "none";
-            
-            phoneInput.required = false;
-            specInput.required = false;
-            expInput.required = false;
-            licInput.required = false;
-            
-            labName.required = false;
-            labAddr.required = false;
-            labId.required = false;
+            var deliveryPhone = document.getElementById("deliveryPhone");
+            var vehicleType = document.getElementById("vehicleType");
 
+            // Reset visibility
+            if(doctorFields) doctorFields.style.display = "none";
+            if(labFields) labFields.style.display = "none";
+            if(deliveryFields) deliveryFields.style.display = "none";
+            
+            // Reset required status
+            if(doctorPhone) doctorPhone.required = false;
+            if(doctorSpec) doctorSpec.required = false;
+            if(doctorExp) doctorExp.required = false;
+            if(doctorLic) doctorLic.required = false;
+
+            if(labName) labName.required = false;
+            if(labAddr) labAddr.required = false;
+            if(labId) labId.required = false;
+
+            if(deliveryPhone) deliveryPhone.required = false;
+            if(vehicleType) vehicleType.required = false;
+
+            // Show and set required based on role
             if (roleSelect.value === "Doctor") {
-                doctorFields.style.display = "block";
-                phoneInput.required = true;
-                specInput.required = true;
-                expInput.required = true;
-                licInput.required = true;
+                if(doctorFields) doctorFields.style.display = "block";
+                if(doctorPhone) doctorPhone.required = true;
+                if(doctorSpec) doctorSpec.required = true;
+                if(doctorExp) doctorExp.required = true;
+                if(doctorLic) doctorLic.required = true;
             } else if (roleSelect.value === "Lab") {
-                labFields.style.display = "block";
-                labName.required = true;
-                labAddr.required = true;
-                labId.required = true;
+                if(labFields) labFields.style.display = "block";
+                if(labName) labName.required = true;
+                if(labAddr) labAddr.required = true;
+                if(labId) labId.required = true;
+            } else if (roleSelect.value === "Delivery") {
+                if(deliveryFields) {
+                    deliveryFields.style.display = "block";
+                    if(deliveryPhone) deliveryPhone.required = true;
+                    if(vehicleType) vehicleType.required = true;
+                }
             }
         }
 
@@ -576,7 +602,7 @@
         heroSection.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url(${heroImages[0]})`;
         
         // Start slider
-        setInterval(changeHeroBackground, 1000);
+        setInterval(changeHeroBackground, 10000); // 10 seconds per slide for better UX
     </script>
 </body>
 </html>

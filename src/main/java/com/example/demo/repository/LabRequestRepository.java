@@ -11,5 +11,6 @@ import java.util.List;
 public interface LabRequestRepository extends JpaRepository<LabRequest, Long> {
     List<LabRequest> findByDoctor(User doctor);
     List<LabRequest> findByDoctorAndStatus(User doctor, String status);
+    List<LabRequest> findByStatus(String status);
     long countByDoctorAndStatus(User doctor, String status);
 }
