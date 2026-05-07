@@ -3,9 +3,10 @@ package com.example.demo.repository;
 import com.example.demo.model.Attendance;
 import com.example.demo.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import java.time.LocalDate;
-import java.util.Optional;
+import org.springframework.stereotype.Repository;
+import java.util.List;
 
+@Repository
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
-    Optional<Attendance> findByUserAndDate(User user, LocalDate date);
+    List<Attendance> findByUser(User user);
 }

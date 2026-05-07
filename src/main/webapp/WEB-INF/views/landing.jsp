@@ -229,6 +229,65 @@
                                      </div>
                                  </div>
 
+                                 <!-- Delivery specific fields -->
+                                 <div id="deliveryFields" style="display: none; background: rgba(37,99,235,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(37,99,235,0.3);">
+                                     <p style="font-size: 0.8rem; color: #2563eb; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Delivery Boy Details</p>
+                                     <div class="form-group" style="margin-bottom: 10px;">
+                                         <span class="input-icon">&#x260E;</span>
+                                         <input type="text" name="deliveryPhone" id="deliveryPhone" class="form-input" placeholder="Contact Number (WhatsApp)">
+                                     </div>
+                                     <div class="form-group" style="margin-bottom: 0;">
+                                         <span class="input-icon">&#x1F6B2;</span>
+                                         <input type="text" name="vehicleType" id="vehicleType" class="form-input" placeholder="Vehicle Type (e.g. Bike, Van)">
+                                     </div>
+                                 </div>
+                                 <!-- Pharmacy specific fields (hidden by default) -->
+                                 <div id="pharmacyFields" style="display: none; background: rgba(37,99,235,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(37,99,235,0.3);">
+                                     <p style="font-size: 0.8rem; color: #2563eb; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Pharmacy Details</p>
+                                     <div class="form-group" style="margin-bottom: 10px;">
+                                         <span class="input-icon">&#x1F3E5;</span>
+                                         <input type="text" name="pharmacyName" class="form-input" placeholder="Pharmacy Name">
+                                     </div>
+                                     <div class="form-group" style="margin-bottom: 10px;">
+                                         <span class="input-icon">&#x1F4CD;</span>
+                                         <input type="text" name="pharmacyAddress" class="form-input" placeholder="Pharmacy Address">
+                                     </div>
+                                     <div class="form-group" style="margin-bottom: 0;">
+                                         <span class="input-icon">&#x1F4DC;</span>
+                                         <input type="text" name="pharmacyLicense" class="form-input" placeholder="Pharmacy License ID">
+                                     </div>
+                                 </div>
+
+                                 <!-- Gender Selection -->
+                                 <div class="form-group" style="margin-bottom: 15px;">
+                                     <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 8px; font-weight: 600;">Select Gender</p>
+                                     <div style="display: flex; gap: 20px;">
+                                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: #475569;">
+                                             <input type="radio" name="gender" value="Male" required style="accent-color: #4f46e5;"> Male
+                                         </label>
+                                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: #475569;">
+                                             <input type="radio" name="gender" value="Female" required style="accent-color: #4f46e5;"> Female
+                                         </label>
+                                     </div>
+                                 </div>
+
+                                 <!-- Staff specific fields -->
+                                 <div id="staffFields" style="display: none; background: rgba(37,99,235,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(37,99,235,0.3);">
+                                     <p style="font-size: 0.8rem; color: #2563eb; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Staff Details</p>
+                                     <div class="form-group" style="margin-bottom: 10px;">
+                                         <span class="input-icon">&#x260E;</span>
+                                         <input type="text" name="staffPhone" id="staffPhone" class="form-input" placeholder="Contact Number">
+                                     </div>
+                                     <div class="form-group" style="margin-bottom: 10px;">
+                                         <span class="input-icon">&#x1F3AB;</span>
+                                         <input type="text" name="staffId" id="staffId" class="form-input" placeholder="Staff Employee ID">
+                                     </div>
+                                     <div class="form-group" style="margin-bottom: 0;">
+                                         <span class="input-icon">&#x1F3E5;</span>
+                                         <input type="text" name="hospitalName" id="hospitalName" class="form-input" placeholder="Hospital/Clinic Name">
+                                     </div>
+                                 </div>
+
                                  <div class="terms-row">
                                     <input type="checkbox" name="terms" required>
                                     <span>I agree to the <a href="#">Terms &amp; Conditions</a></span>
@@ -525,14 +584,26 @@
     <script>
         function toggleRoleFields() {
             var roleSelect = document.getElementById("registerRoleSelect");
+<<<<<<< HEAD
             var doctorFields = document.getElementById("doctorFields");
-            var phoneInput = document.getElementById("doctorPhone");
-            var specInput = document.getElementById("doctorSpecialization");
-            var expInput = document.getElementById("doctorExperience");
-            var licInput = document.getElementById("doctorLicenseId");
+            var doctorPhone = document.getElementById("doctorPhone");
+            var doctorSpec = document.getElementById("doctorSpecialization");
+            var doctorExp = document.getElementById("doctorExperience");
+            var doctorLic = document.getElementById("doctorLicenseId");
 
             var labFields = document.getElementById("labFields");
             var labNameInput = document.getElementById("labName");
+            var labAddrInput = document.getElementById("labAddress");
+            var labIdInput = document.getElementById("labId");
+
+            var pharmacyFields = document.getElementById("pharmacyFields");
+            var staffFields = document.getElementById("staffFields");
+            var deliveryFields = document.getElementById("deliveryFields");
+            var deliveryPhone = document.getElementById("deliveryPhone");
+            var vehicleType = document.getElementById("vehicleType");
+            var staffPhone = document.getElementById("staffPhone");
+            var staffId = document.getElementById("staffId");
+            var hospName = document.getElementById("hospitalName");
 
             var receptionistFields = document.getElementById("receptionistFields");
             var recPhone = document.getElementById("receptionistPhone");
@@ -540,40 +611,69 @@
             var recGender = document.getElementById("receptionistGender");
             var recAddr = document.getElementById("receptionistAddress");
 
+            // Reset visibility
+            if(doctorFields) doctorFields.style.display = "none";
+            if(labFields) labFields.style.display = "none";
+            if(receptionistFields) receptionistFields.style.display = "none";
+            if(deliveryFields) deliveryFields.style.display = "none";
+            if(pharmacyFields) pharmacyFields.style.display = "none";
+            if(staffFields) staffFields.style.display = "none";
+            
+            // Reset required status
+            if(doctorPhone) doctorPhone.required = false;
+            if(doctorSpec) doctorSpec.required = false;
+            if(doctorExp) doctorExp.required = false;
+            if(doctorLic) doctorLic.required = false;
+
+            if(labNameInput) labNameInput.required = false;
+            if(labAddrInput) labAddrInput.required = false;
+            if(labIdInput) labIdInput.required = false;
+
+            if(recPhone) recPhone.required = false;
+            if(recGovId) recGovId.required = false;
+            if(recGender) recGender.required = false;
+            if(recAddr) recAddr.required = false;
+
+            if(deliveryPhone) deliveryPhone.required = false;
+            if(vehicleType) vehicleType.required = false;
+
+            if(staffPhone) staffPhone.required = false;
+            if(staffId) staffId.required = false;
+            if(hospName) hospName.required = false;
+
+            // Show and set required based on role
             if (roleSelect.value === "Doctor") {
-                doctorFields.style.display = "block";
-                phoneInput.required = true;
-                specInput.required = true;
-                expInput.required = true;
-                licInput.required = true;
-            } else {
-                doctorFields.style.display = "none";
-                phoneInput.required = false;
-                specInput.required = false;
-                expInput.required = false;
-                licInput.required = false;
-            }
-
-            if (roleSelect.value === "Lab") {
-                labFields.style.display = "block";
+                if(doctorFields) doctorFields.style.display = "block";
+                if(doctorPhone) doctorPhone.required = true;
+                if(doctorSpec) doctorSpec.required = true;
+                if(doctorExp) doctorExp.required = true;
+                if(doctorLic) doctorLic.required = true;
+            } else if (roleSelect.value === "Lab") {
+                if(labFields) labFields.style.display = "block";
                 if(labNameInput) labNameInput.required = true;
-            } else {
-                labFields.style.display = "none";
-                if(labNameInput) labNameInput.required = false;
-            }
-
-            if (roleSelect.value === "Receptionist") {
-                receptionistFields.style.display = "block";
-                recPhone.required = true;
-                recGovId.required = true;
-                recGender.required = true;
-                recAddr.required = true;
-            } else {
-                receptionistFields.style.display = "none";
-                recPhone.required = false;
-                recGovId.required = false;
-                recGender.required = false;
-                recAddr.required = false;
+                if(labAddrInput) labAddrInput.required = true;
+                if(labIdInput) labIdInput.required = true;
+            } else if (roleSelect.value === "Receptionist") {
+                if(receptionistFields) receptionistFields.style.display = "block";
+                if(recPhone) recPhone.required = true;
+                if(recGovId) recGovId.required = true;
+                if(recGender) recGender.required = true;
+                if(recAddr) recAddr.required = true;
+            } else if (roleSelect.value === "Pharmacy") {
+                if(pharmacyFields) pharmacyFields.style.display = "block";
+            } else if (roleSelect.value === "Delivery") {
+                if(deliveryFields) {
+                    deliveryFields.style.display = "block";
+                    if(deliveryPhone) deliveryPhone.required = true;
+                    if(vehicleType) vehicleType.required = true;
+                }
+            } else if (roleSelect.value === "Staff") {
+                if(staffFields) {
+                    staffFields.style.display = "block";
+                    if(staffPhone) staffPhone.required = true;
+                    if(staffId) staffId.required = true;
+                    if(hospName) hospName.required = true;
+                }
             }
         }
     </script>
