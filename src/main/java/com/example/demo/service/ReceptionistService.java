@@ -193,6 +193,12 @@ public class ReceptionistService {
         if (attendance.getCheckIn() == null) {
             attendance.setCheckIn(LocalTime.now());
         }
+        
+        // Synchronize with User entity for Admin Dashboard
+        user.setAttendanceStatus("Present");
+        user.setCheckInTime(attendance.getCheckIn().toString());
+        userRepository.save(user);
+
         return attendanceRepository.save(attendance);
     }
 
@@ -200,6 +206,12 @@ public class ReceptionistService {
         Attendance attendance = attendanceRepository.findByUserAndDate(user, LocalDate.now())
                 .orElseThrow(() -> new RuntimeException("Must check-in first"));
         attendance.setCheckOut(LocalTime.now());
+        
+        // Synchronize with User entity for Admin Dashboard
+        user.setAttendanceStatus("Completed");
+        user.setCheckOutTime(attendance.getCheckOut().toString());
+        userRepository.save(user);
+
         return attendanceRepository.save(attendance);
     }
 

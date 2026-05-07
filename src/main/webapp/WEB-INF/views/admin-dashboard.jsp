@@ -686,7 +686,7 @@
                                         <td><span class="badge badge-role" style="background:rgba(255,255,255,0.05);">${u.shiftTiming != null ? u.shiftTiming : 'Not Assigned'}</span></td>
                                         <td>
                                             <div style="display:flex; gap:5px;">
-                                                <button onclick="openAttendanceModal('${u.id}', '${u.fullName}', '${u.attendanceStatus}', '${u.checkInTime}', '${u.checkOutTime}')" title="Attendance" style="background:rgba(16,185,129,0.1); border:none; padding:6px; border-radius:6px; color:#34d399; cursor:pointer;">&#x2705;</button>
+                                                <button onclick="openAttendanceModal('${u.id}', '${u.fullName}', '${u.attendanceStatus}')" title="Attendance" style="background:rgba(16,185,129,0.1); border:none; padding:6px; border-radius:6px; color:#34d399; cursor:pointer;">&#x2705;</button>
                                                 <button onclick="openShiftModal('${u.id}', '${u.fullName}')" title="Assign Shift" style="background:rgba(108,99,255,0.1); border:none; padding:6px; border-radius:6px; color:#a78bfa; cursor:pointer;">&#x231B;</button>
                                                 <button onclick="openPerformanceModal('${u.id}', '${u.fullName}')" title="Rating" style="background:rgba(245,158,11,0.1); border:none; padding:6px; border-radius:6px; color:#fbbf24; cursor:pointer;">&#x2B50;</button>
                                             </div>
@@ -907,20 +907,10 @@
             <input type="hidden" name="userId" id="attUserId">
             <div class="form-group">
                 <label>Status</label>
-                <select name="status" id="attStatus" onchange="toggleTimeFields()">
+                <select name="status" id="attStatus">
                     <option value="Present">Present</option>
                     <option value="Absent">Absent</option>
                 </select>
-            </div>
-            <div id="attTimeFields">
-                <div class="form-group">
-                    <label>Check-In Time</label>
-                    <input type="time" name="checkIn" id="attCheckIn">
-                </div>
-                <div class="form-group">
-                    <label>Check-Out Time</label>
-                    <input type="time" name="checkOut" id="attCheckOut">
-                </div>
             </div>
             <button type="submit" class="modal-btn">Update Attendance</button>
             <button type="button" onclick="closeModal('attendanceModal')" style="background:transparent; color:#64748b; border:none; width:100%; margin-top:10px; cursor:pointer;">Cancel</button>
@@ -998,13 +988,10 @@ function showSection(sectionId, element) {
     if(element) element.classList.add('active');
 }
 
-function openAttendanceModal(id, name, status, cin, cout) {
+function openAttendanceModal(id, name, status) {
     document.getElementById('attUserId').value = id;
     document.getElementById('attName').innerText = name;
     document.getElementById('attStatus').value = status || 'Present';
-    document.getElementById('attCheckIn').value = cin || '';
-    document.getElementById('attCheckOut').value = cout || '';
-    toggleTimeFields();
     document.getElementById('attendanceModal').style.display = 'block';
 }
 
@@ -1024,10 +1011,7 @@ function closeModal(id) {
     document.getElementById(id).style.display = 'none';
 }
 
-function toggleTimeFields() {
-    const status = document.getElementById('attStatus').value;
-    document.getElementById('attTimeFields').style.display = status === 'Absent' ? 'none' : 'block';
-}
+
 
 // Close modals when clicking outside
 window.onclick = function(event) {

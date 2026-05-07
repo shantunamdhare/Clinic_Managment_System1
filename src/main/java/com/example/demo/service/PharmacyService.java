@@ -19,6 +19,9 @@ public class PharmacyService {
     @Autowired
     private InvoiceRepository invoiceRepo;
 
+    @Autowired
+    private UserRepository userRepository;
+
     public List<Medicine> getAllMedicines() {
         return medicineRepo.findAll();
     }
@@ -66,5 +69,9 @@ public class PharmacyService {
         
         invoice.setTotalAmount(total);
         return invoiceRepo.save(invoice);
+    }
+    @Transactional
+    public void updateUser(User user) {
+        userRepository.save(user);
     }
 }

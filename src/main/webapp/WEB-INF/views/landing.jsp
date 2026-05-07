@@ -164,7 +164,6 @@
                                     </select>
                                 </div>
                                 
-<<<<<<< HEAD
                                 <!-- Admin specific fields -->
                                 <div id="adminFields" style="display:none; background: rgba(108,99,255,0.03); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px dashed rgba(108,99,255,0.3);">
                                     <p style="font-size: 0.8rem; color: #6C63FF; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Admin Professional Details</p>
@@ -200,10 +199,7 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Doctor specific fields -->
-=======
                                 <!-- Doctor specific fields (hidden by default) -->
->>>>>>> b1123dc2c0f816d8430ee2f38f6a7131aa07e35b
                                 <div id="doctorFields" style="display: none; background: rgba(37,99,235,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(37,99,235,0.3);">
                                     <p style="font-size: 0.8rem; color: #2563eb; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Doctor Details</p>
                                     <div class="form-group" style="margin-bottom: 10px;">
@@ -637,7 +633,6 @@
 
         function toggleRoleFields() {
             var roleSelect = document.getElementById("registerRoleSelect");
-<<<<<<< HEAD
             var adminFields = document.getElementById("adminFields");
             var patientFields = document.getElementById("patientFields");
             var doctorFields = document.getElementById("doctorFields");
@@ -650,23 +645,17 @@
             var patientAge = document.getElementById("patientAge");
             var patientGender = document.getElementById("patientGender");
             var patientAddress = document.getElementById("patientAddress");
-=======
-<<<<<<< HEAD
-            var doctorFields = document.getElementById("doctorFields");
->>>>>>> b1123dc2c0f816d8430ee2f38f6a7131aa07e35b
             var doctorPhone = document.getElementById("doctorPhone");
             var doctorSpec = document.getElementById("doctorSpecialization");
             var doctorExp = document.getElementById("doctorExperience");
             var doctorLic = document.getElementById("doctorLicenseId");
 
-            var labFields = document.getElementById("labFields");
             var labNameInput = document.getElementById("labName");
             var labAddrInput = document.getElementById("labAddress");
             var labIdInput = document.getElementById("labId");
 
             var pharmacyFields = document.getElementById("pharmacyFields");
             var staffFields = document.getElementById("staffFields");
-            var deliveryFields = document.getElementById("deliveryFields");
             var deliveryPhone = document.getElementById("deliveryPhone");
             var vehicleType = document.getElementById("vehicleType");
             var staffPhone = document.getElementById("staffPhone");
@@ -762,8 +751,6 @@
                 }
             }
         }
-<<<<<<< HEAD
-
         // Hero Background Slider Logic
         const heroImages = [
             "/hero-slider/hero1.jpg",
@@ -788,8 +775,6 @@
 
         // Initialize role fields
         window.addEventListener('load', toggleRoleFields);
-=======
->>>>>>> b1123dc2c0f816d8430ee2f38f6a7131aa07e35b
     </script>
 </body>
 </html>

@@ -523,6 +523,12 @@ public class MainController {
             attendance.setCheckIn(checkInDateTime);
             attendance.setStatus("Present");
             attendanceRepo.save(attendance);
+
+            // Sync User entity for Admin Dashboard
+            user.setAttendanceStatus("Present");
+            user.setCheckInTime(time);
+            userRepository.save(user);
+
             redirectAttributes.addFlashAttribute("successMessage", "Attendance marked successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Invalid date or time format!");
@@ -545,8 +551,15 @@ public class MainController {
         if (optionalAttendance.isPresent() && optionalAttendance.get().getUser().getId().equals(user.getId())) {
             try {
                 LocalDateTime checkOutDateTime = LocalDateTime.parse(date + "T" + time);
-                optionalAttendance.get().setCheckOut(checkOutDateTime);
-                attendanceRepo.save(optionalAttendance.get());
+                Attendance att = optionalAttendance.get();
+                att.setCheckOut(checkOutDateTime);
+                attendanceRepo.save(att);
+
+                // Sync User entity for Admin Dashboard
+                user.setAttendanceStatus("Completed");
+                user.setCheckOutTime(time);
+                userRepository.save(user);
+
                 redirectAttributes.addFlashAttribute("successMessage", "Attendance updated successfully!");
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Invalid date or time format!");
@@ -620,6 +633,24 @@ public class MainController {
             String fullShiftInfo = shiftType + " (" + shiftDate + ", " + startTime + " - " + endTime + ")";
             staff.setShiftTiming(fullShiftInfo);
             userRepository.save(staff);
+
+            // Create actual StaffShift record for staff dashboard
+            StaffShift shift = new StaffShift();
+            shift.setUser(staff);
+            shift.setDayOfWeek(LocalDate.parse(shiftDate).getDayOfWeek().name());
+            shift.setStartTime(LocalTime.parse(startTime));
+            shift.setEndTime(LocalTime.parse(endTime));
+            shift.setNote(shiftType);
+            shift.setDepartment(staff.getRole()); // Set department from user role
+            
+            // Set specific date times
+            LocalDateTime startDT = LocalDateTime.parse(shiftDate + "T" + startTime);
+            LocalDateTime endDT = LocalDateTime.parse(shiftDate + "T" + endTime);
+            shift.setShiftStart(startDT);
+            shift.setShiftEnd(endDT);
+            
+            staffShiftRepo.save(shift);
+
             redirectAttributes.addFlashAttribute("successMessage", "Shift assigned to " + staff.getFullName());
         }
         return "redirect:/admin-dashboard";

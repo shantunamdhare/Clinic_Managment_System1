@@ -60,15 +60,14 @@ public class DataInitializer {
             }
 
             // Clear old dummy data from the persistent database (Selective)
-            // Note: In production, we wouldn't delete all. For this task, we follow the script's intent.
-            // attendanceRepo.deleteAll();
-            // shiftRepo.deleteAll();
-            // labReportRepository.deleteAll();
-            // labRequestRepository.deleteAll();
-            // prescriptionRepository.deleteAll();
-            // visitRepository.deleteAll();
-            // appointmentRepository.deleteAll();
-            // patientRepository.deleteAll();
+            attendanceRepo.deleteAll();
+            shiftRepo.deleteAll();
+            labReportRepository.deleteAll();
+            labRequestRepository.deleteAll();
+            prescriptionRepository.deleteAll();
+            visitRepository.deleteAll();
+            appointmentRepository.deleteAll();
+            patientRepository.deleteAll();
 
             // 2. Initialize Lab Tests
             if (labTestRepo.count() == 0) {

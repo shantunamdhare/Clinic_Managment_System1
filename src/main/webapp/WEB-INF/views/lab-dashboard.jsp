@@ -961,8 +961,8 @@
                                         <span class="status-badge" style="background: var(--primary); color: white;">${shift.department}</span>
                                         <span class="material-symbols-outlined" style="color: var(--primary);">event</span>
                                     </div>
-                                    <h3 style="margin: 0; font-size: 20px;">${shift.startTime.toLocalTime()} - ${shift.endTime.toLocalTime()}</h3>
-                                    <p style="margin: 0; font-weight: 700; color: var(--gray-700);">${shift.startTime.toLocalDate()}</p>
+                                    <h3 style="margin: 0; font-size: 20px;">${shift.shiftStart != null ? shift.shiftStart.toLocalTime() : ''} - ${shift.shiftEnd != null ? shift.shiftEnd.toLocalTime() : ''}</h3>
+                                    <p style="margin: 0; font-weight: 700; color: var(--gray-700);">${shift.shiftStart != null ? shift.shiftStart.toLocalDate() : ''}</p>
                                     <p style="margin: 0; font-size: 12px; color: var(--gray-500);">${shift.note}</p>
                                 </div>
                             </c:forEach>

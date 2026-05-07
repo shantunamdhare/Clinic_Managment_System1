@@ -346,8 +346,8 @@
                                                     <c:forEach var="s" items="${shifts}">
                                                         <tr>
                                                             <td class="fw-bold">${s.dayOfWeek}</td>
-                                                            <td>${s.startTime} - ${s.endTime}</td>
-                                                            <td><span class="badge bg-soft-primary text-primary border">${s.shiftType}</span></td>
+                                                            <td>${s.shiftStart != null ? s.shiftStart.toLocalTime() : s.startTime} - ${s.shiftEnd != null ? s.shiftEnd.toLocalTime() : s.endTime}</td>
+                                                            <td><span class="badge bg-soft-primary text-primary border">${s.note}</span></td>
                                                         </tr>
                                                     </c:forEach>
                                                 </tbody>
