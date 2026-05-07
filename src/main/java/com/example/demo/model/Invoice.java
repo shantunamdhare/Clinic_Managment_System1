@@ -1,7 +1,9 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "invoices")
@@ -11,38 +13,110 @@ public class Invoice {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String invoiceNumber; // e.g. INV-1001
+    @Column(nullable = false, unique = true)
+    private String invoiceNumber;
 
     @ManyToOne
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
-    private Double amount;
-    private String status; // Paid, Unpaid, Pending
-    private LocalDate invoiceDate;
+    @Column(nullable = false)
+    private LocalDateTime invoiceDate;
+
+    @Column(nullable = false)
+    private Double totalAmount;
+
+    @Column(nullable = false)
+    private String paymentStatus; // Paid, Pending, Partially Paid
+
+    @Column(nullable = false)
+    private String paymentMethod; // Cash, Card, UPI, Insurance
+
     private String billingItems; // e.g. "Consultation, Lab Test, Medicine"
 
-    public Invoice() {}
+    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<InvoiceItem> items = new ArrayList<>();
+
+    // Default constructor
+    public Invoice() {
+        this.invoiceDate = LocalDateTime.now();
+    }
 
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getInvoiceNumber() { return invoiceNumber; }
-    public void setInvoiceNumber(String invoiceNumber) { this.invoiceNumber = invoiceNumber; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public Patient getPatient() { return patient; }
-    public void setPatient(Patient patient) { this.patient = patient; }
+    public String getInvoiceNumber() {
+        return invoiceNumber;
+    }
 
-    public Double getAmount() { return amount; }
-    public void setAmount(Double amount) { this.amount = amount; }
+    public void setInvoiceNumber(String invoiceNumber) {
+        this.invoiceNumber = invoiceNumber;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public Patient getPatient() {
+        return patient;
+    }
 
-    public LocalDate getInvoiceDate() { return invoiceDate; }
-    public void setInvoiceDate(LocalDate invoiceDate) { this.invoiceDate = invoiceDate; }
+    public void setPatient(Patient patient) {
+        this.patient = patient;
+    }
 
-    public String getBillingItems() { return billingItems; }
-    public void setBillingItems(String billingItems) { this.billingItems = billingItems; }
+    public LocalDateTime getInvoiceDate() {
+        return invoiceDate;
+    }
+
+    public void setInvoiceDate(LocalDateTime invoiceDate) {
+        this.invoiceDate = invoiceDate;
+    }
+
+    public Double getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(Double totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getBillingItems() {
+        return billingItems;
+    }
+
+    public void setBillingItems(String billingItems) {
+        this.billingItems = billingItems;
+    }
+
+    public List<InvoiceItem> getItems() {
+        return items;
+    }
+
+    public void setItems(List<InvoiceItem> items) {
+        this.items = items;
+    }
+
+    public void addItem(InvoiceItem item) {
+        items.add(item);
+        item.setInvoice(this);
+    }
 }

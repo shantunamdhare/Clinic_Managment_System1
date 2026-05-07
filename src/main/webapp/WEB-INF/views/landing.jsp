@@ -11,7 +11,7 @@
 </head>
 <body>
     <!-- Hidden toggle for Login Card -->
-    <input type="checkbox" id="login-toggle" class="login-toggle-input" style="display:none" ${not empty registerSuccess or not empty registerError or not empty loginError ? 'checked' : ''}>
+    <input type="checkbox" id="login-toggle" class="login-toggle-input" style="display:none">
 
     <!-- ==================== HEADER ==================== -->
     <header class="header" id="header">
@@ -74,33 +74,17 @@
             <div class="hero-right" id="login-section">
                 <div class="login-card">
                     <label for="login-toggle" class="modal-close">&times;</label>
-
-                    <!-- Alert Messages -->
-                    <c:if test="${not empty registerSuccess}">
-                        <div class="alert alert-success" style="background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #c3e6cb; font-size: 0.9rem;">
-                            &#x2705; ${registerSuccess}
-                        </div>
-                    </c:if>
-                    <c:if test="${not empty registerError}">
-                        <div class="alert alert-error" style="background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #f5c6cb; font-size: 0.9rem;">
-                            &#x26A0; ${registerError}
-                        </div>
-                    </c:if>
-                    <c:if test="${not empty loginError}">
-                        <div class="alert alert-error" style="background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #f5c6cb; font-size: 0.9rem;">
-                            &#x26A0; ${loginError}
-                        </div>
-                    </c:if>
                     
                     <!-- Tab System -->
                     <div class="modal-tabs">
-                        <input type="radio" name="modal-tab" id="tab-login" ${empty registerError and empty registerSuccess ? 'checked' : ''} style="display:none">
-                        <input type="radio" name="modal-tab" id="tab-register" ${not empty registerError or not empty registerSuccess ? 'checked' : ''} style="display:none">
+                        <input type="radio" name="modal-tab" id="tab-login" checked style="display:none">
+                        <input type="radio" name="modal-tab" id="tab-register" style="display:none">
                         
                         <div class="tab-header">
                             <label for="tab-login" class="tab-btn login-tab-btn">Login</label>
                             <label for="tab-register" class="tab-btn register-tab-btn">Register</label>
                         </div>
+
 
                         <!-- Login Form Content -->
                         <div class="tab-content login-content">
@@ -180,6 +164,7 @@
                                     </select>
                                 </div>
                                 
+<<<<<<< HEAD
                                 <!-- Admin specific fields -->
                                 <div id="adminFields" style="display:none; background: rgba(108,99,255,0.03); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px dashed rgba(108,99,255,0.3);">
                                     <p style="font-size: 0.8rem; color: #6C63FF; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Admin Professional Details</p>
@@ -216,6 +201,9 @@
                                 </div>
                                 
                                 <!-- Doctor specific fields -->
+=======
+                                <!-- Doctor specific fields (hidden by default) -->
+>>>>>>> b1123dc2c0f816d8430ee2f38f6a7131aa07e35b
                                 <div id="doctorFields" style="display: none; background: rgba(37,99,235,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(37,99,235,0.3);">
                                     <p style="font-size: 0.8rem; color: #2563eb; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Doctor Details</p>
                                     <div class="form-group" style="margin-bottom: 10px;">
@@ -231,13 +219,14 @@
                                         <input type="number" name="experience" id="doctorExperience" class="form-input" placeholder="Years of Experience">
                                     </div>
                                     <div class="form-group" style="margin-bottom: 0;">
+                                        <span class="input-icon">&#x1FAAA;</span>
                                         <input type="text" name="licenseId" id="doctorLicenseId" class="form-input" placeholder="Medical License ID">
                                     </div>
                                 </div>
 
-                                <!-- Lab specific fields -->
-                                <div id="labFields" style="display: none; background: rgba(142,45,226,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(142,45,226,0.3);">
-                                    <p style="font-size: 0.8rem; color: #8e2de2; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Laboratory Details</p>
+                                <!-- LAB SPECIFIC FIELDS -->
+                                <div id="labFields" style="display: none; background: rgba(37,99,235,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(37,99,235,0.3);">
+                                    <p style="font-size: 0.8rem; color: #2563eb; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Lab Details</p>
                                     <div class="form-group" style="margin-bottom: 10px;">
                                         <span class="input-icon">&#x1F3EC;</span>
                                         <select name="labType" id="labType" class="form-select">
@@ -258,21 +247,92 @@
                                         <input type="text" name="labId" id="labId" class="form-input" placeholder="Laboratory ID (e.g. LAB1001)">
                                     </div>
                                 </div>
+                                 <!-- RECEPTIONIST SPECIFIC FIELDS -->
+                                 <div id="receptionistFields" style="display: none; background: rgba(37,99,235,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(37,99,235,0.3);">
+                                     <p style="font-size: 0.8rem; color: #2563eb; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Receptionist Details</p>
+                                     <div class="form-group" style="margin-bottom: 10px;">
+                                         <span class="input-icon">&#x260E;</span>
+                                         <input type="text" name="phone" id="receptionistPhone" class="form-input" placeholder="Phone Number">
+                                     </div>
+                                     <div class="form-group" style="margin-bottom: 10px;">
+                                         <span class="input-icon">&#x1F194;</span>
+                                         <input type="text" name="govIdNumber" id="receptionistGovId" class="form-input" placeholder="Government ID Number">
+                                     </div>
+                                     <div class="form-group" style="margin-bottom: 10px;">
+                                         <span class="input-icon">&#x26A5;</span>
+                                         <select name="gender" id="receptionistGender" class="form-select">
+                                             <option value="" disabled selected>Select Gender</option>
+                                             <option value="Male">Male</option>
+                                             <option value="Female">Female</option>
+                                             <option value="Other">Other</option>
+                                         </select>
+                                     </div>
+                                     <div class="form-group" style="margin-bottom: 0;">
+                                         <span class="input-icon">&#x1F4CD;</span>
+                                         <input type="text" name="address" id="receptionistAddress" class="form-input" placeholder="Complete Address">
+                                     </div>
+                                 </div>
 
-                                <!-- Delivery specific fields -->
-                                <div id="deliveryFields" style="display: none; background: rgba(37,99,235,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(37,99,235,0.3);">
-                                    <p style="font-size: 0.8rem; color: #2563eb; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Delivery Boy Details</p>
-                                    <div class="form-group" style="margin-bottom: 10px;">
-                                        <span class="input-icon">&#x260E;</span>
-                                        <input type="text" name="deliveryPhone" id="deliveryPhone" class="form-input" placeholder="Contact Number (WhatsApp)">
-                                    </div>
-                                    <div class="form-group" style="margin-bottom: 0;">
-                                        <span class="input-icon">&#x1F6B2;</span>
-                                        <input type="text" name="vehicleType" id="vehicleType" class="form-input" placeholder="Vehicle Type (e.g. Bike, Van)">
-                                    </div>
-                                </div>
+                                 <!-- Delivery specific fields -->
+                                 <div id="deliveryFields" style="display: none; background: rgba(37,99,235,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(37,99,235,0.3);">
+                                     <p style="font-size: 0.8rem; color: #2563eb; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Delivery Boy Details</p>
+                                     <div class="form-group" style="margin-bottom: 10px;">
+                                         <span class="input-icon">&#x260E;</span>
+                                         <input type="text" name="deliveryPhone" id="deliveryPhone" class="form-input" placeholder="Contact Number (WhatsApp)">
+                                     </div>
+                                     <div class="form-group" style="margin-bottom: 0;">
+                                         <span class="input-icon">&#x1F6B2;</span>
+                                         <input type="text" name="vehicleType" id="vehicleType" class="form-input" placeholder="Vehicle Type (e.g. Bike, Van)">
+                                     </div>
+                                 </div>
+                                 <!-- Pharmacy specific fields (hidden by default) -->
+                                 <div id="pharmacyFields" style="display: none; background: rgba(37,99,235,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(37,99,235,0.3);">
+                                     <p style="font-size: 0.8rem; color: #2563eb; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Pharmacy Details</p>
+                                     <div class="form-group" style="margin-bottom: 10px;">
+                                         <span class="input-icon">&#x1F3E5;</span>
+                                         <input type="text" name="pharmacyName" class="form-input" placeholder="Pharmacy Name">
+                                     </div>
+                                     <div class="form-group" style="margin-bottom: 10px;">
+                                         <span class="input-icon">&#x1F4CD;</span>
+                                         <input type="text" name="pharmacyAddress" class="form-input" placeholder="Pharmacy Address">
+                                     </div>
+                                     <div class="form-group" style="margin-bottom: 0;">
+                                         <span class="input-icon">&#x1F4DC;</span>
+                                         <input type="text" name="pharmacyLicense" class="form-input" placeholder="Pharmacy License ID">
+                                     </div>
+                                 </div>
 
-                                <div class="terms-row">
+                                 <!-- Gender Selection -->
+                                 <div class="form-group" style="margin-bottom: 15px;">
+                                     <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 8px; font-weight: 600;">Select Gender</p>
+                                     <div style="display: flex; gap: 20px;">
+                                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: #475569;">
+                                             <input type="radio" name="gender" value="Male" required style="accent-color: #4f46e5;"> Male
+                                         </label>
+                                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: #475569;">
+                                             <input type="radio" name="gender" value="Female" required style="accent-color: #4f46e5;"> Female
+                                         </label>
+                                     </div>
+                                 </div>
+
+                                 <!-- Staff specific fields -->
+                                 <div id="staffFields" style="display: none; background: rgba(37,99,235,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(37,99,235,0.3);">
+                                     <p style="font-size: 0.8rem; color: #2563eb; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Staff Details</p>
+                                     <div class="form-group" style="margin-bottom: 10px;">
+                                         <span class="input-icon">&#x260E;</span>
+                                         <input type="text" name="staffPhone" id="staffPhone" class="form-input" placeholder="Contact Number">
+                                     </div>
+                                     <div class="form-group" style="margin-bottom: 10px;">
+                                         <span class="input-icon">&#x1F3AB;</span>
+                                         <input type="text" name="staffId" id="staffId" class="form-input" placeholder="Staff Employee ID">
+                                     </div>
+                                     <div class="form-group" style="margin-bottom: 0;">
+                                         <span class="input-icon">&#x1F3E5;</span>
+                                         <input type="text" name="hospitalName" id="hospitalName" class="form-input" placeholder="Hospital/Clinic Name">
+                                     </div>
+                                 </div>
+
+                                 <div class="terms-row">
                                     <input type="checkbox" name="terms" required>
                                     <span>I agree to the <a href="#">Terms &amp; Conditions</a></span>
                                 </div>
@@ -354,12 +414,12 @@
             <div class="module-image-small">
               <img src="https://images.pexels.com/photos/4021775/pexels-photo-4021775.jpeg?auto=compress&cs=tinysrgb&w=200" alt="Doctor" />
             </div>
-            <h3>🩺 Doctor Module</h3>
+            <h3> Doctor Module</h3>
             <p>Manage patient consultations, prescriptions, medical history and appointments efficiently.</p>
             <ul>
-              <li>✔ View patient records</li>
-              <li>✔ Manage prescriptions</li>
-              <li>✔ Track appointments</li>
+              <li> View patient records</li>
+              <li> Manage prescriptions</li>
+              <li> Track appointments</li>
             </ul>
           </div>
     
@@ -367,12 +427,12 @@
             <div class="module-image-small">
               <img src="https://images.pexels.com/photos/3844581/pexels-photo-3844581.jpeg?auto=compress&cs=tinysrgb&w=200" alt="Receptionist" />
             </div>
-            <h3>📋 Receptionist Module</h3>
+            <h3> Receptionist Module</h3>
             <p>Handle patient registrations, appointment scheduling and front-desk operations.</p>
             <ul>
-              <li>✔ Register patients</li>
-              <li>✔ Book appointments</li>
-              <li>✔ Manage check-ins</li>
+              <li> Register patients</li>
+              <li> Book appointments</li>
+              <li> Manage check-ins</li>
             </ul>
           </div>
     
@@ -380,12 +440,12 @@
             <div class="module-image-small">
               <img src="https://images.pexels.com/photos/3769151/pexels-photo-3769151.jpeg?auto=compress&cs=tinysrgb&w=200" alt="Patient" />
             </div>
-            <h3>👤 Patient Module</h3>
+            <h3> Patient Module</h3>
             <p>Allow patients to access their medical records, reports and appointments.</p>
             <ul>
-              <li>✔ View reports</li>
-              <li>✔ Book appointments</li>
-              <li>✔ Track history</li>
+              <li> View reports</li>
+              <li> Book appointments</li>
+              <li> Track history</li>
             </ul>
           </div>
     
@@ -393,12 +453,12 @@
             <div class="module-image-small">
               <img src="https://images.pexels.com/photos/3735770/pexels-photo-3735770.jpeg?auto=compress&cs=tinysrgb&w=200" alt="Lab" />
             </div>
-            <h3>🧪 Lab Module</h3>
+            <h3> Lab Module</h3>
             <p>Manage lab tests, sample collection and report generation efficiently.</p>
             <ul>
-              <li>✔ Test requests</li>
-              <li>✔ Upload reports</li>
-              <li>✔ Track samples</li>
+              <li> Test requests</li>
+              <li> Upload reports</li>
+              <li> Track samples</li>
             </ul>
           </div>
     
@@ -406,12 +466,12 @@
             <div class="module-image-small">
               <img src="https://images.pexels.com/photos/3652103/pexels-photo-3652103.jpeg?auto=compress&cs=tinysrgb&w=200" alt="Pharmacy" />
             </div>
-            <h3>💊 Pharmacy Module</h3>
+            <h3> Pharmacy Module</h3>
             <p>Manage medicines, prescriptions, stock and sales records.</p>
             <ul>
-              <li>✔ Inventory tracking</li>
-              <li>✔ Prescription handling</li>
-              <li>✔ Billing support</li>
+              <li> Inventory tracking</li>
+              <li> Prescription handling</li>
+              <li> Billing support</li>
             </ul>
           </div>
     
@@ -419,12 +479,12 @@
             <div class="module-image-small">
               <img src="https://images.pexels.com/photos/3825539/pexels-photo-3825539.jpeg?auto=compress&cs=tinysrgb&w=200" alt="Staff" />
             </div>
-            <h3>👥 Staff Module</h3>
+            <h3> Staff Module</h3>
             <p>Manage staff roles, schedules and daily operational tasks.</p>
             <ul>
-              <li>✔ Staff scheduling</li>
-              <li>✔ Task management</li>
-              <li>✔ Role control</li>
+              <li> Staff scheduling</li>
+              <li> Task management</li>
+              <li> Role control</li>
             </ul>
           </div>
     
@@ -450,13 +510,15 @@
         </div>
 
         <div class="about-cards">
-          <div class="about-card">🩺 Doctor Management</div>
-          <div class="about-card">👥 Patient Records</div>
-          <div class="about-card">🧪 Lab Reports</div>
-          <div class="about-card">💊 Pharmacy & Billing</div>
+          <div class="about-card"> Doctor Management</div>
+          <div class="about-card"> Patient Records</div>
+          <div class="about-card"> Lab Reports</div>
+          <div class="about-card"> Pharmacy & Billing</div>
         </div>
       </div>
     </section>
+
+
 
     <!-- ==================== HOW IT WORKS SECTION ==================== -->
     <section id="how-it-works" class="how-section">
@@ -528,10 +590,10 @@
             <h3>MediCare+ Clinic Management System</h3>
             <p>We are here to help you manage your clinic efficiently and digitally.</p>
     
-            <div class="contact-item">📍 Bangalore, India</div>
-            <div class="contact-item">📞 +91 9876543210</div>
-            <div class="contact-item">📧 support@medicare.com</div>
-            <div class="contact-item">⏰ Mon - Sat : 9 AM - 6 PM</div>
+            <div class="contact-item"> Bangalore, India</div>
+            <div class="contact-item"> +91 9876543210</div>
+            <div class="contact-item"> support@medicare.com</div>
+            <div class="contact-item"> Mon - Sat : 9 AM - 6 PM</div>
           </div>
     
           <!-- Right Form -->
@@ -545,7 +607,6 @@
     
       </div>
     </section>
-
     <footer class="footer" id="footer">
         <div class="footer-left">
             &copy; 2024 MediCare+ Clinic Management System. All rights reserved.
@@ -576,6 +637,7 @@
 
         function toggleRoleFields() {
             var roleSelect = document.getElementById("registerRoleSelect");
+<<<<<<< HEAD
             var adminFields = document.getElementById("adminFields");
             var patientFields = document.getElementById("patientFields");
             var doctorFields = document.getElementById("doctorFields");
@@ -588,24 +650,44 @@
             var patientAge = document.getElementById("patientAge");
             var patientGender = document.getElementById("patientGender");
             var patientAddress = document.getElementById("patientAddress");
+=======
+<<<<<<< HEAD
+            var doctorFields = document.getElementById("doctorFields");
+>>>>>>> b1123dc2c0f816d8430ee2f38f6a7131aa07e35b
             var doctorPhone = document.getElementById("doctorPhone");
             var doctorSpec = document.getElementById("doctorSpecialization");
             var doctorExp = document.getElementById("doctorExperience");
             var doctorLic = document.getElementById("doctorLicenseId");
 
-            var labName = document.getElementById("labName");
-            var labAddr = document.getElementById("labAddress");
-            var labId = document.getElementById("labId");
+            var labFields = document.getElementById("labFields");
+            var labNameInput = document.getElementById("labName");
+            var labAddrInput = document.getElementById("labAddress");
+            var labIdInput = document.getElementById("labId");
 
+            var pharmacyFields = document.getElementById("pharmacyFields");
+            var staffFields = document.getElementById("staffFields");
+            var deliveryFields = document.getElementById("deliveryFields");
             var deliveryPhone = document.getElementById("deliveryPhone");
             var vehicleType = document.getElementById("vehicleType");
+            var staffPhone = document.getElementById("staffPhone");
+            var staffId = document.getElementById("staffId");
+            var hospName = document.getElementById("hospitalName");
+
+            var receptionistFields = document.getElementById("receptionistFields");
+            var recPhone = document.getElementById("receptionistPhone");
+            var recGovId = document.getElementById("receptionistGovId");
+            var recGender = document.getElementById("receptionistGender");
+            var recAddr = document.getElementById("receptionistAddress");
 
             // Reset visibility
             if(adminFields) adminFields.style.display = "none";
             if(patientFields) patientFields.style.display = "none";
             if(doctorFields) doctorFields.style.display = "none";
             if(labFields) labFields.style.display = "none";
+            if(receptionistFields) receptionistFields.style.display = "none";
             if(deliveryFields) deliveryFields.style.display = "none";
+            if(pharmacyFields) pharmacyFields.style.display = "none";
+            if(staffFields) staffFields.style.display = "none";
             
             // Reset required status
             if(adminId) adminId.required = false;
@@ -619,12 +701,21 @@
             if(doctorExp) doctorExp.required = false;
             if(doctorLic) doctorLic.required = false;
 
-            if(labName) labName.required = false;
-            if(labAddr) labAddr.required = false;
-            if(labId) labId.required = false;
+            if(labNameInput) labNameInput.required = false;
+            if(labAddrInput) labAddrInput.required = false;
+            if(labIdInput) labIdInput.required = false;
+
+            if(recPhone) recPhone.required = false;
+            if(recGovId) recGovId.required = false;
+            if(recGender) recGender.required = false;
+            if(recAddr) recAddr.required = false;
 
             if(deliveryPhone) deliveryPhone.required = false;
             if(vehicleType) vehicleType.required = false;
+
+            if(staffPhone) staffPhone.required = false;
+            if(staffId) staffId.required = false;
+            if(hospName) hospName.required = false;
 
             // Show and set required based on role
             if (roleSelect.value === "Admin") {
@@ -645,17 +736,33 @@
                 if(doctorLic) doctorLic.required = true;
             } else if (roleSelect.value === "Lab") {
                 if(labFields) labFields.style.display = "block";
-                if(labName) labName.required = true;
-                if(labAddr) labAddr.required = true;
-                if(labId) labId.required = true;
+                if(labNameInput) labNameInput.required = true;
+                if(labAddrInput) labAddrInput.required = true;
+                if(labIdInput) labIdInput.required = true;
+            } else if (roleSelect.value === "Receptionist") {
+                if(receptionistFields) receptionistFields.style.display = "block";
+                if(recPhone) recPhone.required = true;
+                if(recGovId) recGovId.required = true;
+                if(recGender) recGender.required = true;
+                if(recAddr) recAddr.required = true;
+            } else if (roleSelect.value === "Pharmacy") {
+                if(pharmacyFields) pharmacyFields.style.display = "block";
             } else if (roleSelect.value === "Delivery") {
                 if(deliveryFields) {
                     deliveryFields.style.display = "block";
                     if(deliveryPhone) deliveryPhone.required = true;
                     if(vehicleType) vehicleType.required = true;
                 }
+            } else if (roleSelect.value === "Staff") {
+                if(staffFields) {
+                    staffFields.style.display = "block";
+                    if(staffPhone) staffPhone.required = true;
+                    if(staffId) staffId.required = true;
+                    if(hospName) hospName.required = true;
+                }
             }
         }
+<<<<<<< HEAD
 
         // Hero Background Slider Logic
         const heroImages = [
@@ -681,6 +788,8 @@
 
         // Initialize role fields
         window.addEventListener('load', toggleRoleFields);
+=======
+>>>>>>> b1123dc2c0f816d8430ee2f38f6a7131aa07e35b
     </script>
 </body>
 </html>

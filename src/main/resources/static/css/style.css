@@ -179,9 +179,9 @@ img {
       rgba(15, 23, 42, 0.15) 65%,
       rgba(15, 23, 42, 0.55) 100%
     ),
-    url("/img/hero-bg.png");
-
+    url("../img/hero-bg.png");
   background-size: cover;
+  background-attachment: fixed;
   background-position: center 10%;
   background-repeat: no-repeat;
   display: flex;
@@ -1634,14 +1634,7 @@ img {
   }
 }
 
-.hero {
-  min-height: 560px;
-  width: 100%;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  transition: background-image 0.8s ease-in-out;
-}
+
 
 .feature-img {
   width: 90px;

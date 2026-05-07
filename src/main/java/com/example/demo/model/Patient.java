@@ -2,7 +2,6 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.util.List;
 
 @Entity
 @Table(name = "patients")
@@ -31,8 +30,6 @@ public class Patient {
 
     private String lastVisit;
 
-    private Integer age;
-
     // Delivery Boy Workflow Fields
     private String deliveryStatus; // Pending Pickup, In Transit, Delivered, Received
     private String deliveryAssignedTo;
@@ -42,17 +39,22 @@ public class Patient {
     private String destinationHospital;
     private String estimatedTime;
     private String currentLocation;
-    
-    // Additional fields
-    private String contact;
 
-    // Test Request specific fields
-    private String testType;
-    private String priority; // Low, Medium, High
-    private String collectionType; // Home, Walk-in
+    private Integer age;
+
+    private String address;
+
+    private String emergencyContact;
+
+    private LocalDate registrationDate;
+
+    private String contact;
+    
+    private String priority; // High, Normal, Low
 
     public Patient() {
         this.deliveryStatus = "Pending Pickup";
+        this.registrationDate = LocalDate.now();
     }
 
     public Patient(String name, String patientId, String gender, LocalDate dateOfBirth, String contactNumber, String bloodGroup, String lastVisit) {
@@ -67,19 +69,6 @@ public class Patient {
         this.sourceHospital = "City Central Hospital";
         this.destinationHospital = "MediCare Partner Lab";
         this.estimatedTime = "45 mins";
-    }
-
-    public Patient(String name, String patientId, String gender, LocalDate dateOfBirth, String contactNumber, String bloodGroup, String lastVisit, String deliveryAssignedTo, String pickupLocation) {
-        this.name = name;
-        this.patientId = patientId;
-        this.gender = gender;
-        this.dateOfBirth = dateOfBirth;
-        this.contactNumber = contactNumber;
-        this.bloodGroup = bloodGroup;
-        this.lastVisit = lastVisit;
-        this.deliveryStatus = "Pending Pickup";
-        this.deliveryAssignedTo = deliveryAssignedTo;
-        this.pickupLocation = pickupLocation;
     }
 
     // Getters and Setters
@@ -137,12 +126,15 @@ public class Patient {
     public String getContact() { return contact; }
     public void setContact(String contact) { this.contact = contact; }
 
-    public String getTestType() { return testType; }
-    public void setTestType(String testType) { this.testType = testType; }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
+    public String getEmergencyContact() { return emergencyContact; }
+    public void setEmergencyContact(String emergencyContact) { this.emergencyContact = emergencyContact; }
+
+    public LocalDate getRegistrationDate() { return registrationDate; }
+    public void setRegistrationDate(LocalDate registrationDate) { this.registrationDate = registrationDate; }
 
     public String getPriority() { return priority; }
     public void setPriority(String priority) { this.priority = priority; }
-
-    public String getCollectionType() { return collectionType; }
-    public void setCollectionType(String collectionType) { this.collectionType = collectionType; }
 }

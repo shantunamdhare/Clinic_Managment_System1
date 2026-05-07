@@ -115,6 +115,7 @@
             border-radius: var(--radius-md);
             transition: all 0.3s ease;
             font-weight: 600;
+            cursor: pointer;
         }
 
         .nav-item:hover, .nav-item.active {
@@ -168,6 +169,13 @@
             background: var(--white);
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .user-profile:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
         }
 
         .user-profile img {
@@ -350,6 +358,54 @@
         .timeline-step.active .step-label { color: var(--primary); }
         .timeline-step.completed .step-label { color: var(--success); }
 
+        /* Profile Styles */
+        .profile-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .profile-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 40px;
+            border-radius: 24px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .profile-avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 5px solid rgba(255,255,255,0.2);
+            object-fit: cover;
+        }
+        .profile-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .profile-card {
+            background: white;
+            padding: 24px;
+            border-radius: 20px;
+            border: 1px solid var(--gray-100);
+            box-shadow: var(--shadow-sm);
+        }
+        .profile-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--gray-400);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        .profile-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
         /* Receipt Modal */
         .receipt-modal {
             display: none;
@@ -398,19 +454,19 @@
             </div>
             
             <nav class="sidebar-nav">
-                <a href="#" class="nav-item active" id="nav-active" onclick="showSection('active-section')">
+                <a class="nav-item active" id="nav-active" onclick="showSection('active-section')">
                     <span class="material-symbols-outlined">dashboard</span>
                     My Deliveries
                 </a>
-                <a href="#" class="nav-item" id="nav-history" onclick="showSection('history-section')">
+                <a class="nav-item" id="nav-history" onclick="showSection('history-section')">
                     <span class="material-symbols-outlined">history</span>
                     Delivery History
                 </a>
-                <a href="#" class="nav-item">
+                <a class="nav-item" id="nav-profile" onclick="showSection('profile-section')">
                     <span class="material-symbols-outlined">person</span>
                     Profile
                 </a>
-                <a href="/" class="nav-item" style="margin-top: auto; color: var(--danger);">
+                <a href="/logout" class="nav-item" style="margin-top: auto; color: var(--danger);">
                     <span class="material-symbols-outlined">logout</span>
                     Logout
                 </a>
@@ -426,7 +482,7 @@
                 </div>
                 
                 <div class="header-actions">
-                    <div class="user-profile">
+                    <div class="user-profile" onclick="showSection('profile-section')">
                         <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Delivery" alt="Delivery Boy">
                         <div class="user-info">
                             <span class="user-name">${user.fullName}</span>
@@ -436,225 +492,259 @@
                 </div>
             </header>
 
-            <!-- STATS CARDS -->
-            <c:set var="activeCount" value="0"/>
-            <c:set var="historyCount" value="0"/>
-            <c:forEach var="t" items="${tasks}">
-                <c:choose>
-                    <c:when test="${t.deliveryStatus == 'Received' || t.deliveryStatus == 'Delivered' || t.deliveryStatus == 'Completed'}">
-                        <c:set var="historyCount" value="${historyCount + 1}"/>
-                    </c:when>
-                    <c:otherwise>
-                        <c:set var="activeCount" value="${activeCount + 1}"/>
-                    </c:otherwise>
-                </c:choose>
-            </c:forEach>
+            <div class="dashboard-container-inner">
+                <!-- STATS CARDS -->
+                <c:set var="activeCount" value="0"/>
+                <c:set var="historyCount" value="0"/>
+                <c:forEach var="t" items="${tasks}">
+                    <c:choose>
+                        <c:when test="${t.deliveryStatus == 'Received' || t.deliveryStatus == 'Delivered' || t.deliveryStatus == 'Completed'}">
+                            <c:set var="historyCount" value="${historyCount + 1}"/>
+                        </c:when>
+                        <c:otherwise>
+                            <c:set var="activeCount" value="${activeCount + 1}"/>
+                        </c:otherwise>
+                    </c:choose>
+                </c:forEach>
 
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 32px;">
-                <div class="section-card" style="margin-bottom: 0; cursor: pointer;" onclick="showSection('active-section')">
-                    <div style="display: flex; align-items: center; gap: 16px;">
-                        <div style="background: rgba(67, 97, 238, 0.1); color: var(--primary); padding: 12px; border-radius: var(--radius-md);">
-                            <span class="material-symbols-outlined">pending_actions</span>
+                <div id="stats-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 32px;">
+                    <div class="section-card" style="margin-bottom: 0; cursor: pointer;" onclick="showSection('active-section')">
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <div style="background: rgba(67, 97, 238, 0.1); color: var(--primary); padding: 12px; border-radius: var(--radius-md);">
+                                <span class="material-symbols-outlined">pending_actions</span>
+                            </div>
+                            <div>
+                                <span style="font-size: 24px; font-weight: 800; display: block;">${activeCount}</span>
+                                <span style="font-size: 13px; color: var(--gray-500); font-weight: 600;">Active Tasks</span>
+                            </div>
                         </div>
-                        <div>
-                            <span style="font-size: 24px; font-weight: 800; display: block;">${activeCount}</span>
-                            <span style="font-size: 13px; color: var(--gray-500); font-weight: 600;">Active Tasks</span>
+                    </div>
+                    <div class="section-card" style="margin-bottom: 0; cursor: pointer;" onclick="showSection('history-section')">
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <div style="background: rgba(76, 201, 240, 0.1); color: #087f5b; padding: 12px; border-radius: var(--radius-md);">
+                                <span class="material-symbols-outlined">history</span>
+                            </div>
+                            <div>
+                                <span style="font-size: 24px; font-weight: 800; display: block;">${historyCount}</span>
+                                <span style="font-size: 13px; color: var(--gray-500); font-weight: 600;">Deliveries</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="section-card" style="margin-bottom: 0; cursor: pointer;" onclick="showSection('history-section')">
-                    <div style="display: flex; align-items: center; gap: 16px;">
-                        <div style="background: rgba(76, 201, 240, 0.1); color: #087f5b; padding: 12px; border-radius: var(--radius-md);">
-                            <span class="material-symbols-outlined">history</span>
-                        </div>
-                        <div>
-                            <span style="font-size: 24px; font-weight: 800; display: block;">${historyCount}</span>
-                            <span style="font-size: 13px; color: var(--gray-500); font-weight: 600;">Deliveries</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- TASKS SECTION -->
-            <div id="active-section" class="dashboard-page">
-            <div class="section-card">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <span class="material-symbols-outlined" style="color: var(--primary);">assignment</span>
-                        Current Tasks
-                    </h2>
-                </div>
+                <!-- TASKS SECTION -->
+                <div id="active-section" class="dashboard-page">
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <span class="material-symbols-outlined" style="color: var(--primary);">assignment</span>
+                                Current Tasks
+                            </h2>
+                        </div>
 
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Patient / ID</th>
-                            <th>Pickup Location</th>
-                            <th>Test Information</th>
-                            <th>Current Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach var="task" items="${tasks}">
-                            <c:set var="status" value="${fn:trim(task.deliveryStatus)}"/>
-                            <c:if test="${status != 'Received' && status != 'Delivered' && status != 'Completed'}">
+                        <table>
+                            <thead>
                                 <tr>
-                                    <td>
-                                        <div style="font-weight: 700; color: var(--gray-900);">${task.name}</div>
-                                        <div style="font-size: 11px; color: var(--gray-500);">${task.patientId}</div>
-                                    </td>
-                                    <td>
-                                        <div style="display: flex; align-items: center; gap: 6px;">
-                                            <span class="material-symbols-outlined" style="font-size: 18px; color: var(--danger);">location_on</span>
-                                            <span>${not empty task.pickupLocation ? task.pickupLocation : 'Main Clinic - Floor 2'}</span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="status-badge" style="background: var(--gray-100); color: var(--gray-700);">Blood Sample</span>
-                                    </td>
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${task.deliveryStatus == 'Pending Pickup'}">
-                                                <span class="status-badge status-pending">Pending Pickup</span>
-                                            </c:when>
-                                            <c:when test="${task.deliveryStatus == 'Collected'}">
-                                                <span class="status-badge status-transit" style="background: #e6fcf5; color: #087f5b;">Collected</span>
-                                            </c:when>
-                                            <c:when test="${task.deliveryStatus == 'In Transit'}">
-                                                <span class="status-badge status-transit">In Transit</span>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span class="status-badge status-pending">${task.deliveryStatus}</span>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                    <td>
-                                        <form action="/update-delivery-status" method="POST" style="display: inline;">
-                                            <input type="hidden" name="id" value="${task.id}">
-                                            <c:choose>
-                                                <c:when test="${task.deliveryStatus == 'Pending Pickup'}">
-                                                    <input type="hidden" name="status" value="Collected">
-                                                    <button type="submit" class="btn-action btn-update">
-                                                        <span class="material-symbols-outlined">hail</span>
-                                                        Pick Up Sample
-                                                    </button>
-                                                </c:when>
-                                                <c:when test="${task.deliveryStatus == 'Collected'}">
-                                                    <input type="hidden" name="status" value="In Transit">
-                                                    <button type="submit" class="btn-action btn-update" style="background: var(--warning);">
-                                                        <span class="material-symbols-outlined">local_shipping</span>
-                                                        Start Transit
-                                                    </button>
-                                                </c:when>
-                                                <c:when test="${task.deliveryStatus == 'In Transit'}">
-                                                    <input type="hidden" name="status" value="Delivered">
-                                                    <button type="submit" class="btn-action btn-update" style="background: var(--secondary);">
-                                                        <span class="material-symbols-outlined">check_circle</span>
-                                                        Mark Delivered
-                                                    </button>
-                                                </c:when>
-                                            </c:choose>
-                                        </form>
-                                    </td>
+                                    <th>Patient / ID</th>
+                                    <th>Pickup Location</th>
+                                    <th>Test Information</th>
+                                    <th>Current Status</th>
+                                    <th>Actions</th>
                                 </tr>
-                                
-                                <!-- PROGRESS TIMELINE FOR THIS TASK -->
-                                <tr>
-                                    <td colspan="5" style="padding: 0 16px 24px 16px; border-bottom: 2px solid var(--gray-50);">
-                                        <div class="delivery-timeline">
-                                            <div class="timeline-step completed">
-                                                <div class="step-icon"><span class="material-symbols-outlined">assignment</span></div>
-                                                <div class="step-label">Task Assigned</div>
-                                            </div>
-                                            <div class="timeline-step ${task.deliveryStatus != 'Pending Pickup' ? 'completed' : 'active'}">
-                                                <div class="step-icon"><span class="material-symbols-outlined">hail</span></div>
-                                                <div class="step-label">Sample Pickup</div>
-                                            </div>
-                                            <div class="timeline-step ${task.deliveryStatus == 'Collected' ? 'active' : (task.deliveryStatus == 'In Transit' || task.deliveryStatus == 'Delivered' || task.deliveryStatus == 'Received' ? 'completed' : '')}">
-                                                <div class="step-icon"><span class="material-symbols-outlined">science</span></div>
-                                                <div class="step-label">Collected</div>
-                                            </div>
-                                            <div class="timeline-step ${task.deliveryStatus == 'In Transit' ? 'active' : (task.deliveryStatus == 'Delivered' || task.deliveryStatus == 'Received' ? 'completed' : '')}">
-                                                <div class="step-icon"><span class="material-symbols-outlined">local_shipping</span></div>
-                                                <div class="step-label">In Transit</div>
-                                            </div>
-                                            <div class="timeline-step ${task.deliveryStatus == 'Delivered' ? 'active' : (task.deliveryStatus == 'Received' ? 'completed' : '')}">
-                                                <div class="step-icon"><span class="material-symbols-outlined">apartment</span></div>
-                                                <div class="step-label">Delivered</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </c:if>
-                        </c:forEach>
-                    </tbody>
-                </table>
-            </div>
-            </div> <!-- End Active Section -->
-
-            <!-- HISTORY SECTION -->
-            <div id="history-section" class="dashboard-page" style="display: none;">
-                <div class="section-card">
-                    <div class="section-header">
-                        <h2 class="section-title">
-                            <span class="material-symbols-outlined" style="color: var(--success);">history</span>
-                            Completed Deliveries
-                        </h2>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="task" items="${tasks}">
+                                    <c:set var="status" value="${fn:trim(task.deliveryStatus)}"/>
+                                    <c:if test="${status != 'Received' && status != 'Delivered' && status != 'Completed'}">
+                                        <tr>
+                                            <td>
+                                                <div style="font-weight: 700; color: var(--gray-900);">${task.name}</div>
+                                                <div style="font-size: 11px; color: var(--gray-500);">${task.patientId}</div>
+                                            </td>
+                                            <td>
+                                                <div style="display: flex; align-items: center; gap: 6px;">
+                                                    <span class="material-symbols-outlined" style="font-size: 18px; color: var(--danger);">location_on</span>
+                                                    <span>${not empty task.pickupLocation ? task.pickupLocation : 'Main Clinic - Floor 2'}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="status-badge" style="background: var(--gray-100); color: var(--gray-700);">Blood Sample</span>
+                                            </td>
+                                            <td>
+                                                <c:choose>
+                                                    <c:when test="${task.deliveryStatus == 'Pending Pickup'}">
+                                                        <span class="status-badge status-pending">Pending Pickup</span>
+                                                    </c:when>
+                                                    <c:when test="${task.deliveryStatus == 'Collected'}">
+                                                        <span class="status-badge status-transit" style="background: #e6fcf5; color: #087f5b;">Collected</span>
+                                                    </c:when>
+                                                    <c:when test="${task.deliveryStatus == 'In Transit'}">
+                                                        <span class="status-badge status-transit">In Transit</span>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <span class="status-badge status-pending">${task.deliveryStatus}</span>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                            <td>
+                                                <form action="/update-delivery-status" method="POST" style="display: inline;">
+                                                    <input type="hidden" name="id" value="${task.id}">
+                                                    <c:choose>
+                                                        <c:when test="${task.deliveryStatus == 'Pending Pickup'}">
+                                                            <input type="hidden" name="status" value="Collected">
+                                                            <button type="submit" class="btn-action btn-update">
+                                                                <span class="material-symbols-outlined">hail</span>
+                                                                Pick Up Sample
+                                                            </button>
+                                                        </c:when>
+                                                        <c:when test="${task.deliveryStatus == 'Collected'}">
+                                                            <input type="hidden" name="status" value="In Transit">
+                                                            <button type="submit" class="btn-action btn-update" style="background: var(--warning);">
+                                                                <span class="material-symbols-outlined">local_shipping</span>
+                                                                Start Transit
+                                                            </button>
+                                                        </c:when>
+                                                        <c:when test="${task.deliveryStatus == 'In Transit'}">
+                                                            <input type="hidden" name="status" value="Delivered">
+                                                            <button type="submit" class="btn-action btn-update" style="background: var(--secondary);">
+                                                                <span class="material-symbols-outlined">check_circle</span>
+                                                                Mark Delivered
+                                                            </button>
+                                                        </c:when>
+                                                    </c:choose>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        
+                                        <!-- PROGRESS TIMELINE FOR THIS TASK -->
+                                        <tr>
+                                            <td colspan="5" style="padding: 0 16px 24px 16px; border-bottom: 2px solid var(--gray-50);">
+                                                <div class="delivery-timeline">
+                                                    <div class="timeline-step completed">
+                                                        <div class="step-icon"><span class="material-symbols-outlined">assignment</span></div>
+                                                        <div class="step-label">Task Assigned</div>
+                                                    </div>
+                                                    <div class="timeline-step ${task.deliveryStatus != 'Pending Pickup' ? 'completed' : 'active'}">
+                                                        <div class="step-icon"><span class="material-symbols-outlined">hail</span></div>
+                                                        <div class="step-label">Sample Pickup</div>
+                                                    </div>
+                                                    <div class="timeline-step ${task.deliveryStatus == 'Collected' ? 'active' : (task.deliveryStatus == 'In Transit' || task.deliveryStatus == 'Delivered' || task.deliveryStatus == 'Received' ? 'completed' : '')}">
+                                                        <div class="step-icon"><span class="material-symbols-outlined">science</span></div>
+                                                        <div class="step-label">Collected</div>
+                                                    </div>
+                                                    <div class="timeline-step ${task.deliveryStatus == 'In Transit' ? 'active' : (task.deliveryStatus == 'Delivered' || task.deliveryStatus == 'Received' ? 'completed' : '')}">
+                                                        <div class="step-icon"><span class="material-symbols-outlined">local_shipping</span></div>
+                                                        <div class="step-label">In Transit</div>
+                                                    </div>
+                                                    <div class="timeline-step ${task.deliveryStatus == 'Delivered' ? 'active' : (task.deliveryStatus == 'Received' ? 'completed' : '')}">
+                                                        <div class="step-icon"><span class="material-symbols-outlined">apartment</span></div>
+                                                        <div class="step-label">Delivered</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </c:if>
+                                </c:forEach>
+                            </tbody>
+                        </table>
                     </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Patient / ID</th>
-                                <th>Source → Destination</th>
-                                <th>Completed On</th>
-                                <th>Status</th>
-                                <th>Receipt</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:set var="hasHistory" value="false"/>
-                            <c:forEach var="task" items="${tasks}">
-                                <c:set var="status" value="${fn:trim(task.deliveryStatus)}"/>
-                                <c:if test="${status == 'Received' || status == 'Delivered' || status == 'Completed'}">
-                                    <c:set var="hasHistory" value="true"/>
+                </div> <!-- End Active Section -->
+
+                <!-- HISTORY SECTION -->
+                <div id="history-section" class="dashboard-page" style="display: none;">
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <span class="material-symbols-outlined" style="color: var(--success);">history</span>
+                                Completed Deliveries
+                            </h2>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Patient / ID</th>
+                                    <th>Source → Destination</th>
+                                    <th>Completed On</th>
+                                    <th>Status</th>
+                                    <th>Receipt</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:set var="hasHistory" value="false"/>
+                                <c:forEach var="task" items="${tasks}">
+                                    <c:set var="status" value="${fn:trim(task.deliveryStatus)}"/>
+                                    <c:if test="${status == 'Received' || status == 'Delivered' || status == 'Completed'}">
+                                        <c:set var="hasHistory" value="true"/>
+                                        <tr>
+                                            <td>
+                                                <div style="font-weight: 700; color: var(--gray-900);">${task.name}</div>
+                                                <div style="font-size: 11px; color: var(--gray-500);">${task.patientId}</div>
+                                            </td>
+                                            <td>
+                                                <div style="font-size: 13px; font-weight: 600;">${task.sourceHospital}</div>
+                                                <div style="font-size: 10px; color: var(--primary); font-weight: 700;">→ ${task.destinationHospital}</div>
+                                            </td>
+                                            <td>
+                                                <div style="font-size: 13px;">${not empty task.lastVisit ? task.lastVisit : 'Today'}</div>
+                                            </td>
+                                            <td>
+                                                <span class="status-badge ${task.deliveryStatus == 'Completed' ? 'status-received' : 'status-delivered'}">
+                                                    ${task.deliveryStatus}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button class="btn-action" style="background: var(--gray-100); color: var(--gray-700);" 
+                                                        onclick="viewReceipt('${task.name}', '${task.patientId}', '${task.sourceHospital}', '${task.destinationHospital}', '${task.lastVisit}', '${task.deliveryStatus}')">
+                                                    <span class="material-symbols-outlined" style="font-size: 18px;">description</span>
+                                                    View Receipt
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </c:if>
+                                </c:forEach>
+                                <c:if test="${!hasHistory}">
                                     <tr>
-                                        <td>
-                                            <div style="font-weight: 700; color: var(--gray-900);">${task.name}</div>
-                                            <div style="font-size: 11px; color: var(--gray-500);">${task.patientId}</div>
-                                        </td>
-                                        <td>
-                                            <div style="font-size: 13px; font-weight: 600;">${task.sourceHospital}</div>
-                                            <div style="font-size: 10px; color: var(--primary); font-weight: 700;">→ ${task.destinationHospital}</div>
-                                        </td>
-                                        <td>
-                                            <div style="font-size: 13px;">${not empty task.lastVisit ? task.lastVisit : 'Today'}</div>
-                                        </td>
-                                        <td>
-                                            <span class="status-badge ${task.deliveryStatus == 'Completed' ? 'status-received' : 'status-delivered'}">
-                                                ${task.deliveryStatus}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <button class="btn-action" style="background: var(--gray-100); color: var(--gray-700);" 
-                                                    onclick="viewReceipt('${task.name}', '${task.patientId}', '${task.sourceHospital}', '${task.destinationHospital}', '${task.lastVisit}', '${task.deliveryStatus}')">
-                                                <span class="material-symbols-outlined" style="font-size: 18px;">description</span>
-                                                View Receipt
-                                            </button>
+                                        <td colspan="5" style="text-align: center; padding: 60px; color: var(--gray-400);">
+                                            <span class="material-symbols-outlined" style="font-size: 48px; margin-bottom: 16px; display: block;">history_toggle_off</span>
+                                            <p>No delivery history found yet.</p>
                                         </td>
                                     </tr>
                                 </c:if>
-                            </c:forEach>
-                            <c:if test="${!hasHistory}">
-                                <tr>
-                                    <td colspan="5" style="text-align: center; padding: 60px; color: var(--gray-400);">
-                                        <span class="material-symbols-outlined" style="font-size: 48px; margin-bottom: 16px; display: block;">history_toggle_off</span>
-                                        <p>No delivery history found yet.</p>
-                                    </td>
-                                </tr>
-                            </c:if>
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- PROFILE SECTION -->
+                <div id="profile-section" class="dashboard-page" style="display: none;">
+                    <div class="profile-container">
+                        <div class="profile-header">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Delivery" class="profile-avatar-large" alt="Avatar">
+                            <div>
+                                <h1 style="font-size: 32px; font-weight: 800; margin-bottom: 5px;">${user.fullName}</h1>
+                                <p style="font-size: 18px; opacity: 0.9; font-weight: 500;">Logistics Executive</p>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-info-grid">
+                            <div class="profile-card">
+                                <p class="profile-label">Full Name</p>
+                                <p class="profile-value">${user.fullName}</p>
+                            </div>
+                            <div class="profile-card">
+                                <p class="profile-label">Email Address</p>
+                                <p class="profile-value">${user.email}</p>
+                            </div>
+                            <div class="profile-card">
+                                <p class="profile-label">Phone Number</p>
+                                <p class="profile-value">${not empty user.phone ? user.phone : 'Not Provided'}</p>
+                            </div>
+                            <div class="profile-card">
+                                <p class="profile-label">Vehicle Type</p>
+                                <p class="profile-value">${not empty user.vehicleType ? user.vehicleType : 'Not Provided'}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -723,9 +813,25 @@
                 item.classList.remove('active');
             });
             
-            const navId = sectionId === 'active-section' ? 'nav-active' : 'nav-history';
-            document.getElementById(navId).classList.add('active');
+            const navIdMap = {
+                'active-section': 'nav-active',
+                'history-section': 'nav-history',
+                'profile-section': 'nav-profile'
+            };
             
+            const navId = navIdMap[sectionId];
+            if (navId) {
+                document.getElementById(navId).classList.add('active');
+            }
+            
+            // Update stats grid visibility (hide on profile)
+            const statsGrid = document.getElementById('stats-grid');
+            if (sectionId === 'profile-section') {
+                statsGrid.style.display = 'none';
+            } else {
+                statsGrid.style.display = 'grid';
+            }
+
             // Update titles
             const title = document.getElementById('page-title');
             const subtitle = document.getElementById('page-subtitle');
@@ -733,9 +839,12 @@
             if (sectionId === 'active-section') {
                 title.innerText = 'Active Assignments';
                 subtitle.innerText = 'Track and update sample collection tasks';
-            } else {
+            } else if (sectionId === 'history-section') {
                 title.innerText = 'Delivery History';
                 subtitle.innerText = 'Review all your completed sample deliveries';
+            } else if (sectionId === 'profile-section') {
+                title.innerText = 'My Profile';
+                subtitle.innerText = 'Manage your account and vehicle details';
             }
         }
 

@@ -36,12 +36,12 @@
         <button onclick="window.print()" style="background:#2563eb;color:#fff;border:none;padding:10px 24px;border-radius:8px;font-size:0.9rem;cursor:pointer;font-weight:600">
             <i class="fas fa-print"></i> Print Prescription
         </button>
-        <a href="/doctor/prescriptions?visitId=${visit.id}" style="margin-left:12px;color:#64748b;text-decoration:none;font-size:0.875rem">← Back</a>
+        <a href="/doctor/prescriptions?visitId=${visit.id}" style="margin-left:12px;color:#64748b;text-decoration:none;font-size:0.875rem"> Back</a>
     </div>
 
     <div class="header">
         <div>
-            <div class="clinic-name">🏥 ClinicMS</div>
+            <div class="clinic-name"> ClinicMS</div>
             <div class="clinic-sub">Clinic Management System | Medical Prescription</div>
         </div>
         <div class="doctor-info">
@@ -75,7 +75,7 @@
         <div style="font-weight:600;color:#1e293b">${visit.diagnosis}</div>
     </div>
 
-    <div class="rx-symbol">℞</div>
+    <div class="rx-symbol"></div>
 
     <table>
         <thead>

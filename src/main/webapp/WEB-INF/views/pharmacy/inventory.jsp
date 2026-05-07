@@ -1,0 +1,74 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory | MediCare+ Pharmacy</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/pharmacy.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { text-align: left; padding: 12px; border-bottom: 2px solid #e2e8f0; color: #64748b; font-size: 13px; text-transform: uppercase; }
+        td { padding: 14px 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        .badge-pill { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .badge-success { background: #ecfdf5; color: #10b981; }
+        .badge-warning { background: #fffbeb; color: #f59e0b; }
+        .badge-danger { background: #fef2f2; color: #ef4444; }
+    </style>
+</head>
+<body>
+    <div class="pharmacy-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo"><i class="fas fa-plus-square"></i> <span>MediCare+ <span>Pharmacy</span></span></div>
+            <nav class="sidebar-nav">
+                <a href="/pharmacy-dashboard" class="nav-link"><i class="fas fa-th-large"></i> Dashboard</a>
+                <a href="/pharmacy/inventory" class="nav-link active"><i class="fas fa-pills"></i> Stock & Expiry</a>
+                <a href="/pharmacy/billing" class="nav-link"><i class="fas fa-file-invoice-dollar"></i> Medicine Issue</a>
+                <a href="/pharmacy/sales" class="nav-link"><i class="fas fa-chart-line"></i> Sales Summary</a>
+                <a href="/pharmacy/staff" class="nav-link"><i class="fas fa-users"></i> Staff & Shifts</a>
+            </nav>
+            <div class="sidebar-footer"><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></div>
+        </aside>
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-search"><i class="fas fa-search"></i><input type="text" placeholder="Search medicines..."></div>
+                <div class="header-user">
+                    <div class="user-profile">
+                        <img src="https://ui-avatars.com/api/?name=${user.fullName}&background=4f46e5&color=fff" alt="User">
+                        <div class="user-info"><span class="name">${user.fullName}</span><span class="role">Pharmacist</span></div>
+                    </div>
+                </div>
+            </header>
+            <div class="grid-card">
+                <div class="card-header"><h2><i class="fas fa-pills"></i> Inventory & Stock Tracking</h2></div>
+                <div class="card-body">
+                    <table>
+                        <thead><tr><th>Medicine Name</th><th>Batch #</th><th>Stock</th><th>Price</th><th>Expiry Date</th><th>Status</th></tr></thead>
+                        <tbody>
+                            <c:forEach var="med" items="${medicines}">
+                                <tr>
+                                    <td><strong>${med.name}</strong></td>
+                                    <td>${med.batchNumber}</td>
+                                    <td>${med.stockLevel} units</td>
+                                    <td>₹${med.price}</td>
+                                    <td>${med.expiryDate}</td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${med.stockLevel <= 10}"><span class="badge-pill badge-danger">Low Stock</span></c:when>
+                                            <c:otherwise><span class="badge-pill badge-success">Available</span></c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

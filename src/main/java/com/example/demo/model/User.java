@@ -22,7 +22,6 @@ public class User {
     @Column(nullable = false)
     private String role;
 
-    // Lab specific fields
     private String labName;
     private String labAddress;
     private String labId;
@@ -33,15 +32,30 @@ public class User {
     private String specialization;
     private Integer experience;
     private String licenseId;
+    
+    // Receptionist / General Staff fields
+    private String govIdNumber;
+    private String gender;
+    private String address;
 
-    // Staff Management fields
-    private String attendanceStatus; // Present, Absent, Pending
+    // Pharmacy specific fields
+    private String pharmacyName;
+    private String pharmacyAddress;
+    private String pharmacyLicense;
+
+    // Profile Image
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String profileImage;
+
+    // Staff specific fields
+    private String staffId;
+    private String hospitalName;
+    private String attendanceStatus;
     private String checkInTime;
     private String checkOutTime;
-    private String shiftTiming; // e.g., 09 AM - 05 PM
-    private Integer performanceRating; // 1-5
-    
-    // Delivery specific fields
+    private String shiftTiming;
+    private Integer performanceRating;
     private String vehicleType;
 
     public User() {
@@ -58,8 +72,6 @@ public class User {
         this.labId = labId;
         this.labType = labType;
     }
-
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -210,5 +222,61 @@ public class User {
 
     public void setVehicleType(String vehicleType) {
         this.vehicleType = vehicleType;
+    }
+
+    public String getPharmacyName() {
+        return pharmacyName;
+    }
+
+    public void setPharmacyName(String pharmacyName) {
+        this.pharmacyName = pharmacyName;
+    }
+
+    public String getPharmacyAddress() {
+        return pharmacyAddress;
+    }
+
+    public void setPharmacyAddress(String pharmacyAddress) {
+        this.pharmacyAddress = pharmacyAddress;
+    }
+
+    public String getPharmacyLicense() {
+        return pharmacyLicense;
+    }
+
+    public void setPharmacyLicense(String pharmacyLicense) {
+        this.pharmacyLicense = pharmacyLicense;
+    }
+
+    public String getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getStaffId() {
+        return staffId;
+    }
+
+    public void setStaffId(String staffId) {
+        this.staffId = staffId;
+    }
+
+    public String getHospitalName() {
+        return hospitalName;
+    }
+
+    public void setHospitalName(String hospitalName) {
+        this.hospitalName = hospitalName;
     }
 }
