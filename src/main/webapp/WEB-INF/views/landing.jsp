@@ -143,28 +143,33 @@
                             <h3>Create Account</h3>
                             <p class="subtitle">Join our medical community</p>
 
-                            <form action="/register" method="post">
+                            <form action="/register" method="post" onsubmit="this.querySelector('.btn-register').classList.add('loading')">
                                 <div class="form-group">
                                     <span class="input-icon">&#x1F464;</span>
                                     <input type="text" name="fullName" class="form-input" placeholder="Full Name" required>
                                 </div>
                                 <div class="form-group">
                                     <span class="input-icon">&#x2709;</span>
-                                    <input type="email" name="email" class="form-input" placeholder="Email Address" required>
+                                    <input type="email" name="email" id="regEmail" class="form-input" placeholder="Email Address" required>
+                                </div>
+                                <div class="form-group" id="regPhoneGroup">
+                                    <span class="input-icon">&#x1F4DE;</span>
+                                    <input type="tel" name="phone" id="regPhone" class="form-input" placeholder="Phone Number">
                                 </div>
                                 <div class="form-group">
                                     <span class="input-icon">&#x1F512;</span>
-                                    <input type="password" name="password" class="form-input" placeholder="Create Password" required>
+                                    <input type="password" name="password" id="regPassword" class="form-input" placeholder="Create Password" required>
+                                    <span class="password-toggle" onclick="togglePassword('regPassword')">&#x1F441;</span>
                                 </div>
                                 <div class="form-group">
                                     <span class="input-icon">&#x1F512;</span>
-                                    <input type="password" name="confirmPassword" class="form-input" placeholder="Confirm Password" required>
+                                    <input type="password" name="confirmPassword" id="regConfirmPassword" class="form-input" placeholder="Confirm Password" required>
+                                    <span class="password-toggle" onclick="togglePassword('regConfirmPassword')">&#x1F441;</span>
                                 </div>
                                 <div class="form-group">
                                     <span class="input-icon">&#x1F464;</span>
                                     <select name="role" id="registerRoleSelect" class="form-select" required onchange="toggleRoleFields()">
-                                        <option value="" disabled selected>Select Your Role</option>
-                                        <option value="Admin">Admin</option>
+                                        <option value="Admin" selected>Admin</option>
                                         <option value="Doctor">Doctor</option>
                                         <option value="Receptionist">Receptionist</option>
                                         <option value="Patient">Patient</option>
@@ -173,6 +178,41 @@
                                         <option value="Staff">Staff</option>
                                         <option value="Delivery">Delivery Boy</option>
                                     </select>
+                                </div>
+                                
+                                <!-- Admin specific fields -->
+                                <div id="adminFields" style="display:none; background: rgba(108,99,255,0.03); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px dashed rgba(108,99,255,0.3);">
+                                    <p style="font-size: 0.8rem; color: #6C63FF; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Admin Professional Details</p>
+                                    <div class="form-group" style="margin-bottom: 10px;">
+                                        <span class="input-icon">&#x1F1EE;&#x1F1E9;</span>
+                                        <input type="text" name="adminId" id="adminId" class="form-input" placeholder="Admin ID (e.g. ADM-101)">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <span class="input-icon">&#x1F3E5;</span>
+                                        <input type="text" name="clinicName" id="clinicName" class="form-input" placeholder="Clinic/Hospital Name">
+                                    </div>
+                                </div>
+
+                                <!-- Patient specific fields -->
+                                <div id="patientFields" style="display:none; background: rgba(124,77,255,0.03); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px dashed rgba(124,77,255,0.3); backdrop-filter: blur(5px);">
+                                    <p style="font-size: 0.8rem; color: #7c4dff; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Patient Medical Details</p>
+                                    <div class="form-group" style="margin-bottom: 10px;">
+                                        <span class="input-icon">&#x1F382;</span>
+                                        <input type="number" name="age" id="patientAge" class="form-input" placeholder="Age">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 10px;">
+                                        <span class="input-icon">&#x26A7;</span>
+                                        <select name="gender" id="patientGender" class="form-select">
+                                            <option value="" disabled selected>Select Gender</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <span class="input-icon">&#x1F4CD;</span>
+                                        <input type="text" name="address" id="patientAddress" class="form-input" placeholder="Full Home Address">
+                                    </div>
                                 </div>
                                 
                                 <!-- Doctor specific fields -->
@@ -525,12 +565,29 @@
     </footer>
 
     <script>
+        function togglePassword(id) {
+            const el = document.getElementById(id);
+            if (el.type === 'password') {
+                el.type = 'text';
+            } else {
+                el.type = 'password';
+            }
+        }
+
         function toggleRoleFields() {
             var roleSelect = document.getElementById("registerRoleSelect");
+            var adminFields = document.getElementById("adminFields");
+            var patientFields = document.getElementById("patientFields");
             var doctorFields = document.getElementById("doctorFields");
             var labFields = document.getElementById("labFields");
             var deliveryFields = document.getElementById("deliveryFields");
             
+            var adminId = document.getElementById("adminId");
+            var clinicName = document.getElementById("clinicName");
+            var regPhone = document.getElementById("regPhone");
+            var patientAge = document.getElementById("patientAge");
+            var patientGender = document.getElementById("patientGender");
+            var patientAddress = document.getElementById("patientAddress");
             var doctorPhone = document.getElementById("doctorPhone");
             var doctorSpec = document.getElementById("doctorSpecialization");
             var doctorExp = document.getElementById("doctorExperience");
@@ -544,11 +601,19 @@
             var vehicleType = document.getElementById("vehicleType");
 
             // Reset visibility
+            if(adminFields) adminFields.style.display = "none";
+            if(patientFields) patientFields.style.display = "none";
             if(doctorFields) doctorFields.style.display = "none";
             if(labFields) labFields.style.display = "none";
             if(deliveryFields) deliveryFields.style.display = "none";
             
             // Reset required status
+            if(adminId) adminId.required = false;
+            if(clinicName) clinicName.required = false;
+            if(regPhone) regPhone.required = false;
+            if(patientAge) patientAge.required = false;
+            if(patientGender) patientGender.required = false;
+            if(patientAddress) patientAddress.required = false;
             if(doctorPhone) doctorPhone.required = false;
             if(doctorSpec) doctorSpec.required = false;
             if(doctorExp) doctorExp.required = false;
@@ -562,7 +627,17 @@
             if(vehicleType) vehicleType.required = false;
 
             // Show and set required based on role
-            if (roleSelect.value === "Doctor") {
+            if (roleSelect.value === "Admin") {
+                if(adminFields) adminFields.style.display = "block";
+                if(adminId) adminId.required = true;
+                if(clinicName) clinicName.required = true;
+            } else if (roleSelect.value === "Patient") {
+                if(patientFields) patientFields.style.display = "block";
+                if(regPhone) regPhone.required = true;
+                if(patientAge) patientAge.required = true;
+                if(patientGender) patientGender.required = true;
+                if(patientAddress) patientAddress.required = true;
+            } else if (roleSelect.value === "Doctor") {
                 if(doctorFields) doctorFields.style.display = "block";
                 if(doctorPhone) doctorPhone.required = true;
                 if(doctorSpec) doctorSpec.required = true;
@@ -603,6 +678,9 @@
         
         // Start slider
         setInterval(changeHeroBackground, 10000); // 10 seconds per slide for better UX
+
+        // Initialize role fields
+        window.addEventListener('load', toggleRoleFields);
     </script>
 </body>
 </html>

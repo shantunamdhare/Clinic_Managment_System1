@@ -5,15 +5,15 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
-@Table(name = "appointments")
+@Table(name = "patient_appointments")
 public class Appointment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "doctor_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "doctor_id", referencedColumnName = "id", nullable = false)
     private User doctor; // User with role 'Doctor'
 
     @ManyToOne
@@ -27,6 +27,8 @@ public class Appointment {
     private LocalTime appointmentTime;
 
     private String status; // Pending, Completed, Cancelled
+
+    private String purpose;
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -46,4 +48,7 @@ public class Appointment {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getPurpose() { return purpose; }
+    public void setPurpose(String purpose) { this.purpose = purpose; }
 }

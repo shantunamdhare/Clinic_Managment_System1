@@ -232,6 +232,9 @@
             <a class="nav-item" href="javascript:void(0)" onclick="showSection('alerts-section', this)">
                 <span class="nav-icon">&#x1F514;</span> Alerts
             </a>
+            <a class="nav-item" href="javascript:void(0)" onclick="showSection('health-section', this)">
+                <span class="nav-icon">&#x1F6E1;</span> System Health
+            </a>
             <a class="nav-item" href="javascript:void(0)" onclick="showSection('analytics-section', this)">
                 <span class="nav-icon">&#x1F4C8;</span> Analytics
             </a>
@@ -298,17 +301,65 @@
                 </div>
             </div>
 
-            <!-- Dashboard Welcome / Summary Info -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>&#x1F4DA; System Summary</h3>
+            <!-- Alerts, Stocks & Bills Row -->
+            <div class="cards-triple" style="margin-top:20px;">
+                <!-- System Alerts Summary -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>&#x1F514; Recent Alerts</h3>
+                        <a href="javascript:void(0)" onclick="showSection('alerts-section', document.querySelectorAll('.nav-item')[4])" style="font-size:12px; color:#6C63FF; text-decoration:none;">View All</a>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+                        <c:forEach var="alert" items="${systemAlerts}">
+                            <div style="background:rgba(239,68,68,0.05); border-left:3px solid #ef4444; padding:10px; border-radius:4px;">
+                                <div style="font-size:13px; font-weight:600; color:#ef4444;">${alert.type}</div>
+                                <div style="font-size:12px; color:#94a3b8;">${alert.message}</div>
+                                <div style="font-size:10px; color:#64748b; margin-top:4px;">${alert.time}</div>
+                            </div>
+                        </c:forEach>
+                    </div>
                 </div>
-                <p style="color:#94a3b8; font-size:14px; line-height:1.6;">
-                    Hello <strong>${user.fullName}</strong>, the system is currently running smoothly. 
-                    You have <strong>${pendingAppointments}</strong> appointments awaiting action and 
-                    <strong>${pendingLabRequests}</strong> lab requests in progress. 
-                    Use the sidebar to navigate to specific management modules.
-                </p>
+
+                <!-- Low Stock Alert -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>&#x1F4E6; Low Stocks</h3>
+                        <span class="badge badge-cancelled" style="font-size:10px;">Attention</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+                        <c:forEach var="stock" items="${lowStocks}">
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:rgba(255,255,255,0.02); border-radius:8px;">
+                                <div>
+                                    <div style="font-size:13px; font-weight:600;">${stock.item}</div>
+                                    <div style="font-size:11px; color:#94a3b8;">Left: ${stock.count}</div>
+                                </div>
+                                <span class="badge" style="background:${stock.status == 'Critical' ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.1)'}; color:${stock.status == 'Critical' ? '#ef4444' : '#f59e0b'}; border:none; font-size:10px;">${stock.status}</span>
+                            </div>
+                        </c:forEach>
+                    </div>
+                </div>
+
+                <!-- Pending Bills -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>&#x1F4B5; Pending Bills</h3>
+                        <span class="badge badge-pending" style="font-size:10px;">Action</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+                        <c:forEach var="bill" items="${pendingBills}">
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:rgba(255,255,255,0.02); border-radius:8px;">
+                                <div>
+                                    <div style="font-size:13px; font-weight:600;">${bill.patient}</div>
+                                    <div style="font-size:11px; color:#ef4444;">Due: ${bill.due}</div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div style="font-weight:700; color:#34d399; font-size:13px;">${bill.amount}</div>
+                                    <div style="font-size:9px; color:#64748b;">Pending</div>
+                                </div>
+                            </div>
+                        </c:forEach>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -401,6 +452,18 @@
                         No appointments scheduled for today
                     </div>
                 </c:if>
+                
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.05); margin:15px 0;">
+                
+                <c:forEach var="alert" items="${systemAlerts}">
+                    <div class="alert-item ${alert.type == 'Critical' ? 'danger' : 'warning'}">
+                        <span class="alert-icon">${alert.type == 'Critical' ? '&#x1F6A8;' : '&#x26A0;'}</span>
+                        <div>
+                            <div>${alert.message}</div>
+                            <div style="font-size:10px; opacity:0.6;">${alert.time}</div>
+                        </div>
+                    </div>
+                </c:forEach>
             </div>
         </div>
 
@@ -697,6 +760,140 @@
                         </c:forEach>
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        </div>
+
+        <!-- Analytics Section -->
+        <div id="analytics-section" class="content-section">
+            <div class="section-title">
+                <span class="title-icon">&#x1F4C8;</span> Performance & Reports
+            </div>
+            
+            <div class="cards-row">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>&#x1F4C8; Analytics Overview</h3>
+                    </div>
+                    <div class="mini-stats" style="margin-bottom:16px;">
+                        <div class="mini-stat">
+                            <h4>${totalVisits}</h4>
+                            <p>Total Visits</p>
+                        </div>
+                        <div class="mini-stat">
+                            <h4>${totalAppointments}</h4>
+                            <p>All Appointments</p>
+                        </div>
+                        <div class="mini-stat">
+                            <h4>${pendingLabRequests}</h4>
+                            <p>Lab Requests</p>
+                        </div>
+                    </div>
+                    <div style="padding:16px; border-radius:12px; background:rgba(108,99,255,0.06); border:1px solid rgba(108,99,255,0.1); margin-bottom:12px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-size:12px; color:#64748b; margin-bottom:4px;">Patient Growth</div>
+                                <div style="font-size:22px; font-weight:800; color:#a78bfa;">${totalPatients} patients</div>
+                            </div>
+                            <div style="font-size:28px;">&#x1F4C8;</div>
+                        </div>
+                    </div>
+                    <div style="padding:16px; border-radius:12px; background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.1);">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-size:12px; color:#64748b; margin-bottom:4px;">Revenue Trend</div>
+                                <div style="font-size:22px; font-weight:800; color:#34d399;">${completedAppointments} completed</div>
+                            </div>
+                            <div style="font-size:28px;">&#x1F4B0;</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>&#x1F9A0; Disease Patterns</h3>
+                    </div>
+                    <div class="data-list">
+                        <div style="margin-bottom:12px;">
+                            <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;">
+                                <span>Viral Fever</span>
+                                <span style="color:#a78bfa;">42%</span>
+                            </div>
+                            <div style="height:6px; background:rgba(255,255,255,0.05); border-radius:10px; overflow:hidden;">
+                                <div style="width:42%; height:100%; background:#6C63FF;"></div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom:12px;">
+                            <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;">
+                                <span>Hypertension</span>
+                                <span style="color:#a78bfa;">28%</span>
+                            </div>
+                            <div style="height:6px; background:rgba(255,255,255,0.05); border-radius:10px; overflow:hidden;">
+                                <div style="width:28%; height:100%; background:#8E2DE2;"></div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom:12px;">
+                            <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;">
+                                <span>Diabetes Type II</span>
+                                <span style="color:#a78bfa;">15%</span>
+                            </div>
+                            <div style="height:6px; background:rgba(255,255,255,0.05); border-radius:10px; overflow:hidden;">
+                                <div style="width:15%; height:100%; background:#a78bfa;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Health Section -->
+        <div id="health-section" class="content-section">
+            <div class="section-title">
+                <span class="title-icon">&#x1F6E1;</span> System Health & Inventory
+            </div>
+            
+            <div class="cards-row">
+                <div class="card">
+                    <div class="card-header"><h3>&#x1F4E6; Detailed Inventory Status</h3></div>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Item Name</th><th>Category</th><th>Current Stock</th><th>Status</th></tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach var="stock" items="${lowStocks}">
+                                <tr>
+                                    <td>${stock.item}</td>
+                                    <td>Pharmacy</td>
+                                    <td style="color:#ef4444; font-weight:600;">${stock.count}</td>
+                                    <td><span class="badge ${stock.status == 'Critical' ? 'badge-cancelled' : 'badge-pending'}">${stock.status}</span></td>
+                                </tr>
+                            </c:forEach>
+                            <tr><td>Antibiotics Pack</td><td>Pharmacy</td><td>120 units</td><td><span class="badge badge-completed">Stable</span></td></tr>
+                            <tr><td>Bandages (L)</td><td>Medical</td><td>340 units</td><td><span class="badge badge-completed">Stable</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h3>&#x1F4B5; Recent Pending Bills</h3></div>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Patient</th><th>Invoice Date</th><th>Amount</th><th>Status</th></tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach var="bill" items="${pendingBills}">
+                                <tr>
+                                    <td>${bill.patient}</td>
+                                    <td>Today</td>
+                                    <td style="color:#34d399; font-weight:700;">${bill.amount}</td>
+                                    <td><span class="badge badge-pending">Unpaid</span></td>
+                                </tr>
+                            </c:forEach>
+                            <tr><td>John Smith</td><td>Yesterday</td><td style="color:#34d399; font-weight:700;">$45.00</td><td><span class="badge badge-pending">Unpaid</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </main>

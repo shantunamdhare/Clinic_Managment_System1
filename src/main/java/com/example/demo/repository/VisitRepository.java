@@ -11,5 +11,6 @@ import java.util.List;
 @Repository
 public interface VisitRepository extends JpaRepository<Visit, Long> {
     List<Visit> findByPatient(Patient patient);
+    List<Visit> findByPatientOrderByVisitDateDesc(Patient patient);
     List<Visit> findByDoctorOrderByVisitDateDesc(User doctor);
 }

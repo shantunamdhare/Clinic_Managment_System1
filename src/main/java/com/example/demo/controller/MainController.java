@@ -6,6 +6,7 @@ import com.example.demo.model.Patient;
 import com.example.demo.model.User;
 import com.example.demo.model.Appointment;
 import com.example.demo.model.Availability;
+import com.example.demo.model.Invoice;
 import com.example.demo.repository.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -47,6 +52,15 @@ public class MainController {
     private VisitRepository visitRepository;
 
     @Autowired
+    private PrescriptionRepository prescriptionRepository;
+
+    @Autowired
+    private LabReportRepository labReportRepository;
+
+    @Autowired
+    private InvoiceRepository invoiceRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @GetMapping("/")
@@ -71,6 +85,11 @@ public class MainController {
             @RequestParam(required = false) String licenseId,
             @RequestParam(required = false) String deliveryPhone,
             @RequestParam(required = false) String vehicleType,
+            @RequestParam(required = false) String adminId,
+            @RequestParam(required = false) String clinicName,
+            @RequestParam(required = false) Integer age,
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false) String address,
             RedirectAttributes redirectAttributes) {
 
         if (!password.equals(confirmPassword)) {
@@ -102,6 +121,17 @@ public class MainController {
         } else if ("Delivery".equalsIgnoreCase(role)) {
             user.setPhone(deliveryPhone);
             user.setVehicleType(vehicleType);
+        } else if ("Patient".equalsIgnoreCase(role)) {
+            user.setPhone(phone);
+            // Also save to Patient entity for clinical records
+            Patient p = new Patient();
+            p.setName(fullName);
+            p.setAge(age);
+            p.setGender(gender);
+            p.setContactNumber(phone);
+            p.setPatientId("PID-" + (1000 + patientRepository.count()));
+            p.setDateOfBirth(LocalDate.now().minusYears(age != null ? age : 0));
+            patientRepository.save(p);
         }
 
         userRepository.save(user);
@@ -208,9 +238,47 @@ public class MainController {
         long totalVisits = visitRepository.count();
         model.addAttribute("totalVisits", totalVisits);
 
-        // Lab request stats
-        long pendingLabRequests = labRequestRepository.count();
-        model.addAttribute("pendingLabRequests", pendingLabRequests);
+        // System Alerts (Mocked for UI)
+        List<Map<String, String>> alerts = new ArrayList<>();
+        Map<String, String> a1 = new HashMap<>();
+        a1.put("type", "Critical");
+        a1.put("message", "Oxygen Cylinder stock below 10%");
+        a1.put("time", "10 mins ago");
+        alerts.add(a1);
+        Map<String, String> a2 = new HashMap<>();
+        a2.put("type", "Warning");
+        a2.put("message", "Dr. Emily Chen requested leave for tomorrow");
+        a2.put("time", "1 hour ago");
+        alerts.add(a2);
+        model.addAttribute("systemAlerts", alerts);
+
+        // Low Stocks (Mocked for UI)
+        List<Map<String, String>> lowStocks = new ArrayList<>();
+        Map<String, String> s1 = new HashMap<>();
+        s1.put("item", "Paracetamol 500mg");
+        s1.put("count", "45 tabs");
+        s1.put("status", "Reorder");
+        lowStocks.add(s1);
+        Map<String, String> s2 = new HashMap<>();
+        s2.put("item", "Surgical Gloves (M)");
+        s2.put("count", "12 pairs");
+        s2.put("status", "Critical");
+        lowStocks.add(s2);
+        model.addAttribute("lowStocks", lowStocks);
+
+        // Pending Bills (Mocked for UI)
+        List<Map<String, String>> pendingBills = new ArrayList<>();
+        Map<String, String> b1 = new HashMap<>();
+        b1.put("patient", "Emily Johnson");
+        b1.put("amount", "$120.00");
+        b1.put("due", "2 days ago");
+        pendingBills.add(b1);
+        Map<String, String> b2 = new HashMap<>();
+        b2.put("patient", "Robert Wilson");
+        b2.put("amount", "$85.50");
+        b2.put("due", "Today");
+        pendingBills.add(b2);
+        model.addAttribute("pendingBills", pendingBills);
 
         return "admin-dashboard";
     }
@@ -230,7 +298,90 @@ public class MainController {
         User user = (User) session.getAttribute("user");
         if (user == null || !"Patient".equalsIgnoreCase(user.getRole())) return "redirect:/";
         model.addAttribute("user", user);
+
+        // Find the Patient record for this user
+        List<Patient> patients = patientRepository.findAll();
+        Patient patient = patients.stream()
+                .filter(p -> p.getName() != null && p.getName().equalsIgnoreCase(user.getFullName()))
+                .findFirst()
+                .orElse(null);
+
+        if (patient == null) {
+            // Mock empty or create one
+            patient = new Patient();
+            patient.setName(user.getFullName());
+            patient.setContactNumber(user.getPhone() != null ? user.getPhone() : "N/A");
+            patient.setPatientId("PID-" + (1000 + patientRepository.count()));
+            patient.setDateOfBirth(LocalDate.now().minusYears(30));
+            patient.setGender("Other");
+            patient = patientRepository.save(patient);
+        }
+        model.addAttribute("patientDetails", patient);
+
+        // Real Data from Repositories
+        model.addAttribute("visitTimeline", visitRepository.findByPatientOrderByVisitDateDesc(patient));
+        model.addAttribute("prescriptions", prescriptionRepository.findByVisit_Patient(patient));
+        model.addAttribute("labReports", labReportRepository.findByRequest_Patient(patient));
+        model.addAttribute("paymentHistory", invoiceRepository.findByPatient(patient));
+        model.addAttribute("appointmentHistory", appointmentRepository.findByPatientOrderByAppointmentDateDesc(patient));
+
+        // Fetch actual doctors for booking
+        model.addAttribute("doctors", userRepository.findByRole("Doctor"));
+
         return "patient-dashboard";
+    }
+
+    @PostMapping("/patient/book-appointment")
+    public String bookAppointment(
+            @RequestParam Long doctorId,
+            @RequestParam String date,
+            @RequestParam String time,
+            @RequestParam(required = false) String purpose,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        
+        User user = (User) session.getAttribute("user");
+        if (user == null || !"Patient".equalsIgnoreCase(user.getRole())) return "redirect:/";
+
+        try {
+            Optional<User> optionalDoctor = userRepository.findById(doctorId);
+            if (optionalDoctor.isPresent()) {
+                // Find the Patient record for this user
+                List<Patient> patients = patientRepository.findAll();
+                Patient patient = patients.stream()
+                        .filter(p -> p.getName() != null && p.getName().equalsIgnoreCase(user.getFullName()))
+                        .findFirst()
+                        .orElse(null);
+
+                if (patient == null) {
+                    patient = new Patient();
+                    patient.setName(user.getFullName());
+                    patient.setContactNumber(user.getPhone() != null ? user.getPhone() : "N/A");
+                    patient.setPatientId("PID-" + (1000 + patientRepository.count()));
+                    patient.setDateOfBirth(LocalDate.now().minusYears(30));
+                    patient.setGender("Other");
+                    patient = patientRepository.save(patient);
+                }
+
+                Appointment appt = new Appointment();
+                appt.setDoctor(optionalDoctor.get());
+                appt.setPatient(patient);
+                appt.setAppointmentDate(LocalDate.parse(date));
+                appt.setAppointmentTime(LocalTime.parse(time));
+                appt.setPurpose(purpose);
+                appt.setStatus("Pending");
+                appointmentRepository.save(appt);
+                
+                redirectAttributes.addFlashAttribute("successMessage", "Appointment booked successfully for " + date + " at " + time);
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "Selected doctor not found.");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error booking appointment: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return "redirect:/patient-dashboard";
     }
 
     @GetMapping("/lab-dashboard")
