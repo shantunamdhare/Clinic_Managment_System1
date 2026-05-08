@@ -60,8 +60,7 @@ public class DataInitializer {
                 userRepository.save(labUser);
                 System.out.println(">> Created Default Lab User: shyam@gmail.com / 1234");
             }
-
-            // Clear old dummy data only if specifically requested or if database is empty
+       // Clear old dummy data only if specifically requested or if database is empty
             // notificationRepo.deleteAll();
             // attendanceRepo.deleteAll();
             // shiftRepo.deleteAll();
@@ -73,6 +72,18 @@ public class DataInitializer {
             // visitRepository.deleteAll();
             // appointmentRepository.deleteAll();
             // patientRepository.deleteAll();
+
+            // Clear old dummy data from the persistent database (Selective)
+            attendanceRepo.deleteAll();
+            shiftRepo.deleteAll();
+            labReportRepository.deleteAll();
+            labRequestRepository.deleteAll();
+            prescriptionRepository.deleteAll();
+            visitRepository.deleteAll();
+            appointmentRepository.deleteAll();
+            invoiceRepo.deleteAll();
+            patientRepository.deleteAll();
+
 
             // 2. Initialize Lab Tests
             if (labTestRepo.count() == 0) {
