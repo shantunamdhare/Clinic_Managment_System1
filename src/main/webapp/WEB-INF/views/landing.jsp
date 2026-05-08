@@ -8,10 +8,206 @@
     <meta name="description" content="MediCare+ Clinic Management System - Manage appointments, patients, labs, pharmacy, billing, staff and more from a single platform.">
     <title>MediCare+ | Clinic Management System</title>
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .login-toggle-input:checked ~ .hero .hero-right {
+            display: block !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 99999 !important;
+            background: rgba(15, 23, 42, 0.8) !important;
+            backdrop-filter: blur(8px) !important;
+            padding: 80px 20px !important; /* Space for top navigation and scrolling */
+            margin: 0 !important;
+            overflow-y: auto !important;
+            scrollbar-width: thin;
+            scrollbar-color: #6C63FF rgba(255,255,255,0.1);
+        }
+        .hero,
+        .hero-section {
+            min-height: 720px !important;
+            width: 100% !important;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            transition: background-image 2.0s ease-in-out !important;
+            background-attachment: scroll !important;
+            background-color: transparent !important;
+        }
+        .hero-right .login-card {
+            background: #ffffff !important;
+            border-radius: 24px !important;
+            padding: 32px !important;
+            max-width: 440px !important;
+            width: 100% !important;
+            max-height: none !important;
+            overflow: visible !important;
+            position: relative !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1) !important;
+            border: 1px solid rgba(0, 0, 0, 0.05) !important;
+            margin: 0 auto !important; /* Center horizontally */
+        }
+        /* Hide scrollbar for cleaner look if desired, or keep it on the body/overlay */
+        .login-toggle-input:checked ~ .hero .hero-right::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+        .login-toggle-input:checked ~ .hero .hero-right {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .login-card h3 {
+            color: #111827 !important;
+            font-size: 24px !important; /* Slightly smaller */
+            font-weight: 800 !important;
+            margin-bottom: 8px !important;
+        }
+        .login-card .subtitle {
+            color: #6b7280 !important;
+            font-size: 14px !important; /* Slightly smaller */
+            margin-bottom: 24px !important;
+        }
+        .tab-header {
+            display: flex !important;
+            gap: 20px !important;
+            margin-bottom: 24px !important;
+            border-bottom: 2px solid #f3f4f6 !important;
+            padding-bottom: 0 !important;
+        }
+        .tab-btn {
+            padding: 10px 0 !important;
+            font-size: 15px !important;
+            font-weight: 700 !important;
+            color: #9ca3af !important;
+            border-bottom: 2px solid transparent !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            margin-bottom: -2px !important;
+        }
+        .form-group {
+            margin-bottom: 16px !important; /* More compact */
+        }
+        .form-input {
+            padding: 12px 12px 12px 42px !important; /* More compact */
+        }
+        .btn-login, .btn-register {
+            height: 48px !important; /* More compact */
+            margin-top: 20px !important;
+        }
+        .modal-close {
+            position: absolute !important;
+            top: 20px !important;
+            right: 20px !important;
+            font-size: 22px !important;
+            color: #9ca3af !important;
+            cursor: pointer !important;
+        }
+
+        /* Footer Modals Styling */
+        #privacy-toggle:checked ~ #privacy-modal,
+        #terms-toggle:checked ~ #terms-modal,
+        #support-toggle:checked ~ #support-modal {
+            display: flex !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        .footer-modal-overlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            background: rgba(15, 23, 42, 0.85) !important;
+            backdrop-filter: blur(8px) !important;
+            z-index: 100000 !important;
+            display: none !important;
+            justify-content: center !important;
+            align-items: center !important;
+            padding: 20px !important;
+            transition: all 0.3s ease !important;
+        }
+        .footer-modal-card {
+            background: #ffffff !important;
+            border-radius: 24px !important;
+            padding: 40px !important;
+            max-width: 600px !important;
+            width: 100% !important;
+            max-height: 90vh !important;
+            overflow-y: auto !important;
+            position: relative !important;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+            border-top: 6px solid #7c3aed !important;
+        }
+        .footer-modal-card h2 {
+            font-size: 28px !important;
+            font-weight: 900 !important;
+            color: #0f172a !important;
+            margin-bottom: 15px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+        }
+        .footer-modal-card p {
+            color: #64748b !important;
+            line-height: 1.6 !important;
+            font-size: 15px !important;
+            margin-bottom: 20px !important;
+        }
+        .footer-modal-card ul {
+            list-style: none !important;
+            padding: 0 !important;
+            margin-bottom: 20px !important;
+        }
+        .footer-modal-card ul li {
+            padding: 10px 0 !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+            color: #334155 !important;
+            font-size: 14px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+        }
+        .footer-modal-card ul li::before {
+            content: "✓" !important;
+            color: #7c3aed !important;
+            font-weight: bold !important;
+        }
+        .footer-modal-close {
+            position: absolute !important;
+            top: 25px !important;
+            right: 25px !important;
+            font-size: 24px !important;
+            color: #94a3b8 !important;
+            cursor: pointer !important;
+            transition: color 0.2s !important;
+        }
+        .footer-modal-close:hover {
+            color: #0f172a !important;
+        }
+        .support-info {
+            background: #f8fafc !important;
+            padding: 20px !important;
+            border-radius: 16px !important;
+            margin-top: 20px !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+        .support-info div {
+            margin-bottom: 10px !important;
+            color: #1e293b !important;
+            font-weight: 600 !important;
+            font-size: 14px !important;
+        }
+    </style>
 </head>
 <body>
     <!-- Hidden toggle for Login Card -->
+    <!-- Hidden toggles for Footer Modals -->
     <input type="checkbox" id="login-toggle" class="login-toggle-input" style="display:none">
+    <input type="checkbox" id="privacy-toggle" class="footer-modal-input" style="display:none">
+    <input type="checkbox" id="terms-toggle" class="footer-modal-input" style="display:none">
+    <input type="checkbox" id="support-toggle" class="footer-modal-input" style="display:none">
 
     <!-- ==================== HEADER ==================== -->
     <header class="header" id="header">
@@ -184,15 +380,7 @@
                                         <span class="input-icon">&#x1F382;</span>
                                         <input type="number" name="age" id="patientAge" class="form-input" placeholder="Age">
                                     </div>
-                                    <div class="form-group" style="margin-bottom: 10px;">
-                                        <span class="input-icon">&#x26A7;</span>
-                                        <select name="gender" id="patientGender" class="form-select">
-                                            <option value="" disabled selected>Select Gender</option>
-                                            <option value="Male">Male</option>
-                                            <option value="Female">Female</option>
-                                            <option value="Other">Other</option>
-                                        </select>
-                                    </div>
+
                                     <div class="form-group" style="margin-bottom: 0;">
                                         <span class="input-icon">&#x1F4CD;</span>
                                         <input type="text" name="address" id="patientAddress" class="form-input" placeholder="Full Home Address">
@@ -202,10 +390,6 @@
                                 <!-- Doctor specific fields (hidden by default) -->
                                 <div id="doctorFields" style="display: none; background: rgba(37,99,235,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(37,99,235,0.3);">
                                     <p style="font-size: 0.8rem; color: #2563eb; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Doctor Details</p>
-                                    <div class="form-group" style="margin-bottom: 10px;">
-                                        <span class="input-icon">&#x260E;</span>
-                                        <input type="text" name="phone" id="doctorPhone" class="form-input" placeholder="Phone Number">
-                                    </div>
                                     <div class="form-group" style="margin-bottom: 10px;">
                                         <span class="input-icon">&#x1F3E5;</span>
                                         <input type="text" name="specialization" id="doctorSpecialization" class="form-input" placeholder="Specialization (e.g. Cardiologist)">
@@ -247,21 +431,8 @@
                                  <div id="receptionistFields" style="display: none; background: rgba(37,99,235,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(37,99,235,0.3);">
                                      <p style="font-size: 0.8rem; color: #2563eb; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Receptionist Details</p>
                                      <div class="form-group" style="margin-bottom: 10px;">
-                                         <span class="input-icon">&#x260E;</span>
-                                         <input type="text" name="phone" id="receptionistPhone" class="form-input" placeholder="Phone Number">
-                                     </div>
-                                     <div class="form-group" style="margin-bottom: 10px;">
                                          <span class="input-icon">&#x1F194;</span>
                                          <input type="text" name="govIdNumber" id="receptionistGovId" class="form-input" placeholder="Government ID Number">
-                                     </div>
-                                     <div class="form-group" style="margin-bottom: 10px;">
-                                         <span class="input-icon">&#x26A5;</span>
-                                         <select name="gender" id="receptionistGender" class="form-select">
-                                             <option value="" disabled selected>Select Gender</option>
-                                             <option value="Male">Male</option>
-                                             <option value="Female">Female</option>
-                                             <option value="Other">Other</option>
-                                         </select>
                                      </div>
                                      <div class="form-group" style="margin-bottom: 0;">
                                          <span class="input-icon">&#x1F4CD;</span>
@@ -355,39 +526,63 @@
         <div class="features-grid">
     
           <div class="feature-card">
-            <img src="https://images.pexels.com/photos/7578808/pexels-photo-7578808.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Appointment Management" class="feature-img" />
-            <h3>Appointment Management</h3>
-            <p>Schedule, track and manage patient appointments efficiently.</p>
+            <div class="feature-image-top" style="height: 170px !important; overflow: hidden !important; border-radius: 12px !important; margin-bottom: 20px !important; display: block !important;">
+              <img src="https://images.pexels.com/photos/7089020/pexels-photo-7089020.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&fit=crop" alt="Appointment Management" style="width: 100% !important; height: 170px !important; min-height: 170px !important; max-height: 170px !important; object-fit: cover !important; display: block !important; border-radius: 12px !important;" />
+            </div>
+            <div class="feature-content" style="padding: 0 !important;">
+              <h3>Appointment Management</h3>
+              <p>Schedule, track and manage patient appointments efficiently.</p>
+            </div>
           </div>
     
           <div class="feature-card">
-            <img src="https://images.pexels.com/photos/8413090/pexels-photo-8413090.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Patient Records" class="feature-img" />
-            <h3>Patient Records</h3>
-            <p>Maintain complete patient history, reports and profiles.</p>
+            <div class="feature-image-top" style="height: 170px !important; overflow: hidden !important; border-radius: 12px !important; margin-bottom: 20px !important; display: block !important;">
+              <img src="https://images.pexels.com/photos/4386464/pexels-photo-4386464.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&fit=crop" alt="Patient Records" style="width: 100% !important; height: 170px !important; min-height: 170px !important; max-height: 170px !important; object-fit: cover !important; display: block !important; border-radius: 12px !important;" />
+            </div>
+            <div class="feature-content" style="padding: 0 !important;">
+              <h3>Patient Records</h3>
+              <p>Maintain complete patient history, reports and profiles.</p>
+            </div>
           </div>
     
           <div class="feature-card">
-            <img src="https://images.pexels.com/photos/8442110/pexels-photo-8442110.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Lab Integration" class="feature-img" />
-            <h3>Lab Integration</h3>
-            <p>Manage test requests, results and lab workflows efficiently.</p>
+            <div class="feature-image-top" style="height: 170px !important; overflow: hidden !important; border-radius: 12px !important; margin-bottom: 20px !important; display: block !important;">
+              <img src="https://images.pexels.com/photos/3825539/pexels-photo-3825539.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&fit=crop" alt="Lab Integration" style="width: 100% !important; height: 170px !important; min-height: 170px !important; max-height: 170px !important; object-fit: cover !important; display: block !important; border-radius: 12px !important;" />
+            </div>
+            <div class="feature-content" style="padding: 0 !important;">
+              <h3>Lab Integration</h3>
+              <p>Manage test requests, results and lab workflows efficiently.</p>
+            </div>
           </div>
     
           <div class="feature-card">
-            <img src="https://images.pexels.com/photos/19471016/pexels-photo-19471016.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Pharmacy Management" class="feature-img" />
-            <h3>Pharmacy Management</h3>
-            <p>Handle medicines, prescriptions and stock tracking.</p>
+            <div class="feature-image-top" style="height: 170px !important; overflow: hidden !important; border-radius: 12px !important; margin-bottom: 20px !important; display: block !important;">
+              <img src="https://images.pexels.com/photos/3652103/pexels-photo-3652103.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&fit=crop" alt="Pharmacy Management" style="width: 100% !important; height: 170px !important; min-height: 170px !important; max-height: 170px !important; object-fit: cover !important; display: block !important; border-radius: 12px !important;" />
+            </div>
+            <div class="feature-content" style="padding: 0 !important;">
+              <h3>Pharmacy Management</h3>
+              <p>Handle medicines, prescriptions and stock tracking.</p>
+            </div>
           </div>
     
           <div class="feature-card">
-            <img src="https://images.pexels.com/photos/6129118/pexels-photo-6129118.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Billing & Payments" class="feature-img" />
-            <h3>Billing & Payments</h3>
-            <p>Generate invoices and manage payments securely.</p>
+            <div class="feature-image-top" style="height: 170px !important; overflow: hidden !important; border-radius: 12px !important; margin-bottom: 20px !important; display: block !important;">
+              <img src="https://images.pexels.com/photos/5849581/pexels-photo-5849581.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&fit=crop" alt="Billing & Payments" style="width: 100% !important; height: 170px !important; min-height: 170px !important; max-height: 170px !important; object-fit: cover !important; display: block !important; border-radius: 12px !important;" />
+            </div>
+            <div class="feature-content" style="padding: 0 !important;">
+              <h3>Billing & Payments</h3>
+              <p>Generate invoices and manage payments securely.</p>
+            </div>
           </div>
     
           <div class="feature-card">
-            <img src="https://images.pexels.com/photos/6129502/pexels-photo-6129502.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Staff Management" class="feature-img" />
-            <h3>Staff Management</h3>
-            <p>Manage staff roles, schedules and daily operations.</p>
+            <div class="feature-image-top" style="height: 170px !important; overflow: hidden !important; border-radius: 12px !important; margin-bottom: 20px !important; display: block !important;">
+              <img src="https://images.pexels.com/photos/3184435/pexels-photo-3184435.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&fit=crop" alt="Staff Management" style="width: 100% !important; height: 170px !important; min-height: 170px !important; max-height: 170px !important; object-fit: cover !important; display: block !important; border-radius: 12px !important;" />
+            </div>
+            <div class="feature-content" style="padding: 0 !important;">
+              <h3>Staff Management</h3>
+              <p>Manage staff roles, schedules and daily operations.</p>
+            </div>
           </div>
     
         </div>
@@ -401,87 +596,129 @@
         <span class="section-line"></span>
         <h2>Our Modules</h2>
         <p class="section-subtitle">
-          Powerful tools designed for every role in your clinic
+          All essential modules in one integrated system
         </p>
     
         <div class="modules-grid">
     
           <div class="module-card">
-            <div class="module-image-small">
-              <img src="https://images.pexels.com/photos/4021775/pexels-photo-4021775.jpeg?auto=compress&cs=tinysrgb&w=200" alt="Doctor" />
+            <div class="module-image-top">
+              <img src="https://images.pexels.com/photos/4173251/pexels-photo-4173251.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Doctor Module" />
             </div>
-            <h3> Doctor Module</h3>
-            <p>Manage patient consultations, prescriptions, medical history and appointments efficiently.</p>
-            <ul>
-              <li> View patient records</li>
-              <li> Manage prescriptions</li>
-              <li> Track appointments</li>
-            </ul>
+            <div class="module-content">
+              <div class="module-title-row">
+                <div class="module-icon doctor-icon">👨‍⚕️</div>
+                <h3>Doctor Module</h3>
+              </div>
+              <p>Manage consultations and patient treatments.</p>
+              <ul class="module-features">
+                <li>View Appointments</li>
+                <li>Patient History</li>
+                <li>Prescriptions</li>
+                <li>Consultation Notes</li>
+              </ul>
+              <a href="#" class="explore-module-btn">Explore Module &rarr;</a>
+            </div>
           </div>
     
           <div class="module-card">
-            <div class="module-image-small">
-              <img src="https://images.pexels.com/photos/3844581/pexels-photo-3844581.jpeg?auto=compress&cs=tinysrgb&w=200" alt="Receptionist" />
+            <div class="module-image-top">
+              <img src="https://images.pexels.com/photos/3844581/pexels-photo-3844581.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Medical Receptionist" style="width: 100%; height: 100%; object-fit: cover;" />
             </div>
-            <h3> Receptionist Module</h3>
-            <p>Handle patient registrations, appointment scheduling and front-desk operations.</p>
-            <ul>
-              <li> Register patients</li>
-              <li> Book appointments</li>
-              <li> Manage check-ins</li>
-            </ul>
+            <div class="module-content">
+              <div class="module-title-row">
+                <div class="module-icon reception-icon">📋</div>
+                <h3>Reception Module</h3>
+              </div>
+              <p>Handle registrations and appointments.</p>
+              <ul class="module-features">
+                <li>Patient Check-in</li>
+                <li>Appointment Booking</li>
+                <li>Queue Management</li>
+                <li>Front Desk Operations</li>
+              </ul>
+              <a href="#" class="explore-module-btn">Explore Module &rarr;</a>
+            </div>
           </div>
     
           <div class="module-card">
-            <div class="module-image-small">
-              <img src="https://images.pexels.com/photos/3769151/pexels-photo-3769151.jpeg?auto=compress&cs=tinysrgb&w=200" alt="Patient" />
+            <div class="module-image-top">
+              <img src="https://images.pexels.com/photos/2280571/pexels-photo-2280571.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Lab Module" />
             </div>
-            <h3> Patient Module</h3>
-            <p>Allow patients to access their medical records, reports and appointments.</p>
-            <ul>
-              <li> View reports</li>
-              <li> Book appointments</li>
-              <li> Track history</li>
-            </ul>
+            <div class="module-content">
+              <div class="module-title-row">
+                <div class="module-icon lab-icon">🔬</div>
+                <h3>Lab Module</h3>
+              </div>
+              <p>Manage tests, reports and sample tracking.</p>
+              <ul class="module-features">
+                <li>Test Requests</li>
+                <li>Sample Collection</li>
+                <li>Report Generation</li>
+                <li>Result Tracking</li>
+              </ul>
+              <a href="#" class="explore-module-btn">Explore Module &rarr;</a>
+            </div>
           </div>
     
           <div class="module-card">
-            <div class="module-image-small">
-              <img src="https://images.pexels.com/photos/3735770/pexels-photo-3735770.jpeg?auto=compress&cs=tinysrgb&w=200" alt="Lab" />
+            <div class="module-image-top">
+              <img src="https://images.pexels.com/photos/5910956/pexels-photo-5910956.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Pharmacy Module" />
             </div>
-            <h3> Lab Module</h3>
-            <p>Manage lab tests, sample collection and report generation efficiently.</p>
-            <ul>
-              <li> Test requests</li>
-              <li> Upload reports</li>
-              <li> Track samples</li>
-            </ul>
+            <div class="module-content">
+              <div class="module-title-row">
+                <div class="module-icon pharmacy-icon">💊</div>
+                <h3>Pharmacy Module</h3>
+              </div>
+              <p>Manage medicines, stock and prescriptions.</p>
+              <ul class="module-features">
+                <li>Inventory Tracking</li>
+                <li>Prescription Handling</li>
+                <li>Billing Support</li>
+                <li>Stock Alerts</li>
+              </ul>
+              <a href="#" class="explore-module-btn">Explore Module &rarr;</a>
+            </div>
           </div>
     
           <div class="module-card">
-            <div class="module-image-small">
-              <img src="https://images.pexels.com/photos/3652103/pexels-photo-3652103.jpeg?auto=compress&cs=tinysrgb&w=200" alt="Pharmacy" />
+            <div class="module-image-top">
+              <img src="https://images.pexels.com/photos/4386339/pexels-photo-4386339.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Billing Module" />
             </div>
-            <h3> Pharmacy Module</h3>
-            <p>Manage medicines, prescriptions, stock and sales records.</p>
-            <ul>
-              <li> Inventory tracking</li>
-              <li> Prescription handling</li>
-              <li> Billing support</li>
-            </ul>
+            <div class="module-content">
+              <div class="module-title-row">
+                <div class="module-icon billing-icon">📑</div>
+                <h3>Billing Module</h3>
+              </div>
+              <p>Generate invoices and manage payments.</p>
+              <ul class="module-features">
+                <li>Invoice Generation</li>
+                <li>Payment Tracking</li>
+                <li>Financial Reports</li>
+                <li>Insurance Claims</li>
+              </ul>
+              <a href="#" class="explore-module-btn">Explore Module &rarr;</a>
+            </div>
           </div>
     
           <div class="module-card">
-            <div class="module-image-small">
-              <img src="https://images.pexels.com/photos/3825539/pexels-photo-3825539.jpeg?auto=compress&cs=tinysrgb&w=200" alt="Staff" />
+            <div class="module-image-top">
+              <img src="https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Staff Module" />
             </div>
-            <h3> Staff Module</h3>
-            <p>Manage staff roles, schedules and daily operational tasks.</p>
-            <ul>
-              <li> Staff scheduling</li>
-              <li> Task management</li>
-              <li> Role control</li>
-            </ul>
+            <div class="module-content">
+              <div class="module-title-row">
+                <div class="module-icon staff-icon">👥</div>
+                <h3>Staff Module</h3>
+              </div>
+              <p>Manage staff roles and daily operations.</p>
+              <ul class="module-features">
+                <li>Staff Scheduling</li>
+                <li>Task Management</li>
+                <li>Role Control</li>
+                <li>Attendance Tracking</li>
+              </ul>
+              <a href="#" class="explore-module-btn">Explore Module &rarr;</a>
+            </div>
           </div>
     
         </div>
@@ -506,10 +743,10 @@
         </div>
 
         <div class="about-cards">
-          <div class="about-card"> Doctor Management</div>
-          <div class="about-card"> Patient Records</div>
-          <div class="about-card"> Lab Reports</div>
-          <div class="about-card"> Pharmacy & Billing</div>
+          <div class="about-card">Doctor Management</div>
+          <div class="about-card">Patient Records</div>
+          <div class="about-card">Lab Reports</div>
+          <div class="about-card">Pharmacy & Billing</div>
         </div>
       </div>
     </section>
@@ -604,24 +841,198 @@
       </div>
     </section>
     <footer class="footer" id="footer">
-        <div class="footer-left">
+      <div class="footer-container">
+        <div class="footer-top">
+          <!-- Column 1: Brand Info -->
+          <div class="footer-column brand-info">
+            <div class="footer-logo">
+              <div class="logo-square">M+</div>
+              <span>MediCare+</span>
+            </div>
+            <p>All-in-one Clinic Management System to streamline your clinic operations and improve patient care.</p>
+            <div class="footer-social">
+              <a href="#" class="social-icon fb">f</a>
+              <a href="#" class="social-icon tw">t</a>
+              <a href="#" class="social-icon ln">in</a>
+              <a href="#" class="social-icon ig">ig</a>
+            </div>
+          </div>
+
+          <!-- Column 2: Quick Links -->
+          <div class="footer-column">
+            <h3>Quick Links</h3>
+            <ul>
+              <li><a href="#hero">Home</a></li>
+              <li><a href="#features">Features</a></li>
+              <li><a href="#modules">Modules</a></li>
+              <li><a href="#how-it-works">How It Works</a></li>
+              <li><a href="#about">About Us</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </div>
+
+          <!-- Column 3: Support -->
+          <div class="footer-column">
+            <h3>Support</h3>
+            <ul>
+              <li><a href="javascript:void(0)" onclick="openFooterModal('help-modal')">Help Center</a></li>
+              <li><a href="javascript:void(0)" onclick="openFooterModal('faq-modal')">FAQ</a></li>
+              <li><a href="javascript:void(0)" onclick="openFooterModal('privacy-modal')">Privacy Policy</a></li>
+              <li><a href="javascript:void(0)" onclick="openFooterModal('terms-modal')">Terms & Conditions</a></li>
+              <li><a href="javascript:void(0)" onclick="openFooterModal('support-modal')">Support</a></li>
+            </ul>
+          </div>
+
+          <!-- Column 4: Newsletter -->
+          <div class="footer-column newsletter">
+            <h3>Newsletter</h3>
+            <p>Subscribe to our newsletter to get updates and offers.</p>
+            <div class="newsletter-form">
+              <input type="email" placeholder="Enter your email" />
+              <button type="button">Subscribe</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <div class="footer-copyright">
             &copy; 2024 MediCare+ Clinic Management System. All rights reserved.
+          </div>
+          <div class="footer-policy-links">
+            <a href="javascript:void(0)" onclick="openFooterModal('privacy-modal')">Privacy Policy</a>
+            <span>|</span>
+            <a href="javascript:void(0)" onclick="openFooterModal('terms-modal')">Terms & Conditions</a>
+            <span>|</span>
+            <a href="javascript:void(0)" onclick="openFooterModal('support-modal')">Support</a>
+          </div>
         </div>
-        <ul class="footer-links">
-            <li><a href="#">Privacy Policy</a></li>
-            <li><a href="#">Terms &amp; Conditions</a></li>
-            <li><a href="#">Support</a></li>
-        </ul>
-        <div class="footer-social">
-            <span>Follow Us:</span>
-            <span class="social-icon fb">f</span>
-            <span class="social-icon tw">t</span>
-            <span class="social-icon ln">in</span>
-            <span class="social-icon ig">ig</span>
-        </div>
+      </div>
     </footer>
 
+    <!-- Help Center Modal -->
+    <div class="footer-modal-overlay" id="help-modal">
+        <div class="footer-modal-card">
+            <span class="footer-modal-close" onclick="closeFooterModal('help-modal')">&times;</span>
+            <h2>📖 Help Center</h2>
+            <p>Welcome to the MediCare+ Help Center. Learn how to navigate and use our Clinic Management System effectively.</p>
+            <div class="support-info">
+                <div style="font-size:16px; margin-bottom:15px; color:#7c3aed;">Quick Tutorials:</div>
+                <ul style="border:none;">
+                    <li><strong>Registration:</strong> Click "Get Started" and select your role (Doctor, Patient, etc.) to create an account.</li>
+                    <li><strong>Dashboard:</strong> Once logged in, use the sidebar to access your specific modules.</li>
+                    <li><strong>Appointments:</strong> Patients can book appointments via the "Appointments" tab in their portal.</li>
+                    <li><strong>Lab Reports:</strong> View and download your test results directly from the "Lab" section.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Modal -->
+    <div class="footer-modal-overlay" id="faq-modal">
+        <div class="footer-modal-card">
+            <span class="footer-modal-close" onclick="closeFooterModal('faq-modal')">&times;</span>
+            <h2>❓ Frequently Asked Questions</h2>
+            <p>Common questions about MediCare+ Clinic Management System.</p>
+            <div class="support-info">
+                <div style="margin-bottom:15px;">
+                    <strong style="color:#0f172a;">Q: Is my medical data secure?</strong>
+                    <p style="font-size:14px; margin-top:5px;">A: Yes, we use high-level encryption and secure role-based access to protect all patient and clinic data.</p>
+                </div>
+                <div style="margin-bottom:15px;">
+                    <strong style="color:#0f172a;">Q: How can I reset my password?</strong>
+                    <p style="font-size:14px; margin-top:5px;">A: Contact your clinic administrator or use the "Forgot Password" link on the login screen.</p>
+                </div>
+                <div>
+                    <strong style="color:#0f172a;">Q: Can I access MediCare+ on mobile?</strong>
+                    <p style="font-size:14px; margin-top:5px;">A: Yes, our platform is fully responsive and works on all smartphones and tablets.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div class="footer-modal-overlay" id="privacy-modal">
+        <div class="footer-modal-card">
+            <span class="footer-modal-close" onclick="closeFooterModal('privacy-modal')">&times;</span>
+            <h2>🛡️ Privacy Policy</h2>
+            <p>MediCare+ Clinic Management System values patient privacy and data security. All medical records, appointments, prescriptions, billing details, and lab reports are stored securely within the system.</p>
+            <ul>
+                <li>Patient information is securely managed</li>
+                <li>Only authorized staff can access records</li>
+                <li>Password-protected login system</li>
+                <li>Secure appointment and billing management</li>
+                <li>Lab reports and prescriptions remain confidential</li>
+                <li>System data is maintained for clinic operations only</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Terms & Conditions Modal -->
+    <div class="footer-modal-overlay" id="terms-modal">
+        <div class="footer-modal-card">
+            <span class="footer-modal-close" onclick="closeFooterModal('terms-modal')">&times;</span>
+            <h2>📜 Terms & Conditions</h2>
+            <p>By using the MediCare+ Clinic Management System, users agree to use the platform responsibly for clinic and healthcare management purposes only.</p>
+            <ul>
+                <li>Users must provide valid information</li>
+                <li>Unauthorized access is prohibited</li>
+                <li>Patient data must remain confidential</li>
+                <li>Staff accounts are role-based and secure</li>
+                <li>System misuse may result in account restriction</li>
+                <li>Clinic administrators manage all user access</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Support Modal -->
+    <div class="footer-modal-overlay" id="support-modal">
+        <div class="footer-modal-card">
+            <span class="footer-modal-close" onclick="closeFooterModal('support-modal')">&times;</span>
+            <h2>🎧 Support</h2>
+            <p>Need help with MediCare+ Clinic Management System? Our support section helps users manage technical and operational issues efficiently.</p>
+            
+            <div class="support-info">
+                <div>✉️ Email: support@medicareplus.com</div>
+                <div>📞 Phone: +91 9876543210</div>
+                <div>⏰ Working Hours: Monday – Saturday | 9:00 AM – 6:00 PM</div>
+            </div>
+
+            <h3 style="margin-top:25px; font-size:16px; color:#0f172a; font-weight:800;">Support Features:</h3>
+            <ul>
+                <li>Appointment assistance</li>
+                <li>Login issue support</li>
+                <li>Patient record management help</li>
+                <li>Lab and pharmacy workflow support</li>
+                <li>Billing and payment assistance</li>
+                <li>Technical troubleshooting</li>
+            </ul>
+        </div>
+    </div>
+
     <script>
+        function openFooterModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeFooterModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('footer-modal-overlay')) {
+                event.target.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
         function togglePassword(id) {
             const el = document.getElementById(id);
             if (el.type === 'password') {
@@ -645,7 +1056,6 @@
             var patientAge = document.getElementById("patientAge");
             var patientGender = document.getElementById("patientGender");
             var patientAddress = document.getElementById("patientAddress");
-            var doctorPhone = document.getElementById("doctorPhone");
             var doctorSpec = document.getElementById("doctorSpecialization");
             var doctorExp = document.getElementById("doctorExperience");
             var doctorLic = document.getElementById("doctorLicenseId");
@@ -663,7 +1073,6 @@
             var hospName = document.getElementById("hospitalName");
 
             var receptionistFields = document.getElementById("receptionistFields");
-            var recPhone = document.getElementById("receptionistPhone");
             var recGovId = document.getElementById("receptionistGovId");
             var recGender = document.getElementById("receptionistGender");
             var recAddr = document.getElementById("receptionistAddress");
@@ -685,7 +1094,6 @@
             if(patientAge) patientAge.required = false;
             if(patientGender) patientGender.required = false;
             if(patientAddress) patientAddress.required = false;
-            if(doctorPhone) doctorPhone.required = false;
             if(doctorSpec) doctorSpec.required = false;
             if(doctorExp) doctorExp.required = false;
             if(doctorLic) doctorLic.required = false;
@@ -694,7 +1102,6 @@
             if(labAddrInput) labAddrInput.required = false;
             if(labIdInput) labIdInput.required = false;
 
-            if(recPhone) recPhone.required = false;
             if(recGovId) recGovId.required = false;
             if(recGender) recGender.required = false;
             if(recAddr) recAddr.required = false;
@@ -719,7 +1126,6 @@
                 if(patientAddress) patientAddress.required = true;
             } else if (roleSelect.value === "Doctor") {
                 if(doctorFields) doctorFields.style.display = "block";
-                if(doctorPhone) doctorPhone.required = true;
                 if(doctorSpec) doctorSpec.required = true;
                 if(doctorExp) doctorExp.required = true;
                 if(doctorLic) doctorLic.required = true;
@@ -730,7 +1136,6 @@
                 if(labIdInput) labIdInput.required = true;
             } else if (roleSelect.value === "Receptionist") {
                 if(receptionistFields) receptionistFields.style.display = "block";
-                if(recPhone) recPhone.required = true;
                 if(recGovId) recGovId.required = true;
                 if(recGender) recGender.required = true;
                 if(recAddr) recAddr.required = true;
@@ -752,29 +1157,48 @@
             }
         }
         // Hero Background Slider Logic
-        const heroImages = [
-            "/hero-slider/hero1.jpg",
-            "/hero-slider/hero2.jpg",
-            "/hero-slider/hero3.jpg",
-            "/hero-slider/hero4.jpg",
-            "/hero-slider/hero5.jpg"
-        ];
-        let currentHero = 0;
-        const heroSection = document.getElementById('hero');
+        document.addEventListener("DOMContentLoaded", function () {
+          const heroImages = [
+            "/hero-backdrop/hero1.jpg",
+            "/hero-backdrop/hero2.jpg",
+            "/hero-backdrop/hero3.jpg",
+            "/hero-backdrop/hero4.jpg",
+            "/hero-backdrop/hero5.jpg"
+          ];
 
-        function changeHeroBackground() {
-            currentHero = (currentHero + 1) % heroImages.length;
-            heroSection.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url(${heroImages[currentHero]})`;
-        }
+          let index = 0;
 
-        // Initialize first background
-        heroSection.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url(${heroImages[0]})`;
-        
-        // Start slider
-        setInterval(changeHeroBackground, 10000); // 10 seconds per slide for better UX
+          const heroSection =
+            document.querySelector(".hero") ||
+            document.querySelector(".hero-section") ||
+            document.querySelector("#hero");
 
-        // Initialize role fields
-        window.addEventListener('load', toggleRoleFields);
+          if (!heroSection) {
+            console.error("Hero section not found");
+            return;
+          }
+
+          function changeHeroBackground() {
+            heroSection.style.backgroundImage =
+              "linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url('" +
+              heroImages[index] +
+              "')";
+
+            heroSection.style.backgroundSize = "cover";
+            heroSection.style.backgroundPosition = "center";
+            heroSection.style.backgroundRepeat = "no-repeat";
+
+            index = (index + 1) % heroImages.length;
+          }
+
+          changeHeroBackground();
+          setInterval(changeHeroBackground, 5000);
+          
+          // Also call role toggle
+          if (typeof toggleRoleFields === 'function') toggleRoleFields();
+        });
+
     </script>
+
 </body>
 </html>

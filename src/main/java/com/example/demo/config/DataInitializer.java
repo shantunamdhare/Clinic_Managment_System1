@@ -67,6 +67,7 @@ public class DataInitializer {
             prescriptionRepository.deleteAll();
             visitRepository.deleteAll();
             appointmentRepository.deleteAll();
+            invoiceRepo.deleteAll();
             patientRepository.deleteAll();
 
             // 2. Initialize Lab Tests

@@ -1,0 +1,5 @@
+/* Final Fix for Receptionist Image */
+.modules-grid .module-card:nth-child(2) .module-image-top img { 
+  content: url("https://images.pexels.com/photos/3844581/pexels-photo-3844581.jpeg?auto=compress&cs=tinysrgb&w=800") !important; 
+  object-fit: cover !important;
+}
