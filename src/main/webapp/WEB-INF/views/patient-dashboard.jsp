@@ -16,30 +16,30 @@
 
         /* Sidebar */
         .sidebar {
-            width:280px; background:#ffffff; padding:24px 0; display:flex; 
+            width:280px; background:#0f172a; padding:24px 0; display:flex; 
             flex-direction:column; position:fixed; top:0; left:0; height:100vh; 
-            z-index:100; border-right:1px solid #e2e8f0;
+            z-index:100; border-right:1px solid rgba(255,255,255,0.05);
         }
-        .sidebar-brand { padding:0 24px 28px; border-bottom:1px solid #f1f5f9; }
-        .sidebar-brand h2 { font-size:22px; font-weight:800; color:#4f46e5; }
-        .sidebar-brand span { font-size:11px; color:#64748b; text-transform:uppercase; letter-spacing:1px; }
+        .sidebar-brand { padding:0 24px 28px; border-bottom:1px solid rgba(255,255,255,0.05); }
+        .sidebar-brand h2 { font-size:22px; font-weight:800; color:#fff; }
+        .sidebar-brand span { font-size:11px; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; }
         
         .sidebar-nav { flex:1; padding:20px 12px; display:flex; flex-direction:column; gap:4px; }
         .nav-item {
             display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:12px;
-            color:#64748b; font-size:14px; font-weight:600; cursor:pointer; transition:all .2s;
+            color:#94a3b8; font-size:14px; font-weight:600; cursor:pointer; transition:all .2s;
             text-decoration:none;
         }
-        .nav-item:hover, .nav-item.active { background:#f1f5f9; color:#4f46e5; }
-        .nav-item.active { background:#eff6ff; color:#2563eb; }
+        .nav-item:hover, .nav-item.active { background:rgba(255,255,255,0.05); color:#fff; }
+        .nav-item.active { background:rgba(37,99,235,0.1); color:#fff; }
         .nav-icon { font-size:18px; width:24px; text-align:center; }
 
-        .sidebar-footer { padding:16px 24px; border-top:1px solid #f1f5f9; }
+        .sidebar-footer { padding:16px 24px; border-top:1px solid rgba(255,255,255,0.05); }
         .sidebar-footer a {
-            display:flex; align-items:center; gap:10px; color:#ef4444; font-size:14px;
+            display:flex; align-items:center; gap:10px; color:#f87171; font-size:14px;
             font-weight:700; text-decoration:none; padding:12px 16px; border-radius:12px; transition:all .2s;
         }
-        .sidebar-footer a:hover { background:#fef2f2; }
+        .sidebar-footer a:hover { background:rgba(248,113,113,0.1); }
 
         /* Main Content */
         .main-content { flex:1; margin-left:280px; padding:32px 40px; background:#f8fafc; }
@@ -50,7 +50,7 @@
         }
         .user-profile-summary { display:flex; align-items:center; gap:12px; }
         .user-avatar {
-            width:48px; height:48px; border-radius:14px; background:#4f46e5;
+            width:48px; height:48px; border-radius:14px; background:#0f172a;
             display:flex; align-items:center; justify-content:center; color:#fff;
             font-weight:700; font-size:20px;
         }

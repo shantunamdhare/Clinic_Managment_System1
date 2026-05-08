@@ -140,11 +140,11 @@
         }
 
         .proc-type-label input:checked + div div:first-child {
-            color: #4f46e5;
+            color: #2563eb;
         }
 
         input[type="radio"]:checked + div {
-            border-color: #4f46e5;
+            border-color: #2563eb;
         }
     </style>
 </head>

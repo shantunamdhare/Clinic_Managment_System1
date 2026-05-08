@@ -1,12 +1,12 @@
 :root {
-    --primary: #4f46e5;
-    --primary-hover: #4338ca;
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
     --secondary: #64748b;
     --success: #10b981;
     --warning: #f59e0b;
     --danger: #ef4444;
     --info: #0ea5e9;
-    --bg-main: #f8fafc;
+    --bg-main: #f0f4f8;
     --bg-card: #ffffff;
     --text-main: #1e293b;
     --text-muted: #64748b;
@@ -28,7 +28,7 @@ body {
 /* Sidebar Styling */
 .sidebar {
     width: 260px;
-    background: #1e293b;
+    background: #0f172a;
     color: white;
     display: flex;
     flex-direction: column;
@@ -47,11 +47,11 @@ body {
 }
 
 .sidebar-logo i {
-    color: #818cf8;
+    color: #3b82f6;
 }
 
 .sidebar-logo span span {
-    color: #818cf8;
+    color: #3b82f6;
 }
 
 .sidebar-nav {
@@ -75,8 +75,9 @@ body {
 }
 
 .sidebar-nav a.nav-link.active {
-    background: var(--primary);
+    background: rgba(37, 99, 235, 0.1);
     color: white;
+    border-left: 3px solid var(--primary);
 }
 
 .sidebar-footer {

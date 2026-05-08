@@ -18,9 +18,9 @@
     <link rel="stylesheet" href="/css/dashboard.css">
     <style>
         :root {
-            --staff-primary: #8E2DE2;
-            --staff-secondary: #4A00E0;
-            --staff-gradient: linear-gradient(135deg, #8E2DE2, #4A00E0);
+            --staff-primary: #2563eb;
+            --staff-secondary: #0f172a;
+            --staff-gradient: linear-gradient(135deg, #0f172a, #2563eb);
         }
 
         .staff-bg-gradient {
@@ -314,7 +314,7 @@
                         </c:if>
                     </button>
                     <div class="user-profile" style="cursor: pointer;" onclick="switchTab(event, 'profile')">
-                        <img src="https://ui-avatars.com/api/?name=${user.fullName}&background=8E2DE2&color=fff" alt="User">
+                        <img src="https://ui-avatars.com/api/?name=${user.fullName}&background=0f172a&color=fff" alt="User">
                         <div class="user-info">
                             <span class="user-name">${user.fullName}</span>
                             <span class="user-role">${user.role}</span>

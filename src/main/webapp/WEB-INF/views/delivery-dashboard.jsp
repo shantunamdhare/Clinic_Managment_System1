@@ -13,13 +13,13 @@
     
     <style>
         :root {
-            --primary: #4361ee;
-            --primary-light: #4895ef;
-            --primary-dark: #3f37c9;
-            --secondary: #7209b7;
-            --success: #4cc9f0;
-            --warning: #f72585;
-            --danger: #e63946;
+            --primary: #2563eb;
+            --primary-light: #60a5fa;
+            --primary-dark: #1d4ed8;
+            --secondary: #0f172a;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
             --gray-50: #f8f9fa;
             --gray-100: #f1f3f5;
             --gray-200: #e9ecef;
@@ -61,8 +61,8 @@
         /* SIDEBAR */
         .sidebar {
             width: var(--sidebar-width);
-            background: var(--white);
-            border-right: 1px solid var(--gray-200);
+            background: #0f172a;
+            border-right: 1px solid rgba(255,255,255,0.05);
             padding: 32px 24px;
             display: flex;
             flex-direction: column;
@@ -93,9 +93,7 @@
         .logo-text {
             font-size: 20px;
             font-weight: 800;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #fff;
             letter-spacing: -0.5px;
         }
 
@@ -111,7 +109,7 @@
             gap: 12px;
             padding: 14px 16px;
             text-decoration: none;
-            color: var(--gray-600);
+            color: #94a3b8;
             border-radius: var(--radius-md);
             transition: all 0.3s ease;
             font-weight: 600;
@@ -119,13 +117,13 @@
         }
 
         .nav-item:hover, .nav-item.active {
-            background: var(--gray-50);
-            color: var(--primary);
+            background: rgba(255,255,255,0.05);
+            color: #fff;
         }
 
         .nav-item.active {
-            background: rgba(67, 97, 238, 0.08);
-            color: var(--primary);
+            background: rgba(37, 99, 235, 0.1);
+            color: #fff;
         }
 
         /* MAIN CONTENT */

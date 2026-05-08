@@ -4,18 +4,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
-    --primary: #6C63FF;
-    --primary-light: #8E89FF;
-    --primary-dark: #5046E5;
-    --accent: #8E2DE2;
-    --accent-light: #B066FE;
-    --gradient-1: linear-gradient(135deg, #6C63FF, #8E2DE2);
-    --gradient-2: linear-gradient(135deg, #8E2DE2, #6C63FF);
-    --gradient-3: linear-gradient(135deg, #F5F3FF, #EDE9FE, #E0E7FF);
+    --primary: #2563eb;
+    --primary-light: #60a5fa;
+    --primary-dark: #1d4ed8;
+    --accent: #3b82f6;
+    --accent-light: #93c5fd;
+    --gradient-1: linear-gradient(135deg, #0f172a, #2563eb);
+    --gradient-2: linear-gradient(135deg, #2563eb, #0f172a);
+    --gradient-3: linear-gradient(135deg, #f8fafc, #f1f5f9, #e2e8f0);
     --white: #FFFFFF;
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.4);
-    --purple-main: #7c4dff;
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --purple-main: #2563eb;
     --gray-50: #F9FAFB;
     --gray-100: #F3F4F6;
     --gray-200: #E5E7EB;
