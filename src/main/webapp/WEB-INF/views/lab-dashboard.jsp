@@ -114,6 +114,38 @@
 
         .btn-print-record { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
         .btn-print-record:hover { transform: translateY(-1px); box-shadow: 0 6px 15px rgba(79, 70, 229, 0.4); }
+        .btn-action {
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #dbeafe;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-action:hover {
+            background: #2563eb;
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .proc-type-label:hover {
+            border-color: #4f46e5 !important;
+            background: #f5f3ff !important;
+        }
+
+        .proc-type-label input:checked + div div:first-child {
+            color: #4f46e5;
+        }
+
+        input[type="radio"]:checked + div {
+            border-color: #4f46e5;
+        }
     </style>
 </head>
 <body>
@@ -135,7 +167,7 @@
                     <span class="material-symbols-outlined">experiment</span>
                     Test Requests
                 </a>
-                <a href="#" class="nav-item" onclick="event.preventDefault(); showSection('samples-section', event)">
+                <a href="#" class="nav-item" onclick="event.preventDefault(); showSection('collection-section', event)">
                     <span class="material-symbols-outlined">bloodtype</span>
                     Sample Collection
                 </a>
@@ -143,7 +175,7 @@
                     <span class="material-symbols-outlined">pending_actions</span>
                     Pending Reports
                 </a>
-                <a href="#" class="nav-item" onclick="event.preventDefault(); showSection('inprogress-section', event)">
+                <a href="#" class="nav-item" onclick="event.preventDefault(); showSection('progress-section', event)">
                     <span class="material-symbols-outlined">science</span>
                     In-Progress Tests
                 </a>
@@ -277,14 +309,13 @@
                         </div>
                     </div>
 
-                    <!-- STATS GRID -->
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-icon-wrapper stat-blue">
                                 <span class="material-symbols-outlined">experiment</span>
                             </div>
                             <div class="stat-content">
-                                <h3>${patients.size()}</h3>
+                                <h3>${labRequests.size()}</h3>
                                 <p>Total Test Requests</p>
                             </div>
                         </div>
@@ -294,7 +325,7 @@
                                 <span class="material-symbols-outlined">bloodtype</span>
                             </div>
                             <div class="stat-content">
-                                <h3>0</h3>
+                                <h3>${labRequests.stream().filter(r -> r.status == 'Collected' || r.status == 'In-Transit').count()}</h3>
                                 <p>Samples Collected</p>
                             </div>
                         </div>
@@ -304,7 +335,7 @@
                                 <span class="material-symbols-outlined">hourglass_empty</span>
                             </div>
                             <div class="stat-content">
-                                <h3>0</h3>
+                                <h3>${labRequests.stream().filter(r -> r.status == 'Pending').count()}</h3>
                                 <p>Pending Reports</p>
                             </div>
                         </div>
@@ -314,7 +345,7 @@
                                 <span class="material-symbols-outlined">fact_check</span>
                             </div>
                             <div class="stat-content">
-                                <h3>0</h3>
+                                <h3>${labRequests.stream().filter(r -> r.status == 'Completed').count()}</h3>
                                 <p>Completed Reports</p>
                             </div>
                         </div>
@@ -339,47 +370,37 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <c:forEach var="p" items="${patients}" begin="0" end="2">
-                                    <tr>
-                                        <td>
-                                            <div class="patient-cell">
-                                                <div class="patient-avatar" style="background: var(--primary-light); color: var(--primary);">
-                                                    ${p.name.substring(0,1)}${p.name.contains(' ') ? p.name.split(' ')[1].substring(0,1) : ''}
+                                <c:forEach var="req" items="${labRequests}" begin="0" end="4">
+                                    <c:if test="${req.status == 'Pending'}">
+                                        <tr>
+                                            <td>
+                                                <div class="patient-cell">
+                                                    <div class="patient-avatar" style="background: var(--primary-light); color: var(--primary);">
+                                                        ${req.patient.name.substring(0,1)}
+                                                    </div>
+                                                    <div class="patient-details">
+                                                        <span class="patient-name">${req.patient.name}</span>
+                                                        <span class="patient-id">${req.patient.patientId}</span>
+                                                    </div>
                                                 </div>
-                                                <div class="patient-details">
-                                                    <span class="patient-name">${p.name}</span>
-                                                    <span class="patient-id">${p.patientId}</span>
+                                            </td>
+                                            <td><strong>${req.test.name}</strong><br><small style="color:var(--gray-500)">Standard Protocol</small></td>
+                                            <td>Dr. ${req.doctor.fullName}</td>
+                                            <td><span class="priority-urgent">Normal</span></td>
+                                            <td><span class="status-badge status-pending">${req.status}</span></td>
+                                            <td>
+                                                <div class="actions-cell">
+                                                    <button class="btn-action collect-sample-btn" 
+                                                            style="background: #ef4444; color: white; border: none; font-weight: 900;"
+                                                            data-id="${req.id}" 
+                                                            data-patient="${req.patient.name}" 
+                                                            data-test="${req.test.name}">
+                                                        GO FOR COLLECTION
+                                                    </button>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td><strong>Complete Blood Count (CBC)</strong><br><small style="color:var(--gray-500)">Blood Sample</small></td>
-                                        <td>Dr. Emily Chen</td>
-                                        <td><span class="priority-urgent">Urgent</span></td>
-                                        <td><span class="status-badge status-pending">Pending</span></td>
-                                        <td>
-                                            <div class="actions-cell">
-                                                <button class="btn-icon view-record-btn" title="View Full Record" 
-                                                        data-id="${p.id}" 
-                                                        data-name="${p.name}"
-                                                        data-pid="${p.patientId}"
-                                                        data-gender="${p.gender}"
-                                                        data-dob="${p.dateOfBirth}"
-                                                        data-contact="${p.contactNumber}"
-                                                        data-blood="${p.bloodGroup}"
-                                                        data-last="${p.lastVisit}"
-                                                        data-status="${p.deliveryStatus}"
-                                                        data-executive="${p.deliveryAssignedTo}"
-                                                        data-phone="${p.deliveryBoyPhone}"
-                                                        data-source="${p.sourceHospital}"
-                                                        data-dest="${p.destinationHospital}"
-                                                        data-eta="${p.estimatedTime}"
-                                                        data-loc="${p.currentLocation}">
-                                                    <span class="material-symbols-outlined" style="color: var(--primary); font-size: 22px;">visibility</span>
-                                                </button>
-                                                <button class="btn-action" onclick="alert('Starting sample collection for ${p.name}...')">Collect Sample</button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                            </td>
+                                        </tr>
+                                    </c:if>
                                 </c:forEach>
                                 <c:if test="${empty patients}">
                                     <tr>
@@ -445,11 +466,74 @@
                         <div class="section-header">
                             <h2 class="section-title">Sample Collection Queue</h2>
                         </div>
-                        <div style="padding: 40px; text-align: center; color: var(--gray-500);">
-                            <span class="material-symbols-outlined" style="font-size: 48px; margin-bottom: 16px;">bloodtype</span>
-                            <h3 style="color: var(--gray-800); font-size: 20px; margin-bottom: 8px;">No samples to collect</h3>
-                            <p>Tracking active sample collections...</p>
-                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Request ID</th>
+                                    <th>Patient</th>
+                                    <th>Test Type</th>
+                                    <th>Destination</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="req" items="${labRequests}">
+                                    <c:if test="${req.processingType == 'External' && (req.status == 'Pending' || req.status == 'Collected' || req.status == 'In-Transit')}">
+                                        <tr>
+                                            <td>#REQ-${req.id}</td>
+                                            <td>
+                                                <div class="patient-cell">
+                                                    <div class="patient-details">
+                                                        <span class="patient-name">${req.patient.name}</span>
+                                                        <span class="patient-id">${req.patient.patientId}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><strong>${req.test.name}</strong></td>
+                                            <td>
+                                                <c:choose>
+                                                    <c:when test="${req.status == 'Pending'}">
+                                                        <span class="status-badge" style="background:#f1f5f9; color:#64748b;">Not Set</span>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <span class="status-badge" style="background:${req.processingType == 'In-House' ? '#ecfdf5' : '#fff7ed'}; color:${req.processingType == 'In-House' ? '#059669' : '#c2410c'};">
+                                                            ${req.processingType}
+                                                        </span>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                            <td>
+                                                <span class="status-badge" style="background:${req.status == 'Pending' ? '#fef2f2' : '#e0f2fe'}; color:${req.status == 'Pending' ? '#b91c1c' : '#0369a1'};">
+                                                    ${req.status}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <c:choose>
+                                                    <c:when test="${req.status == 'Pending'}">
+                                                        <button class="btn-action collect-sample-btn" 
+                                                                style="background: #ef4444; color: white; border: none; font-weight: 900;"
+                                                                data-id="${req.id}" 
+                                                                data-patient="${req.patient.name}" 
+                                                                data-test="${req.test.name}">
+                                                            GO FOR COLLECTION
+                                                        </button>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <button class="btn-action" onclick="prepareUpload(${req.id}, '${req.patient.name}', '${req.test.name}')">
+                                                            Process & Upload
+                                                        </button>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                        </tr>
+                                    </c:if>
+                                </c:forEach>
+                                <c:if test="${empty labRequests}">
+                                    <tr><td colspan="6" style="text-align:center; padding:40px; color:var(--gray-500);">No active requests found.</td></tr>
+                                </c:if>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -460,21 +544,33 @@
                             <h2 class="section-title">Upload New Lab Report</h2>
                         </div>
                         <div style="padding: 32px;">
-                            <form id="uploadForm" action="/lab/upload-report" method="POST" style="max-width: 600px; margin: 0 auto;">
-                                <div class="form-group" style="margin-bottom: 24px;">
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--gray-700);">Select Request</label>
-                                    <select name="requestId" id="uploadRequestId" class="form-select" style="padding-left: 14px;" required>
-                                        <option value="" disabled selected>Choose a pending request...</option>
-                                        <c:forEach var="req" items="${labRequests}">
-                                            <c:if test="${req.status == 'Pending'}">
-                                                <option value="${req.id}">${req.patient.name} - ${req.test.name} (#REQ-${req.id})</option>
-                                            </c:if>
-                                        </c:forEach>
-                                    </select>
-                                </div>
+                            <div id="manualUploadSelection" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px; margin-bottom: 24px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--gray-700);">Manually Select Patient Request</label>
+                                <select id="manualRequestSelect" class="form-select" style="width: 100%; border-radius: 10px; background: white; padding: 10px;" onchange="updateUploadTarget(this)">
+                                    <option value="">-- Choose a patient/test --</option>
+                                    <c:forEach var="req" items="${labRequests}">
+                                        <c:if test="${req.status != 'Completed'}">
+                                            <option value="${req.id}" data-name="${req.patient.name}" data-test="${req.test.name}">
+                                                #REQ-${req.id} - ${req.patient.name} (${req.test.name})
+                                            </option>
+                                        </c:if>
+                                    </c:forEach>
+                                </select>
+                            </div>
 
+                            <div id="activeUploadInfo" style="display:none; background: #e0f2fe; border: 1px solid #bae6fd; padding: 16px; border-radius: 12px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+                                <span class="material-symbols-outlined" style="color: #0369a1;">info</span>
+                                <div>
+                                    <div style="font-size: 12px; color: #0369a1; font-weight: 700; text-transform: uppercase;">Currently Processing</div>
+                                    <div id="activePatientTest" style="font-weight: 800; color: #0c4a6e; font-size: 16px;"></div>
+                                </div>
+                            </div>
+
+                            <form id="uploadForm" action="/lab/upload-report" method="POST" enctype="multipart/form-data" style="max-width: 600px; margin: 0 auto;">
+                                <input type="hidden" name="requestId" id="uploadRequestId">
+                                
                                 <div class="form-group" style="margin-bottom: 24px;">
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--gray-700);">Report Summary / Results</label>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--gray-700);">Test Observations</label>
                                     <textarea name="result" class="form-select" style="padding: 12px; height: 120px; resize: none;" placeholder="Enter clinical findings and observations..." required></textarea>
                                 </div>
                                 
@@ -495,31 +591,159 @@
                     </div>
                 </div>
 
-                <!-- PENDING REPORTS SECTION -->
-                <div id="pending-section" class="dashboard-section" style="display: none;">
+                <!-- SAMPLE COLLECTION SECTION -->
+                <div id="collection-section" class="dashboard-section" style="display: none;">
                     <div class="section-card">
                         <div class="section-header">
-                            <h2 class="section-title">Pending Reports Verification</h2>
+                            <h2 class="section-title">
+                                <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px;">colorize</span>
+                                Sample Collection Queue
+                            </h2>
                         </div>
-                        <div style="padding: 40px; text-align: center; color: var(--gray-500);">
-                            <span class="material-symbols-outlined" style="font-size: 48px; margin-bottom: 16px;">pending_actions</span>
-                            <h3 style="color: var(--gray-800); font-size: 20px; margin-bottom: 8px;">No pending reports</h3>
-                            <p>All reports have been verified successfully.</p>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Test Requested</th>
+                                    <th>Processing</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="req" items="${labRequests}">
+                                    <c:if test="${req.status == 'Pending' || req.status == 'Awaiting Pickup'}">
+                                        <tr>
+                                            <td>
+                                                <div class="patient-cell">
+                                                    <div class="patient-details">
+                                                        <span class="patient-name">${req.patient.name}</span>
+                                                        <span class="patient-id">${req.patient.patientId}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><strong>${req.test.name}</strong></td>
+                                            <td><span class="status-badge" style="background:#f1f5f9; color:#475569;">${req.processingType}</span></td>
+                                            <td>
+                                                <span class="status-badge" style="background:${req.status == 'Pending' ? '#fef2f2' : '#fff7ed'}; color:${req.status == 'Pending' ? '#b91c1c' : '#c2410c'};">
+                                                    ${req.status}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button class="btn-action btn-primary" style="background: var(--primary); color: white; border: none;" onclick="prepareCollection(${req.id}, '${req.patient.name}', '${req.test.name}')">
+                                                    <span class="material-symbols-outlined">biotech</span> Process
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </c:if>
+                                </c:forEach>
+                            </tbody>
+                        </table>
+                        
+                        <!-- RECENTLY COLLECTED (Persistence) -->
+                        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #f1f5f9;">
+                            <h3 style="font-size: 14px; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px;">Recently Handled Samples</h3>
+                            <table class="data-table">
+                                <tbody style="opacity: 0.8;">
+                                    <c:forEach var="req" items="${labRequests}">
+                                        <c:if test="${req.status == 'Collected' || req.status == 'In-Transit' || req.status == 'Arrived at Lab' || req.status == 'Delivered (Pending Confirmation)'}">
+                                            <tr style="background: #f8fafc;">
+                                                <td style="font-size: 13px; color: var(--gray-600);">${req.patient.name}</td>
+                                                <td style="font-size: 13px; font-weight: 600;">${req.test.name}</td>
+                                                <td style="font-size: 12px;">${req.processingType}</td>
+                                                <td style="font-size: 12px; color: var(--primary); font-weight: 700;">
+                                                    <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">schedule</span>
+                                                    ${not empty req.collectionDate ? req.collectionDate : 'N/A'}
+                                                </td>
+                                                <td><span class="status-badge" style="background: #ecfdf5; color: #059669; font-size: 10px;">${req.status}</span></td>
+                                            </tr>
+                                        </c:if>
+                                    </c:forEach>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- IN-PROGRESS SECTION -->
-                <div id="inprogress-section" class="dashboard-section" style="display: none;">
+                <!-- IN-PROGRESS TESTS SECTION -->
+                <div id="progress-section" class="dashboard-section" style="display: none;">
                     <div class="section-card">
                         <div class="section-header">
-                            <h2 class="section-title">Tests In-Progress</h2>
+                            <h2 class="section-title">
+                                <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px;">hourglass_empty</span>
+                                In-Progress & Processing
+                            </h2>
                         </div>
-                        <div style="padding: 40px; text-align: center; color: var(--gray-500);">
-                            <span class="material-symbols-outlined" style="font-size: 48px; margin-bottom: 16px;">science</span>
-                            <h3 style="color: var(--gray-800); font-size: 20px; margin-bottom: 8px;">No tests in progress</h3>
-                            <p>Currently active laboratory analysis will appear here.</p>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Test Name</th>
+                                    <th>Processing</th>
+                                    <th>Current Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="req" items="${labRequests}">
+                                    <c:if test="${req.status == 'Collected' || req.status == 'In-Transit' || req.status == 'Arrived at Lab' || req.status == 'Delivered (Pending Confirmation)'}">
+                                        <tr>
+                                            <td>
+                                                <div class="patient-cell">
+                                                    <div class="patient-details">
+                                                        <span class="patient-name">${req.patient.name}</span>
+                                                        <span class="patient-id">${req.patient.patientId}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><strong>${req.test.name}</strong></td>
+                                            <td><span class="status-badge" style="background:#f1f5f9; color:#475569;">${req.processingType}</span></td>
+                                            <td><span class="status-badge status-transit" style="background:#e0f2fe; color:#0369a1;">${req.status}</span></td>
+                                            <td>
+                                                <button class="btn-action" style="background: var(--primary); color: white; border: none;" onclick="prepareUpload(${req.id}, '${req.patient.name}', '${req.test.name}')">
+                                                    <span class="material-symbols-outlined">upload</span> Upload Results
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </c:if>
+                                </c:forEach>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- PENDING REPORTS SECTION (Internal) -->
+                <div id="pending-section" class="dashboard-section" style="display: none;">
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h2 class="section-title">Awaiting Internal Verification</h2>
                         </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Test Name</th>
+                                    <th>Sample Collected</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="req" items="${labRequests}">
+                                    <c:if test="${req.processingType == 'In-House' && (req.status == 'Collected' || req.status == 'In-Transit')}">
+                                        <tr>
+                                            <td>${req.patient.name}</td>
+                                            <td>${req.test.name}</td>
+                                            <td>${req.collectionDate}</td>
+                                            <td><span class="status-badge" style="background:#fef3c7; color:#92400e;">Pending Data</span></td>
+                                            <td>
+                                                <button class="btn-action" onclick="prepareUpload(${req.id}, '${req.patient.name}', '${req.test.name}')">Enter Result</button>
+                                            </td>
+                                        </tr>
+                                    </c:if>
+                                </c:forEach>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -529,11 +753,30 @@
                         <div class="section-header">
                             <h2 class="section-title">Completed Reports History</h2>
                         </div>
-                        <div style="padding: 40px; text-align: center; color: var(--gray-500);">
-                            <span class="material-symbols-outlined" style="font-size: 48px; margin-bottom: 16px;">task_alt</span>
-                            <h3 style="color: var(--gray-800); font-size: 20px; margin-bottom: 8px;">No completed reports yet</h3>
-                            <p>History of all successfully delivered reports.</p>
-                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Request ID</th>
+                                    <th>Patient</th>
+                                    <th>Test Name</th>
+                                    <th>Completion Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="req" items="${labRequests}">
+                                    <c:if test="${req.status == 'Completed'}">
+                                        <tr>
+                                            <td>#REQ-${req.id}</td>
+                                            <td>${req.patient.name}</td>
+                                            <td>${req.test.name}</td>
+                                            <td>${req.collectionDate}</td>
+                                            <td><span class="status-badge status-completed">${req.status}</span></td>
+                                        </tr>
+                                    </c:if>
+                                </c:forEach>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -573,7 +816,7 @@
                                         </td>
                                         <td>
                                             <c:choose>
-                                                <c:when test="${user.labType == 'External'}">
+                                                <c:when test="${not empty patient.deliveryStatus && patient.deliveryStatus != 'Not Required'}">
                                                     <span style="background: #fff0f6; color: #d6336c; font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 800;">EXTERNAL</span>
                                                 </c:when>
                                                 <c:otherwise>
@@ -624,8 +867,8 @@
                                         </td>
                                     </tr>
                                     
-                                    <!-- DELIVERY TRACKING TIMELINE (Only for External Labs) -->
-                                    <c:if test="${user.labType == 'External'}">
+                                    <!-- DELIVERY TRACKING TIMELINE (Only for External Tasks) -->
+                                    <c:if test="${not empty patient.deliveryStatus && patient.deliveryStatus != 'Not Required'}">
                                         <tr>
                                             <td colspan="8" style="padding: 0 24px 24px 24px; border-top: none;">
                                                 <div style="background: var(--gray-50); padding: 16px; border-radius: 12px; border: 1px solid var(--gray-200);">
@@ -685,110 +928,81 @@
                     </div>
                 </div>
 
-                <!-- LOGISTICS & SAMPLES SECTION -->
                 <div id="logistics-section" class="dashboard-section" style="display: none;">
                     <div class="section-card">
                         <div class="section-header">
                             <h2 class="section-title">
                                 <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px;">local_shipping</span>
-                                Advanced Sample Logistics Tracking
+                                External Sample Logistics & Tracking
                             </h2>
                         </div>
-                        <div style="padding: 24px; border-bottom: 1px solid var(--gray-100);">
-                            <p style="color: var(--gray-500); margin: 0; font-size: 14px;">Monitor real-time sample movement, executive details, and hospital-to-hospital routing.</p>
-                        </div>
-                        
                         <table class="data-table">
                             <thead>
                                 <tr>
-                                    <th>Patient & ID</th>
-                                    <th>Routing (Source  Destination)</th>
-                                    <th>Delivery Executive</th>
-                                    <th>Current Location</th>
-                                    <th>Pickup Status</th>
-                                    <th>ETA & Progress</th>
+                                    <th>Patient Details</th>
+                                    <th>Delivery Partner</th>
+                                    <th>Pickup Timing</th>
+                                    <th>Delivery Timing</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <c:forEach var="p" items="${patients}">
-                                    <c:if test="${not empty p.deliveryStatus}">
-                                        <tr style="border-bottom: 1px solid var(--gray-50);">
-                                            <td>
-                                                <div style="font-weight: 700; color: var(--gray-900);">${p.name}</div>
-                                                <div style="font-size: 11px; color: var(--primary); font-weight: 600;">${p.patientId}</div>
-                                            </td>
-                                            <td>
-                                                <div style="display: flex; align-items: center; gap: 12px;">
-                                                    <div style="background: var(--gray-50); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--gray-100);">
-                                                        <div style="font-size: 11px; font-weight: 700; color: var(--gray-700);">${p.sourceHospital}</div>
-                                                        <div style="font-size: 9px; color: var(--gray-400); text-transform: uppercase;">Origin</div>
+                                    <c:forEach var="req" items="${labRequests}">
+                                        <c:if test="${req.processingType == 'External'}">
+                                            <tr>
+                                                <td>
+                                                    <div class="patient-cell">
+                                                        <div class="patient-details">
+                                                            <span class="patient-name">${req.patient.name}</span>
+                                                            <span class="patient-id">${req.patient.patientId}</span>
+                                                        </div>
                                                     </div>
-                                                    <span class="material-symbols-outlined" style="font-size: 18px; color: var(--primary); opacity: 0.5;">arrow_right_alt</span>
-                                                    <div style="background: var(--primary-50); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--primary-100);">
-                                                        <div style="font-size: 11px; font-weight: 700; color: var(--primary-700);">${p.destinationHospital}</div>
-                                                        <div style="font-size: 9px; color: var(--primary-400); text-transform: uppercase;">Destination</div>
+                                                </td>
+                                                <td>
+                                                    <div style="font-weight: 700; color: var(--gray-900);">${not empty req.deliveryPartner.fullName ? req.deliveryPartner.fullName : 'Not Assigned'}</div>
+                                                    <div style="font-size: 11px; color: var(--primary);"><span class="material-symbols-outlined" style="font-size: 10px; vertical-align: middle;">call</span> ${not empty req.deliveryPartner.phone ? req.deliveryPartner.phone : 'N/A'}</div>
+                                                </td>
+                                                <td>
+                                                    <div style="font-size: 13px; font-weight: 700; color: var(--primary);">
+                                                        <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">schedule</span> 
+                                                        ${not empty req.pickupDate ? req.pickupDate : 'Pending...'}
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div style="display: flex; align-items: center; gap: 10px;">
-                                                    <div style="width: 36px; height: 36px; border-radius: 10px; background: var(--gray-100); color: var(--gray-700); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px;">
-                                                        ${p.deliveryAssignedTo.substring(0,1)}
+                                                    <div style="font-size: 11px; color: var(--gray-500);">${(req.status == 'Awaiting Pickup' || req.status == 'Pending') ? 'Awaiting Collector' : 'Collected'}</div>
+                                                </td>
+                                                <td>
+                                                    <div style="font-size: 13px; font-weight: 700; color: var(--success);">
+                                                        <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">check_circle</span> 
+                                                        ${not empty req.deliveryDate ? req.deliveryDate : 'In Progress...'}
                                                     </div>
-                                                    <div>
-                                                        <div style="font-size: 13px; font-weight: 700;">${p.deliveryAssignedTo}</div>
-                                                        <a href="tel:${p.deliveryBoyPhone}" style="font-size: 11px; color: var(--success-700); text-decoration: none; display: flex; align-items: center; gap: 4px; font-weight: 600;">
-                                                            <span class="material-symbols-outlined" style="font-size: 12px;">call</span>
-                                                            ${p.deliveryBoyPhone}
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div style="display: flex; align-items: center; gap: 6px; color: var(--gray-700);">
-                                                    <span class="material-symbols-outlined" style="font-size: 16px; color: var(--primary);">my_location</span>
-                                                    <span style="font-size: 12px; font-weight: 600;">${p.currentLocation}</span>
-                                                </div>
-                                            </td>
+                                                    <div style="font-size: 11px; color: var(--gray-500);">${(req.status == 'Arrived at Lab' || req.status == 'Completed') ? 'Delivered' : 'In Transit'}</div>
+                                                </td>
+                                                <td>
+                                                    <span class="status-badge" style="background:${(req.status == 'Arrived at Lab' || req.status == 'Completed') ? '#ecfdf5' : (req.status == 'Delivered (Pending Confirmation)' ? '#fff7ed' : '#e0f2fe')}; color:${(req.status == 'Arrived at Lab' || req.status == 'Completed') ? '#059669' : (req.status == 'Delivered (Pending Confirmation)' ? '#c2410c' : '#0369a1')};">
+                                                        ${req.status}
+                                                    </span>
+                                                </td>
                                             <td>
                                                 <c:choose>
-                                                    <c:when test="${p.deliveryStatus == 'Pending Pickup'}">
-                                                        <span style="display: inline-flex; align-items: center; gap: 6px; background: #fff9db; color: #f08c00; padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: 800; border: 1px solid #ffe066;">
-                                                            <span style="width: 6px; height: 6px; background: #f08c00; border-radius: 50%; display: block;"></span>
-                                                            PENDING
+                                                    <c:when test="${req.status == 'Arrived at Lab' || req.status == 'Completed'}">
+                                                        <span class="status-badge" style="background: #ecfdf5; color: #059669; font-size: 10px; font-weight: 800;">
+                                                            <span class="material-symbols-outlined" style="font-size: 12px; vertical-align: middle;">verified</span> LOGISTICS DONE
                                                         </span>
                                                     </c:when>
                                                     <c:otherwise>
-                                                        <span style="display: inline-flex; align-items: center; gap: 6px; background: #ebfbee; color: #2f9e44; padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: 800; border: 1px solid #b2f2bb;">
-                                                            <span style="width: 6px; height: 6px; background: #2f9e44; border-radius: 50%; display: block;"></span>
-                                                            PICKED UP
-                                                        </span>
+                                                        <form action="/update-delivery-status" method="POST" style="display: inline;">
+                                                            <input type="hidden" name="id" value="${req.patient.id}">
+                                                            <input type="hidden" name="status" value="Received">
+                                                            <button type="submit" class="btn-action" style="background: var(--success); color: white; border: none; font-size: 11px; padding: 6px 12px; font-weight: 700;">
+                                                                <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">check_circle</span> MARK DELIVERED
+                                                            </button>
+                                                        </form>
                                                     </c:otherwise>
                                                 </c:choose>
-                                            </td>
-                                            <td>
-                                                <div style="display: flex; flex-direction: column; gap: 6px;">
-                                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                                        <span style="font-size: 10px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">${p.deliveryStatus}</span>
-                                                        <span style="font-size: 10px; font-weight: 600; color: var(--gray-500);">ETA: ${p.estimatedTime}</span>
-                                                    </div>
-                                                    <div style="width: 140px; height: 6px; background: var(--gray-100); border-radius: 3px; overflow: hidden; border: 1px solid var(--gray-200);">
-                                                        <div style="width: ${p.deliveryStatus == 'Received' ? '100%' : (p.deliveryStatus == 'Delivered to Partner Lab' ? '75%' : (p.deliveryStatus == 'In Transit' ? '50%' : '20%'))}; height: 100%; background: linear-gradient(90deg, var(--primary), #748ffc); transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);"></div>
-                                                    </div>
-                                                </div>
                                             </td>
                                         </tr>
                                     </c:if>
                                 </c:forEach>
-                                <c:if test="${empty patients}">
-                                    <tr>
-                                        <td colspan="6" style="text-align: center; padding: 60px; color: var(--gray-400);">
-                                            <span class="material-symbols-outlined" style="font-size: 48px; display: block; margin-bottom: 12px;">inventory_2</span>
-                                            <h3 style="color: var(--gray-800); font-size: 18px; margin-bottom: 8px;">No active logistics records</h3>
-                                            <p style="font-size: 14px;">Track sample movement and routing here.</p>
-                                        </td>
-                                    </tr>
-                                </c:if>
                             </tbody>
                         </table>
                     </div>
@@ -803,14 +1017,18 @@
                                 <form id="presentForm" action="/mark-attendance" method="POST">
                                     <input type="hidden" name="date" id="attDate">
                                     <input type="hidden" name="time" id="attTime">
-                                    <button type="button" class="btn-primary" style="background: var(--success); border: none;" onclick="submitAttendance('Present')">
-                                        <span class="material-symbols-outlined">how_to_reg</span> Mark Present
+                                    <button type="button" class="btn-primary" style="background: ${todayAttendanceExists ? 'var(--gray-300)' : 'var(--success)'}; border: none; cursor: ${todayAttendanceExists ? 'not-allowed' : 'pointer'};" 
+                                            onclick="${todayAttendanceExists ? '' : 'submitAttendance(\'Present\')'}"
+                                            ${todayAttendanceExists ? 'disabled' : ''}>
+                                        <span class="material-symbols-outlined">how_to_reg</span> ${todayAttendanceExists ? 'Attendance Marked' : 'Mark Present'}
                                     </button>
                                 </form>
                                 <form id="leaveForm" action="/mark-attendance" method="POST">
                                     <input type="hidden" name="date" id="leaveDate">
                                     <input type="hidden" name="time" id="leaveTime">
-                                    <button type="button" class="btn-secondary" onclick="submitAttendance('Leave')">Mark Leave</button>
+                                    <button type="button" class="btn-secondary" style="background: ${todayAttendanceExists ? 'var(--gray-100)' : ''}; cursor: ${todayAttendanceExists ? 'not-allowed' : 'pointer'};"
+                                            onclick="${todayAttendanceExists ? '' : 'submitAttendance(\'Leave\')'}"
+                                            ${todayAttendanceExists ? 'disabled' : ''}>Mark Leave</button>
                                 </form>
                             </div>
                         </div>
@@ -1184,14 +1402,30 @@
                         </div>
                     </div>
                     
-                    <div style="padding: 16px; background: var(--gray-50); border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--gray-200);">
-                        <label style="display:block; margin-bottom: 8px; font-weight:600; color: var(--gray-700);">Prescribed Test</label>
-                        <select name="testType" class="form-select" style="padding-left:16px; border-radius: 10px; background: white;">
-                            <option>Complete Blood Count (CBC)</option>
-                            <option>Lipid Profile</option>
-                            <option>Thyroid Function Test</option>
-                            <option>Blood Sugar (Fasting)</option>
-                        </select>
+                    <div style="padding: 16px; background: var(--gray-50); border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--gray-200); display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px;">
+                        <div>
+                            <label style="display:block; margin-bottom: 8px; font-weight:600; color: var(--gray-700);">Prescribed Test</label>
+                            <select name="testType" class="form-select" style="padding-left:16px; border-radius: 10px; background: white;">
+                                <c:forEach var="t" items="${allTests}">
+                                    <option>${t.name}</option>
+                                </c:forEach>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom: 8px; font-weight:600; color: var(--gray-700);">Requesting Doctor</label>
+                            <select name="doctorId" class="form-select" style="padding-left:16px; border-radius: 10px; background: white;">
+                                <c:forEach var="doc" items="${doctors}">
+                                    <option value="${doc.id}">${doc.fullName}</option>
+                                </c:forEach>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom: 8px; font-weight:600; color: var(--gray-700);">Processing</label>
+                            <select name="processingType" class="form-select" style="padding-left:16px; border-radius: 10px; background: white;">
+                                <option value="In-House">In-House</option>
+                                <option value="External">External</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div style="display: flex; gap: 12px; justify-content: flex-end;">
@@ -1215,12 +1449,93 @@
         </div>
     </div>
 
+    <!-- SAMPLE COLLECTION MODAL -->
+    <div id="collectionModal" class="modal" style="display:none; position:fixed; z-index:3000; left:0; top:0; width:100%; height:100%; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); align-items: center; justify-content: center;">
+        <div class="section-card" style="width: 100%; max-width: 550px; border-radius: 24px; overflow: hidden; animation: slideUp 0.4s ease;">
+            <div class="section-header" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; padding: 24px;">
+                <h2 style="font-size: 22px; font-weight: 800; display: flex; align-items: center; gap: 12px; margin: 0;">
+                    <span class="material-symbols-outlined" style="font-size: 28px;">biotech</span>
+                    Sample Collection & Logistics
+                </h2>
+            </div>
+            <div style="padding: 32px;">
+                <form action="/lab/collect-sample" method="POST">
+                    <input type="hidden" id="collRequestId" name="requestId">
+                    
+                    <div style="background: #f8fafc; padding: 16px; border-radius: 12px; margin-bottom: 24px; border: 1px solid #e2e8f0;">
+                        <div style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Patient & Test</div>
+                        <div id="collPatientInfo" style="font-weight: 700; color: #1e293b; font-size: 15px;"></div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label style="display:block; margin-bottom: 8px; font-weight:700; color: #334155;">Sample Type</label>
+                        <select name="sampleType" class="form-select" style="padding-left:16px; border-radius: 12px; height: 45px;" required>
+                            <option value="Blood">Blood Sample</option>
+                            <option value="Urine">Urine Sample</option>
+                            <option value="Swab">Swab / Tissue</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label style="display:block; margin-bottom: 8px; font-weight:700; color: #334155;">Processing Destination</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <label style="cursor: pointer; border: 2px solid #e2e8f0; border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 10px; transition: all 0.2s;" class="proc-type-label">
+                                <input type="radio" name="processingType" value="In-House" checked onclick="toggleLogistics(false)" style="accent-color: #4f46e5;">
+                                <div>
+                                    <div style="font-weight: 800; font-size: 14px;">In-House</div>
+                                    <div style="font-size: 11px; color: #64748b;">Process in central lab</div>
+                                </div>
+                            </label>
+                            <label style="cursor: pointer; border: 2px solid #e2e8f0; border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 10px; transition: all 0.2s;" class="proc-type-label">
+                                <input type="radio" name="processingType" value="External" onclick="toggleLogistics(true)" style="accent-color: #4f46e5;">
+                                <div>
+                                    <div style="font-weight: 800; font-size: 14px;">External</div>
+                                    <div style="font-size: 11px; color: #64748b;">Send to partner lab</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="logisticsFields" style="display: none; background: #fffbeb; border: 1px solid #fef3c7; padding: 20px; border-radius: 16px; margin-bottom: 24px; animation: fadeIn 0.3s ease;">
+                        <h4 style="margin: 0 0 12px 0; color: #92400e; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                            <span class="material-symbols-outlined" style="font-size: 20px;">local_shipping</span>
+                            Assign Delivery Partner
+                        </h4>
+                        <select name="deliveryPartnerId" class="form-select" style="background: white; border-radius: 10px;">
+                            <option value="">Select Delivery Boy...</option>
+                            <c:forEach var="dp" items="${deliveryPartners}">
+                                <option value="${dp.id}">${dp.fullName} (${dp.vehicleType})</option>
+                            </c:forEach>
+                        </select>
+                        <p style="font-size: 11px; color: #b45309; margin: 8px 0 0 0; line-height: 1.4;">Partner will be notified immediately to collect the sample from the lab desk.</p>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                        <button type="button" class="btn-secondary" onclick="closeCollectionModal()" style="border-radius: 12px; padding: 12px 24px;">Cancel</button>
+                        <button type="submit" class="btn-primary" style="border-radius: 12px; padding: 12px 28px; background: #4f46e5; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);">
+                            <span class="material-symbols-outlined">done_all</span>
+                            Confirm Collection
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
+        console.log("Lab Dashboard Scripts Initialized");
         document.addEventListener('click', function(event) {
             const btn = event.target.closest('.view-record-btn');
             if (btn) {
                 const data = btn.dataset;
                 viewPatientFull(data.id, data.name, data.pid, data.gender, data.dob, data.contact, data.blood, data.last, data.status, data.executive, data.phone, data.source, data.dest, data.eta, data.loc);
+            }
+
+            const collectBtn = event.target.closest('.collect-sample-btn');
+            if (collectBtn) {
+                const data = collectBtn.dataset;
+                openCollectionModal(data.id, data.patient, data.test);
             }
         });
 
@@ -1328,6 +1643,11 @@
                 // Update Page Title based on ID
                 const titleMap = {
                     'overview-section': 'Lab Dashboard',
+                    'collection-section': 'Sample Collection Queue',
+                    'progress-section': 'In-Progress & Processing',
+                    'pending-section': 'Pending Lab Reports',
+                    'completed-section': 'Completed Test History',
+                    'reports-section': 'Upload Lab Reports',
                     'patients-section': 'Global Patient Records',
                     'profile-section': 'Technician Profile',
                     'notifications-section': 'System Notifications',
@@ -1339,8 +1659,17 @@
                 };
                 
                 const titleElement = document.querySelector('.page-title');
-                if (titleElement && titleMap[target.id]) {
-                    titleElement.innerText = titleMap[target.id];
+                if (titleElement && (titleMap[target.id] || titleMap[sectionId])) {
+                    titleElement.innerText = titleMap[target.id] || titleMap[sectionId];
+                }
+
+                // Handle manual selection visibility for reports
+                if (target.id === 'reports-section') {
+                    const reqId = document.getElementById('uploadRequestId').value;
+                    if (!reqId) {
+                        document.getElementById('manualUploadSelection').style.display = 'block';
+                        document.getElementById('activeUploadInfo').style.display = 'none';
+                    }
                 }
             }
         }
@@ -1388,7 +1717,27 @@
 
         function prepareUpload(requestId, patientName, testName) {
             document.getElementById('uploadRequestId').value = requestId;
+            document.getElementById('activePatientTest').innerText = patientName + " - " + testName;
+            document.getElementById('activeUploadInfo').style.display = 'flex';
+            document.getElementById('manualUploadSelection').style.display = 'none';
+            
+            // Sync the dropdown if it exists
+            const select = document.getElementById('manualRequestSelect');
+            if (select) select.value = requestId;
+
             showSection('reports-section');
+        }
+
+        function updateUploadTarget(select) {
+            const option = select.options[select.selectedIndex];
+            if (option.value) {
+                document.getElementById('uploadRequestId').value = option.value;
+                document.getElementById('activePatientTest').innerText = option.getAttribute('data-name') + " - " + option.getAttribute('data-test');
+                document.getElementById('activeUploadInfo').style.display = 'flex';
+            } else {
+                document.getElementById('uploadRequestId').value = '';
+                document.getElementById('activeUploadInfo').style.display = 'none';
+            }
         }
 
         function showFileName(input) {
@@ -1441,6 +1790,19 @@
             document.getElementById('checkoutDate_' + recordId).value = dateStr;
             document.getElementById('checkoutTime_' + recordId).value = timeStr;
             document.getElementById('checkoutForm_' + recordId).submit();
+        }
+        function openCollectionModal(requestId, patientName, testName) {
+            document.getElementById('collRequestId').value = requestId;
+            document.getElementById('collPatientInfo').innerText = patientName + " - " + testName;
+            document.getElementById('collectionModal').style.display = 'flex';
+        }
+
+        function closeCollectionModal() {
+            document.getElementById('collectionModal').style.display = 'none';
+        }
+
+        function toggleLogistics(show) {
+            document.getElementById('logisticsFields').style.display = show ? 'block' : 'none';
         }
     </script>
 </body>

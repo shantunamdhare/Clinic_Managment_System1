@@ -230,7 +230,11 @@
             <i class="fas fa-th-large"></i> Dashboard
         </a>
         <a href="/doctor/appointments" class="nav-link-item ${pageContext.request.requestURI.contains('appointments') ? 'active' : ''}">
-            <i class="fas fa-calendar-check"></i> Today's Appointments
+            <i class="fas fa-calendar-check"></i> 
+            <span style="flex-grow: 1;">Today's Appointments</span>
+            <c:if test="${pendingAppointmentCount > 0}">
+                <span class="badge rounded-pill bg-danger" style="font-size: 0.65rem; padding: 4px 6px;">${pendingAppointmentCount}</span>
+            </c:if>
         </a>
 
         <div class="nav-label">Clinical</div>

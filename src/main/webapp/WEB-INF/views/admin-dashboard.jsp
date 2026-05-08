@@ -311,12 +311,15 @@
                     </div>
                     <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
                         <c:forEach var="alert" items="${systemAlerts}">
-                            <div style="background:rgba(239,68,68,0.05); border-left:3px solid #ef4444; padding:10px; border-radius:4px;">
-                                <div style="font-size:13px; font-weight:600; color:#ef4444;">${alert.type}</div>
-                                <div style="font-size:12px; color:#94a3b8;">${alert.message}</div>
-                                <div style="font-size:10px; color:#64748b; margin-top:4px;">${alert.time}</div>
+                            <div style="background:rgba(${alert.type == 'Urgent' ? '239,68,68' : alert.type == 'Warning' ? '245,158,11' : '108,99,255'},0.05); border-left:3px solid ${alert.type == 'Urgent' ? '#ef4444' : alert.type == 'Warning' ? '#f59e0b' : '#6C63FF'}; padding:10px; border-radius:4px; margin-bottom:8px;">
+                                <div style="font-size:13px; font-weight:600; color:${alert.type == 'Urgent' ? '#ef4444' : alert.type == 'Warning' ? '#f59e0b' : '#6C63FF'};">${alert.type} Alert</div>
+                                <div style="font-size:12px; color:#cbd5e1; margin-top:2px;">${alert.message}</div>
+                                <div style="font-size:10px; color:#64748b; margin-top:6px;">${alert.createdAt}</div>
                             </div>
                         </c:forEach>
+                        <c:if test="${empty systemAlerts}">
+                            <div style="text-align:center; padding:20px; color:#475569; font-size:12px;">No active alerts</div>
+                        </c:if>
                     </div>
                 </div>
 
@@ -456,14 +459,21 @@
                 <hr style="border:0; border-top:1px solid rgba(255,255,255,0.05); margin:15px 0;">
                 
                 <c:forEach var="alert" items="${systemAlerts}">
-                    <div class="alert-item ${alert.type == 'Critical' ? 'danger' : 'warning'}">
-                        <span class="alert-icon">${alert.type == 'Critical' ? '&#x1F6A8;' : '&#x26A0;'}</span>
+                    <div class="alert-item ${alert.type == 'Urgent' ? 'danger' : alert.type == 'Warning' ? 'warning' : 'info'}">
+                        <span class="alert-icon">${alert.type == 'Urgent' ? '&#x1F6A8;' : alert.type == 'Warning' ? '&#x26A0;' : '&#x1F4AC;'}</span>
                         <div>
+                            <div style="font-weight:700;">${alert.type} Alert</div>
                             <div>${alert.message}</div>
-                            <div style="font-size:10px; opacity:0.6;">${alert.time}</div>
+                            <div style="font-size:10px; opacity:0.6; margin-top:4px;">${alert.createdAt}</div>
                         </div>
                     </div>
                 </c:forEach>
+                <c:if test="${empty systemAlerts}">
+                    <div class="empty-state">
+                        <div class="empty-icon">&#x1F514;</div>
+                        <p>No new system alerts</p>
+                    </div>
+                </c:if>
             </div>
         </div>
 

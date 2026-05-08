@@ -114,8 +114,10 @@
             const medId = medicineSelect.value;
             const qty = parseInt(quantityInput.value) || 0;
             const price = medicinePrices[medId] || 0;
-            const total = price * qty;
-            totalDisplay.innerText = total.toFixed(2);
+            const subtotal = price * qty;
+            const tax = subtotal * 0.05;
+            const total = subtotal + tax;
+            totalDisplay.innerText = total.toFixed(2) + " (Inc. 5% GST)";
         }
 
         const methodSelect = document.getElementById('paymentMethod');

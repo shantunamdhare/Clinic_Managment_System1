@@ -26,7 +26,17 @@ public class LabRequest {
     @JoinColumn(name = "lab_id", nullable = true) // true so existing data doesn't break
     private User lab;
 
-    private String status; // Pending, Completed
+    private String status; // Pending, Collected, In-Transit, Completed
+    private String processingType; // In-House, External
+    
+    @ManyToOne
+    @JoinColumn(name = "delivery_partner_id", nullable = true)
+    private User deliveryPartner;
+    
+    private String sampleType;
+    private String collectionDate;
+    private String pickupDate;
+    private String deliveryDate;
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -46,4 +56,22 @@ public class LabRequest {
 
     public User getLab() { return lab; }
     public void setLab(User lab) { this.lab = lab; }
+
+    public String getProcessingType() { return processingType; }
+    public void setProcessingType(String processingType) { this.processingType = processingType; }
+
+    public User getDeliveryPartner() { return deliveryPartner; }
+    public void setDeliveryPartner(User deliveryPartner) { this.deliveryPartner = deliveryPartner; }
+
+    public String getSampleType() { return sampleType; }
+    public void setSampleType(String sampleType) { this.sampleType = sampleType; }
+
+    public String getCollectionDate() { return collectionDate; }
+    public void setCollectionDate(String collectionDate) { this.collectionDate = collectionDate; }
+
+    public String getPickupDate() { return pickupDate; }
+    public void setPickupDate(String pickupDate) { this.pickupDate = pickupDate; }
+
+    public String getDeliveryDate() { return deliveryDate; }
+    public void setDeliveryDate(String deliveryDate) { this.deliveryDate = deliveryDate; }
 }

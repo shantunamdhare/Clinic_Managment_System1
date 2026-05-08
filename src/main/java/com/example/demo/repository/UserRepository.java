@@ -18,6 +18,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Find users by role
     java.util.List<User> findByRole(String role);
 
+    // Find users by role (case-insensitive)
+    java.util.List<User> findByRoleIgnoreCase(String role);
+
     // Admin dashboard queries
     long countByRole(String role);
 }

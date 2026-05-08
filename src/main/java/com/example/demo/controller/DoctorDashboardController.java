@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
+import com.example.demo.service.PrescriptionPdfService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.io.ByteArrayInputStream;
 
 @Controller
 @RequestMapping("/doctor")
@@ -27,6 +29,28 @@ public class DoctorDashboardController {
     @Autowired private LabReportRepository labReportRepo;
     @Autowired private AvailabilityRepository availabilityRepo;
     @Autowired private UserRepository userRepository;
+    @Autowired private MedicineRepository medicineRepo;
+    @Autowired private PrescriptionItemRepository prescriptionItemRepo;
+    @Autowired private NotificationRepository notificationRepo;
+    @Autowired private PrescriptionPdfService pdfService;
+
+    @GetMapping("/prescriptions/download/{id}")
+    public org.springframework.http.ResponseEntity<org.springframework.core.io.InputStreamResource> downloadPdf(@PathVariable Long id) {
+        Prescription rx = prescriptionRepo.findById(id).orElse(null);
+        if (rx == null) return org.springframework.http.ResponseEntity.notFound().build();
+
+        ByteArrayInputStream bis = pdfService.generatePrescriptionPdf(rx);
+
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.add("Content-Disposition", "attachment; filename=prescription_" + rx.getPrescriptionId() + ".pdf");
+
+        return org.springframework.http.ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
+                .body(new org.springframework.core.io.InputStreamResource(bis));
+    }
+
 
     // -------------------------------------------------------
     // Helper: Get Logged-in User from Session (Harmonized)
@@ -37,6 +61,16 @@ public class DoctorDashboardController {
             return user;
         }
         return null;
+    }
+
+    @ModelAttribute("pendingAppointmentCount")
+    public long getPendingAppointmentCount(HttpSession session) {
+        User doctor = getLoggedInDoctor(session);
+        if (doctor == null) return 0;
+        // Count today's pending/scheduled appointments
+        return appointmentRepo.findByDoctorAndAppointmentDate(doctor, LocalDate.now()).stream()
+                .filter(a -> "Scheduled".equalsIgnoreCase(a.getStatus()) || "Pending".equalsIgnoreCase(a.getStatus()))
+                .count();
     }
 
     // -------------------------------------------------------
@@ -246,40 +280,133 @@ public class DoctorDashboardController {
         List<Visit> recentVisits = visitRepo.findByDoctorOrderByVisitDateDesc(doctor);
         model.addAttribute("doctor", doctor);
         model.addAttribute("visits", recentVisits);
+        model.addAttribute("patients", patientRepo.findAll());
 
         if (visitId != null) {
             visitRepo.findById(visitId).ifPresent(v -> {
                 model.addAttribute("selectedVisit", v);
+                model.addAttribute("selectedPatient", v.getPatient());
                 model.addAttribute("prescriptions", prescriptionRepo.findByVisit(v));
             });
         }
         return "doctor/prescriptions";
     }
 
-    @PostMapping("/prescriptions/save")
-    public String savePrescription(@RequestParam Long visitId,
-                                   @RequestParam String medicine,
-                                   @RequestParam String dosage,
-                                   @RequestParam String duration,
-                                   @RequestParam String instructions,
-                                   RedirectAttributes ra) {
-        Visit visit = visitRepo.findById(visitId).orElse(null);
-        if (visit == null) {
-            ra.addFlashAttribute("error", "Visit not found.");
+    @GetMapping("/prescriptions/api/search-medicines")
+    @ResponseBody
+    public List<Medicine> searchMedicines(@RequestParam String query) {
+        return medicineRepo.findByNameContainingIgnoreCase(query);
+    }
+
+    @GetMapping("/prescriptions/save-full")
+    public String saveFullPrescriptionGet() {
+        return "redirect:/doctor/prescriptions";
+    }
+
+    @PostMapping("/prescriptions/save-full")
+    public String saveFullPrescription(@RequestParam(required = false) Long patientId,
+                                       @RequestParam(required = false) Long visitId,
+                                       @RequestParam String status,
+                                       @RequestParam(required = false) String notes,
+                                       @RequestParam("medName[]") String[] medNames,
+                                       @RequestParam("dosage[]") String[] dosages,
+                                       @RequestParam("frequency[]") String[] frequencies,
+                                       @RequestParam("duration[]") String[] durations,
+                                       @RequestParam("quantity[]") Integer[] quantities,
+                                       @RequestParam("food[]") String[] foods,
+                                       @RequestParam(required = false) Double consultationFee,
+                                       HttpSession session,
+                                       RedirectAttributes ra) {
+        User doctor = getLoggedInDoctor(session);
+        if (doctor == null) return "redirect:/";
+
+        if (patientId == null) {
+            ra.addFlashAttribute("error", "Please select a patient.");
+            return "redirect:/doctor/prescriptions" + (visitId != null ? "?visitId=" + visitId : "");
+        }
+
+        Patient patient = patientRepo.findById(patientId).orElse(null);
+        if (patient == null) {
+            ra.addFlashAttribute("error", "Patient not found.");
             return "redirect:/doctor/prescriptions";
         }
 
         Prescription p = new Prescription();
-        p.setVisit(visit);
-        p.setMedicine(medicine);
-        p.setDosage(dosage);
-        p.setDuration(duration);
-        p.setInstructions(instructions);
+        p.setPatient(patient);
+        p.setDoctor(doctor);
+        p.setStatus(status);
+        p.setNotes(notes);
+        p.setConsultationFee(consultationFee);
+        if (visitId != null) {
+            visitRepo.findById(visitId).ifPresent(p::setVisit);
+        }
+
+        if (medNames == null || medNames.length == 0) {
+            ra.addFlashAttribute("error", "Please add at least one medicine.");
+            return "redirect:/doctor/prescriptions";
+        }
+
+        for (int i = 0; i < medNames.length; i++) {
+            if (medNames[i] == null || medNames[i].trim().isEmpty()) continue;
+            List<Medicine> meds = medicineRepo.findByNameContainingIgnoreCase(medNames[i]);
+            if (!meds.isEmpty()) {
+                PrescriptionItem item = new PrescriptionItem();
+                item.setMedicine(meds.get(0));
+                item.setDosage(dosages[i]);
+                item.setFrequency(frequencies[i]);
+                item.setDuration(durations[i]);
+                item.setQuantity(quantities[i]);
+                item.setFoodRelation(foods[i]);
+                p.addItem(item);
+            }
+        }
+
         prescriptionRepo.save(p);
 
-        ra.addFlashAttribute("success", "Prescription saved.");
-        return "redirect:/doctor/prescriptions?visitId=" + visitId;
+        if ("Pending".equals(status)) {
+            // Notify Pharmacy
+            List<User> pharmacists = userRepository.findByRole("Pharmacy");
+            for (User ph : pharmacists) {
+                Notification n = new Notification();
+                n.setUser(ph);
+                n.setMessage("New Prescription Received: " + p.getPrescriptionId() + " for " + patient.getName());
+                n.setType("Urgent");
+                notificationRepo.save(n);
+            }
+        }
+
+        ra.addFlashAttribute("success", "Prescription " + (status.equals("Draft") ? "saved as draft." : "sent to pharmacy."));
+        return "redirect:/doctor/prescriptions";
     }
+
+    @GetMapping("/prescriptions/status-updates")
+    @ResponseBody
+    public List<Prescription> getPrescriptionStatusUpdates(HttpSession session) {
+        User doctor = getLoggedInDoctor(session);
+        if (doctor == null) return List.of();
+        return prescriptionRepo.findByDoctorOrderByCreatedAtDesc(doctor);
+    }
+
+    @GetMapping("/notifications/latest")
+    @ResponseBody
+    public List<Notification> getLatestNotifications(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return List.of();
+        return notificationRepo.findByUserAndIsReadOrderByCreatedAtDesc(user, false);
+    }
+
+    @PostMapping("/notifications/mark-read")
+    @ResponseBody
+    public String markNotificationsRead(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user != null) {
+            List<Notification> unread = notificationRepo.findByUserAndIsReadOrderByCreatedAtDesc(user, false);
+            unread.forEach(n -> n.setRead(true));
+            notificationRepo.saveAll(unread);
+        }
+        return "Success";
+    }
+
 
     @GetMapping("/prescriptions/print/{visitId}")
     public String printPrescription(@PathVariable Long visitId,
@@ -351,7 +478,24 @@ public class DoctorDashboardController {
         if (doctorSession == null) return "redirect:/";
         User doctor = userRepository.findById(doctorSession.getId()).orElse(doctorSession);
 
-        List<LabReport> reports = labReportRepo.findByRequest_Doctor(doctor);
+        // Robust retrieval: Get reports where doctor is assigned OR patients the doctor has seen
+        final Long currentDoctorId = doctor.getId();
+        final List<Appointment> doctorAppointments = appointmentRepo.findByDoctor(doctor);
+        
+        List<LabReport> reports = labReportRepo.findAll().stream()
+            .filter(r -> {
+                LabRequest req = r.getRequest();
+                if (req == null) return false;
+                // Directly assigned
+                if (req.getDoctor() != null && req.getDoctor().getId().equals(currentDoctorId)) return true;
+                // Same patient as doctor's appointments
+                String patientName = req.getPatient() != null ? req.getPatient().getName() : null;
+                if (patientName == null) return false;
+                return doctorAppointments.stream()
+                    .anyMatch(a -> a.getPatient() != null && patientName.equalsIgnoreCase(a.getPatient().getName()));
+            })
+            .collect(java.util.stream.Collectors.toList());
+
         model.addAttribute("doctor", doctor);
         model.addAttribute("reports", reports);
         return "doctor/lab-reports";

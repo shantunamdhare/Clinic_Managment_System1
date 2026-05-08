@@ -205,7 +205,7 @@
                         <div class="stat-icon" style="background:#fffbeb; color:#f59e0b;">&#x1F4B3;</div>
                         <div class="stat-data">
                             <p>Pending Bills</p>
-                            <h4>$0.00</h4>
+                            <h4>₹0.00</h4>
                         </div>
                     </div>
                 </div>
@@ -278,7 +278,7 @@
                                     <td style="font-weight:600; color:#4f46e5;">${p.medicine}</td>
                                     <td>${p.dosage}</td>
                                     <td>${p.duration}</td>
-                                    <td>Dr. ${p.visit.doctor.fullName}</td>
+                                    <td>Dr. ${p.doctor.fullName}</td>
                                 </tr>
                             </c:forEach>
                         </tbody>
@@ -323,7 +323,7 @@
                                     <td>Dr. ${ah.doctor.fullName}</td>
                                     <td>${ah.appointmentDate}</td>
                                     <td>${ah.appointmentTime}</td>
-                                    <td><span class="badge ${ah.status == 'Scheduled' ? 'badge-success' : 'badge-info'}">${ah.status}</span></td>
+                                    <td><span class="badge ${ah.status == 'Scheduled' || ah.status == 'Completed' ? 'badge-success' : (ah.status == 'Pending' ? 'badge-warning' : 'badge-info')}">${ah.status}</span></td>
                                 </tr>
                             </c:forEach>
                         </tbody>
@@ -349,9 +349,9 @@
                                 <tr>
                                     <td>#${ph.invoiceNumber}</td>
                                     <td>${ph.invoiceDate}</td>
-                                    <td style="font-weight:700;">$${ph.amount}</td>
-                                    <td><span class="badge ${ph.status == 'Paid' ? 'badge-success' : 'badge-warning'}">${ph.status}</span></td>
-                                    <td><button style="background:none; border:none; color:#4f46e5; cursor:pointer; font-weight:700;">View Invoice</button></td>
+                                    <td style="font-weight:700;">₹${ph.totalAmount}</td>
+                                    <td><span class="badge ${ph.paymentStatus == 'Paid' ? 'badge-success' : 'badge-warning'}">${ph.paymentStatus}</span></td>
+                                    <td><a href="/pharmacy/invoice/download?id=${ph.id}" class="btn-primary" style="padding:4px 12px; font-size:12px; text-decoration:none;" target="_blank">View Invoice</a></td>
                                 </tr>
                             </c:forEach>
                         </tbody>

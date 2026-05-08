@@ -17,4 +17,6 @@ public interface MedicineRepository extends JpaRepository<Medicine, Long> {
     
     @Query("SELECT m FROM Medicine m WHERE m.expiryDate BETWEEN :start AND :end")
     List<Medicine> findExpiringSoon(LocalDate start, LocalDate end);
+
+    List<Medicine> findByNameContainingIgnoreCase(String query);
 }

@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +9,19 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/doctor.css">
+    <style>
+        .medicine-row { border-bottom: 1px solid #f1f5f9; padding: 15px 0; position: relative; }
+        .medicine-row:last-child { border-bottom: none; }
+        .remove-row { color: #ef4444; cursor: pointer; position: absolute; right: 0; top: 15px; }
+        .status-badge { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; padding: 4px 10px; border-radius: 12px; }
+        .status-pending { background: #fef3c7; color: #d97706; }
+        .status-preparing { background: #dbeafe; color: #2563eb; }
+        .status-ready { background: #dcfce7; color: #16a34a; }
+        .status-dispensed { background: #f1f5f9; color: #64748b; }
+        .search-results { position: absolute; background: white; border: 1px solid #e2e8f0; width: 100%; z-index: 1000; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: none; max-height: 200px; overflow-y: auto; }
+        .search-item { padding: 8px 12px; cursor: pointer; }
+        .search-item:hover { background: #f8fafc; }
+    </style>
 </head>
 <body>
 <div class="sidebar">
@@ -40,129 +54,316 @@
     </nav>
     <div class="sidebar-footer"><a href="/logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</a></div>
 </div>
+
 <div class="main-content">
     <div class="topbar">
-        <h5><i class="fas fa-prescription-bottle-alt me-2" style="color:#2563eb"></i> Prescriptions</h5>
+        <h5><i class="fas fa-prescription-bottle-alt me-2" style="color:#2563eb"></i> Pharmacy Integration</h5>
+        <div class="d-flex align-items-center gap-3">
+            <div class="dropdown">
+                <a href="#" class="position-relative text-dark me-3" id="notifDropdown" data-bs-toggle="dropdown">
+                    <i class="fas fa-bell fa-lg"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notif-count" style="display:none">0</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0" id="notif-list" style="width: 300px; max-height: 400px; overflow-y: auto;">
+                    <li><h6 class="dropdown-header">Notifications</h6></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li class="text-center py-3 text-muted"><small>No new notifications</small></li>
+                </ul>
+            </div>
+        </div>
     </div>
+
     <div class="content-area">
         <c:if test="${not empty success}"><div class="alert-custom alert-success"><i class="fas fa-check-circle"></i> ${success}</div></c:if>
         <c:if test="${not empty error}"><div class="alert-custom alert-error"><i class="fas fa-exclamation-circle"></i> ${error}</div></c:if>
 
         <div class="row g-4">
-            <!-- Left: Select Visit -->
-            <div class="col-lg-4">
+            <!-- New Prescription Form -->
+            <div class="col-lg-12">
                 <div class="panel">
-                    <div class="panel-title"><i class="fas fa-history"></i> Select Visit</div>
-                    <c:choose>
-                        <c:when test="${empty visits}">
-                            <p style="color:#94a3b8;font-size:0.875rem">No visits yet. Create an EMR record first.</p>
-                            <a href="/doctor/emr" class="btn-primary-custom" style="text-decoration:none;display:inline-block;margin-top:8px">
-                                <i class="fas fa-file-medical me-1"></i> New EMR
-                            </a>
-                        </c:when>
-                        <c:otherwise>
-                            <div style="display:flex;flex-direction:column;gap:8px">
-                                <c:forEach items="${visits}" var="v">
-                                    <a href="/doctor/prescriptions?visitId=${v.id}"
-                                       style="display:block;padding:12px;border-radius:10px;text-decoration:none;border:2px solid ${selectedVisit != null && selectedVisit.id == v.id ? '#2563eb' : '#e2e8f0'};background:${selectedVisit != null && selectedVisit.id == v.id ? '#eff6ff' : '#fff'};transition:all 0.2s">
-                                        <div style="font-weight:600;color:#1e293b;font-size:0.875rem">${v.patient.name}</div>
-                                        <div style="color:#64748b;font-size:0.75rem;margin-top:3px"><i class="fas fa-calendar me-1"></i>${v.visitDate}</div>
-                                        <div style="color:#94a3b8;font-size:0.75rem;margin-top:2px">${v.diagnosis}</div>
-                                    </a>
-                                </c:forEach>
+                    <div class="panel-title d-flex justify-content-between">
+                        <span><i class="fas fa-plus-circle"></i> Create New Prescription</span>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#patientModal">
+                                <i class="fas fa-user-plus me-1"></i> Select Patient
+                            </button>
+                        </div>
+                    </div>
+
+                    <form action="/doctor/prescriptions/save-full" method="post" id="complexRxForm">
+                        <input type="hidden" name="patientId" id="selectedPatientId" value="${selectedPatient != null ? selectedPatient.id : ''}" required>
+                        
+                        <div id="patientInfoSection" class="mb-4 p-3 rounded" style="background: #f8fafc; border: 1px solid #e2e8f0; ${selectedPatient == null ? 'display: none;' : ''}">
+                            <div class="row">
+                                <div class="col-md-3"><strong>Patient:</strong> <span id="displayPatientName">${selectedPatient != null ? selectedPatient.name : ''}</span></div>
+                                <div class="col-md-2"><strong>ID:</strong> <span id="displayPatientId">${selectedPatient != null ? selectedPatient.patientId : ''}</span></div>
+                                <div class="col-md-2"><strong>Age/Sex:</strong> <span id="displayPatientAgeSex">${selectedPatient != null ? selectedPatient.age : ''}y / ${selectedPatient != null ? selectedPatient.gender : ''}</span></div>
+                                <div class="col-md-5"><strong>Allergies:</strong> <span class="text-danger">None Reported</span></div>
                             </div>
-                        </c:otherwise>
-                    </c:choose>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-borderless align-middle" id="medicineTable">
+                                <thead class="text-muted" style="font-size: 0.75rem; text-transform: uppercase;">
+                                    <tr>
+                                        <th style="width: 25%">Medicine Name</th>
+                                        <th style="width: 15%">Dosage</th>
+                                        <th style="width: 15%">Frequency</th>
+                                        <th style="width: 15%">Duration</th>
+                                        <th style="width: 10%">Qty</th>
+                                        <th style="width: 15%">Food</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="medicineBody">
+                                    <tr class="medicine-row">
+                                        <td>
+                                            <div class="position-relative">
+                                                <input type="text" name="medName[]" class="form-control-custom med-search" placeholder="Search medicine..." required autocomplete="off">
+                                                <div class="search-results"></div>
+                                            </div>
+                                        </td>
+                                        <td><input type="text" name="dosage[]" class="form-control-custom" placeholder="500mg" required></td>
+                                        <td><input type="text" name="frequency[]" class="form-control-custom" placeholder="1-0-1" required></td>
+                                        <td><input type="text" name="duration[]" class="form-control-custom" placeholder="5 days" required></td>
+                                        <td><input type="number" name="quantity[]" class="form-control-custom" placeholder="10" required></td>
+                                        <td>
+                                            <select name="food[]" class="form-control-custom">
+                                                <option>After Food</option>
+                                                <option>Before Food</option>
+                                                <option>With Food</option>
+                                            </select>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <button type="button" class="btn btn-sm btn-outline-secondary mb-3" id="addRowBtn">
+                            <i class="fas fa-plus me-1"></i> Add Another Medicine
+                        </button>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group mb-4">
+                                    <label class="form-label-custom"><i class="fas fa-hand-holding-usd text-success me-1"></i> Consultation Fee (₹)</label>
+                                    <input type="number" name="consultationFee" class="form-control-custom" placeholder="e.g. 500" min="0" step="10" value="500">
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="form-group mb-4">
+                                    <label class="form-label-custom">Special Notes for Pharmacist</label>
+                                    <textarea name="notes" class="form-control-custom" rows="1" placeholder="Any specific instructions..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" name="status" value="Pending" class="btn-primary-custom" style="background: #2563eb;">
+                                <i class="fas fa-paper-plane me-2"></i> Send to Pharmacy
+                            </button>
+                            <button type="submit" name="status" value="Draft" class="btn-primary-custom" style="background: #64748b;">
+                                <i class="fas fa-save me-2"></i> Save Draft
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            <!-- Right: Add & List Prescriptions -->
-            <div class="col-lg-8">
-                <c:if test="${selectedVisit != null}">
-                    <!-- Visit Summary -->
-                    <div class="panel" style="background:linear-gradient(135deg,#eff6ff,#f0fdf4);border-color:#bfdbfe">
-                        <div style="font-weight:700;color:#1e293b;font-size:0.95rem">
-                            <i class="fas fa-user me-2" style="color:#2563eb"></i>${selectedVisit.patient.name}
-                            <a href="/doctor/prescriptions/print/${selectedVisit.id}" target="_blank" class="btn-sm-action btn-print ms-3">
-                                <i class="fas fa-print"></i> Print Prescription
-                            </a>
-                        </div>
-                        <div style="color:#64748b;font-size:0.8rem;margin-top:6px;display:flex;gap:16px;flex-wrap:wrap">
-                            <span><i class="fas fa-calendar me-1"></i>${selectedVisit.visitDate}</span>
-                            <span><i class="fas fa-diagnoses me-1"></i>${selectedVisit.diagnosis}</span>
-                        </div>
+            <!-- Prescription Queue & Updates -->
+            <div class="col-lg-12">
+                <div class="panel">
+                    <div class="panel-title"><i class="fas fa-clock"></i> Sent Prescriptions & Status</div>
+                    <div class="table-responsive">
+                        <table class="custom-table" id="statusTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Patient</th>
+                                    <th>Date</th>
+                                    <th>Medicines</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="statusBody">
+                                <!-- Populated by AJAX -->
+                                <tr id="statusPlaceholder"><td colspan="6" class="text-center py-4">Loading updates...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
-
-                    <!-- Add Prescription Form -->
-                    <div class="panel">
-                        <div class="panel-title"><i class="fas fa-plus-circle"></i> Add Medicine</div>
-                        <form action="/doctor/prescriptions/save" method="post" id="rxForm" novalidate>
-                            <input type="hidden" name="visitId" value="${selectedVisit.id}">
-                            <div class="row g-3">
-                                <div class="col-md-6 form-group">
-                                    <label class="form-label-custom">Medicine Name *</label>
-                                    <input type="text" name="medicine" required class="form-control-custom" placeholder="e.g. Paracetamol 500mg">
-                                </div>
-                                <div class="col-md-3 form-group">
-                                    <label class="form-label-custom">Dosage *</label>
-                                    <input type="text" name="dosage" required class="form-control-custom" placeholder="e.g. 1-0-1">
-                                </div>
-                                <div class="col-md-3 form-group">
-                                    <label class="form-label-custom">Duration *</label>
-                                    <input type="text" name="duration" required class="form-control-custom" placeholder="e.g. 5 days">
-                                </div>
-                                <div class="col-12 form-group">
-                                    <label class="form-label-custom">Instructions</label>
-                                    <input type="text" name="instructions" class="form-control-custom" placeholder="e.g. After meals, with warm water">
-                                </div>
-                            </div>
-                            <button type="submit" class="btn-primary-custom mt-3" style="padding:9px 24px">
-                                <i class="fas fa-plus me-1"></i> Add Medicine
-                            </button>
-                        </form>
-                    </div>
-
-                    <!-- Existing Prescriptions -->
-                    <div class="panel">
-                        <div class="panel-title"><i class="fas fa-list"></i> Prescribed Medicines</div>
-                        <c:choose>
-                            <c:when test="${empty prescriptions}">
-                                <p style="color:#94a3b8;font-size:0.875rem">No medicines added yet.</p>
-                            </c:when>
-                            <c:otherwise>
-                                <table class="custom-table">
-                                    <thead><tr><th>Medicine</th><th>Dosage</th><th>Duration</th><th>Instructions</th></tr></thead>
-                                    <tbody>
-                                        <c:forEach items="${prescriptions}" var="rx">
-                                            <tr>
-                                                <td style="font-weight:600">${rx.medicine}</td>
-                                                <td><span class="badge-pending">${rx.dosage}</span></td>
-                                                <td>${rx.duration}</td>
-                                                <td style="color:#64748b">${rx.instructions}</td>
-                                            </tr>
-                                        </c:forEach>
-                                    </tbody>
-                                </table>
-                            </c:otherwise>
-                        </c:choose>
-                    </div>
-                </c:if>
-                <c:if test="${selectedVisit == null}">
-                    <div class="panel text-center py-5">
-                        <i class="fas fa-hand-point-left fa-3x mb-3 d-block" style="color:#cbd5e1"></i>
-                        <p style="color:#64748b">Select a visit from the left panel to manage prescriptions.</p>
-                    </div>
-                </c:if>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Patient Selection Modal -->
+<div class="modal fade" id="patientModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Select Patient</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="patientSearch" class="form-control-custom mb-3" placeholder="Search by name or ID...">
+                <div id="patientList" style="max-height: 300px; overflow-y: auto;">
+                    <c:forEach items="${patients}" var="p">
+                        <div class="search-item patient-item border-bottom" 
+                             data-id="${p.id}" 
+                             data-name="${p.name}" 
+                             data-pid="${p.patientId}" 
+                             data-age="${p.age}" 
+                             data-gender="${p.gender}">
+                            <strong>${p.name}</strong> <small class="text-muted">(${p.patientId})</small>
+                        </div>
+                    </c:forEach>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 <script>
-document.getElementById('rxForm') && document.getElementById('rxForm').addEventListener('submit', function(e) {
-    if (!this.checkValidity()) { e.preventDefault(); e.stopPropagation(); }
-    this.classList.add('was-validated');
+$(document).ready(function() {
+    // Row Addition
+    $('#addRowBtn').click(function() {
+        const row = $('.medicine-row').first().clone();
+        row.find('input').val('');
+        row.append('<i class="fas fa-times remove-row"></i>');
+        $('#medicineBody').append(row);
+    });
+
+    $(document).on('click', '.remove-row', function() {
+        $(this).closest('tr').remove();
+    });
+
+    // Patient Selection
+    $('.patient-item').click(function() {
+        const id = $(this).data('id');
+        const name = $(this).data('name');
+        const pid = $(this).data('pid');
+        const age = $(this).data('age');
+        const gender = $(this).data('gender');
+
+        $('#selectedPatientId').val(id);
+        $('#displayPatientName').text(name);
+        $('#displayPatientId').text(pid);
+        $('#displayPatientAgeSex').text(age + 'y / ' + gender);
+        $('#patientInfoSection').fadeIn();
+        $('#patientModal').modal('hide');
+    });
+
+    // Form Validation
+    $('#complexRxForm').submit(function(e) {
+        if (!$('#selectedPatientId').val()) {
+            e.preventDefault();
+            alert('Please select a patient before saving the prescription.');
+            $('#patientModal').modal('show');
+            return false;
+        }
+        return true;
+    });
+
+    // Medicine Search (AJAX)
+    $(document).on('keyup', '.med-search', function() {
+        const input = $(this);
+        const results = input.siblings('.search-results');
+        const query = input.val();
+
+        if (query.length < 2) { results.hide(); return; }
+
+        $.get('/doctor/prescriptions/api/search-medicines', { query: query }, function(data) {
+            results.empty();
+            if (data.length > 0) {
+                data.forEach(med => {
+                    results.append('<div class="search-item med-item" data-name="' + med.name + '">' + med.name + ' <small class="text-muted">(Stock: ' + med.stockLevel + ')</small></div>');
+                });
+                results.show();
+            } else {
+                results.hide();
+            }
+        });
+    });
+
+    $(document).on('click', '.med-item', function() {
+        const name = $(this).data('name');
+        $(this).closest('.position-relative').find('.med-search').val(name);
+        $('.search-results').hide();
+    });
+
+    // Status Updates (AJAX Polling)
+    function fetchStatusUpdates() {
+        $.get('/doctor/prescriptions/status-updates', function(data) {
+            if (data.length === 0) {
+                $('#statusBody').html('<tr><td colspan="6" class="text-center">No prescriptions found.</td></tr>');
+                return;
+            }
+            let html = '';
+            data.forEach(rx => {
+                let statusClass = 'status-' + rx.status.toLowerCase();
+                let meds = rx.items.map(i => i.medicine.name).join(', ');
+                if (meds.length > 30) meds = meds.substring(0, 27) + '...';
+
+                html += '<tr>' +
+                    '<td><span class="text-primary fw-bold">' + rx.prescriptionId + '</span></td>' +
+                    '<td>' + rx.patient.name + '</td>' +
+                    '<td>' + new Date(rx.createdAt).toLocaleDateString() + '</td>' +
+                    '<td>' + meds + '</td>' +
+                    '<td><span class="status-badge ' + statusClass + '">' + rx.status + '</span></td>' +
+                    '<td>' +
+                        '<button class="btn btn-sm btn-outline-info me-1"><i class="fas fa-eye"></i></button>' +
+                        '<a href="/doctor/prescriptions/download/' + rx.id + '" class="btn btn-sm btn-outline-dark"><i class="fas fa-download"></i></a>' +
+                    '</td>' +
+                '</tr>';
+            });
+            $('#statusBody').html(html);
+        });
+    }
+
+    // Notifications Polling
+    function fetchNotifications() {
+        $.get('/doctor/notifications/latest', function(data) {
+            if (data.length > 0) {
+                $('#notif-count').text(data.length).show();
+                let html = '<li><h6 class="dropdown-header">New Notifications</h6></li>';
+                data.forEach(n => {
+                    html += '<li><a class="dropdown-item py-2" href="#">' +
+                        '<div class="d-flex align-items-center">' +
+                        '<div class="flex-shrink-0"><i class="fas fa-info-circle text-primary"></i></div>' +
+                        '<div class="ms-3"><div>' + n.message + '</div><small class="text-muted">Just now</small></div>' +
+                        '</div></a></li>';
+                });
+                html += '<li><hr class="dropdown-divider"></li><li><a class="dropdown-item text-center small text-primary" href="#" id="markAllRead">Mark all as read</a></li>';
+                $('#notif-list').html(html);
+            }
+        });
+    }
+
+    $(document).on('click', '#markAllRead', function() {
+        $.post('/doctor/notifications/mark-read', function() {
+            $('#notif-count').hide();
+            $('#notif-list').html('<li><h6 class="dropdown-header">Notifications</h6></li><li><hr class="dropdown-divider"></li><li class="text-center py-3 text-muted"><small>No new notifications</small></li>');
+        });
+    });
+
+    setInterval(fetchStatusUpdates, 5000);
+    setInterval(fetchNotifications, 10000);
+    fetchStatusUpdates();
+    fetchNotifications();
+
+    // Close search results on click outside
+    $(document).click(function(e) {
+        if (!$(e.target).closest('.position-relative').length) {
+            $('.search-results').hide();
+        }
+    });
 });
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+

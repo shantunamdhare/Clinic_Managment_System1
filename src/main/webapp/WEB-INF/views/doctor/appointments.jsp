@@ -27,7 +27,13 @@
     <nav>
         <div class="nav-label">Main</div>
         <a href="/doctor/dashboard" class="nav-link-item"><i class="fas fa-th-large"></i> Dashboard</a>
-        <a href="/doctor/appointments" class="nav-link-item active"><i class="fas fa-calendar-check"></i> Today's Appointments</a>
+        <a href="/doctor/appointments" class="nav-link-item active">
+            <i class="fas fa-calendar-check"></i> 
+            <span style="flex-grow: 1;">Today's Appointments</span>
+            <c:if test="${pendingAppointmentCount > 0}">
+                <span class="badge rounded-pill bg-danger" style="font-size: 0.65rem; padding: 4px 6px;">${pendingAppointmentCount}</span>
+            </c:if>
+        </a>
         <div class="nav-label">Clinical</div>
         <a href="/doctor/patients" class="nav-link-item"><i class="fas fa-user-injured"></i> Patients</a>
         <a href="/doctor/emr" class="nav-link-item"><i class="fas fa-file-medical-alt"></i> EMR</a>

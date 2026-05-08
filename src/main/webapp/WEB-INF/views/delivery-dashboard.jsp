@@ -562,9 +562,13 @@
                                                 <div style="font-size: 11px; color: var(--gray-500);">${task.patientId}</div>
                                             </td>
                                             <td>
-                                                <div style="display: flex; align-items: center; gap: 6px;">
-                                                    <span class="material-symbols-outlined" style="font-size: 18px; color: var(--danger);">location_on</span>
-                                                    <span>${not empty task.pickupLocation ? task.pickupLocation : 'Main Clinic - Floor 2'}</span>
+                                                <div style="font-size: 13px; font-weight: 700; color: var(--primary);">
+                                                    <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">upload</span> 
+                                                    From: ${not empty task.sourceHospital ? task.sourceHospital : 'Main Clinic'}
+                                                </div>
+                                                <div style="font-size: 13px; font-weight: 700; color: var(--success); margin-top: 4px;">
+                                                    <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">download</span> 
+                                                    To: ${not empty task.destinationHospital ? task.destinationHospital : 'External Lab'}
                                                 </div>
                                             </td>
                                             <td>

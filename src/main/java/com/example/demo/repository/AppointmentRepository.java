@@ -31,4 +31,5 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     long countByStatus(String status);
     List<Appointment> findByAppointmentDateOrderByAppointmentTimeAsc(LocalDate date);
     List<Appointment> findTop10ByOrderByAppointmentDateDescAppointmentTimeDesc();
+    List<Appointment> findByPatient_ContactNumberOrderByAppointmentDateDesc(String contactNumber);
 }

@@ -27,12 +27,17 @@ public class Invoice {
     private Double totalAmount;
 
     @Column(nullable = false)
+    private Double taxAmount;
+
+    @Column(nullable = false)
     private String paymentStatus; // Paid, Pending, Partially Paid
 
     @Column(nullable = false)
     private String paymentMethod; // Cash, Card, UPI, Insurance
 
     private String billingItems; // e.g. "Consultation, Lab Test, Medicine"
+
+    private Double consultationFee;
 
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InvoiceItem> items = new ArrayList<>();
@@ -83,6 +88,14 @@ public class Invoice {
         this.totalAmount = totalAmount;
     }
 
+    public Double getTaxAmount() {
+        return taxAmount;
+    }
+
+    public void setTaxAmount(Double taxAmount) {
+        this.taxAmount = taxAmount;
+    }
+
     public String getPaymentStatus() {
         return paymentStatus;
     }
@@ -106,6 +119,9 @@ public class Invoice {
     public void setBillingItems(String billingItems) {
         this.billingItems = billingItems;
     }
+
+    public Double getConsultationFee() { return consultationFee; }
+    public void setConsultationFee(Double consultationFee) { this.consultationFee = consultationFee; }
 
     public List<InvoiceItem> getItems() {
         return items;

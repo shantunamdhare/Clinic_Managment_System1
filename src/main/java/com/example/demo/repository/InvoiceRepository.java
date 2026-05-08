@@ -22,4 +22,5 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     List<Invoice> findByPaymentStatus(String status);
     
     List<Invoice> findAllByOrderByInvoiceDateDesc();
+    List<Invoice> findByPatient_ContactNumberOrderByInvoiceDateDesc(String contactNumber);
 }

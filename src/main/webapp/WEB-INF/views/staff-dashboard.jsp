@@ -341,10 +341,26 @@
                 <div id="overview" class="tab-content active">
                     <div class="page-header">
                         <h1 class="page-title">Staff Dashboard</h1>
-                        <button onclick="openModal('attendanceModal')" class="btn-primary staff-bg-gradient">
-                            <span class="material-symbols-outlined">add</span>
-                            Mark Attendance
-                        </button>
+                        <c:choose>
+                            <c:when test="${empty todayAtt}">
+                                <button onclick="openModal('attendanceModal')" class="btn-primary staff-bg-gradient">
+                                    <span class="material-symbols-outlined">add</span>
+                                    Mark Attendance
+                                </button>
+                            </c:when>
+                            <c:when test="${not empty todayAtt and empty todayAtt.checkOut}">
+                                <button onclick="openUpdateModal('${todayAtt.id}')" class="btn-primary" style="background: #ef4444; border: none;">
+                                    <span class="material-symbols-outlined">logout</span>
+                                    Check Out Now
+                                </button>
+                            </c:when>
+                            <c:otherwise>
+                                <div style="display: flex; align-items: center; gap: 8px; background: #ecfdf5; color: #059669; padding: 10px 16px; border-radius: 12px; font-weight: 700; font-size: 14px;">
+                                    <span class="material-symbols-outlined">verified_user</span>
+                                    Today's Attendance Completed
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
 
                     <!-- Stats Grid -->
@@ -450,10 +466,20 @@
                 <div id="attendance" class="tab-content">
                     <div class="page-header">
                         <h1 class="page-title">Attendance Logs</h1>
-                        <button onclick="openModal('attendanceModal')" class="btn-primary staff-bg-gradient">
-                            <span class="material-symbols-outlined">add</span>
-                            Mark Attendance
-                        </button>
+                        <c:choose>
+                            <c:when test="${empty todayAtt}">
+                                <button onclick="openModal('attendanceModal')" class="btn-primary staff-bg-gradient">
+                                    <span class="material-symbols-outlined">add</span>
+                                    Mark Attendance
+                                </button>
+                            </c:when>
+                            <c:when test="${not empty todayAtt and empty todayAtt.checkOut}">
+                                <button onclick="openUpdateModal('${todayAtt.id}')" class="btn-primary" style="background: #ef4444; border: none;">
+                                    <span class="material-symbols-outlined">logout</span>
+                                    Check Out Now
+                                </button>
+                            </c:when>
+                        </c:choose>
                     </div>
                     <div class="section-card">
                         <table class="data-table">

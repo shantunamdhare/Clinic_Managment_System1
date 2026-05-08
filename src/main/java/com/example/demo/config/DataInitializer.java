@@ -32,7 +32,9 @@ public class DataInitializer {
             MedicineRepository medicineRepo,
             InvoiceRepository invoiceRepo,
             StaffShiftRepository shiftRepo,
-            StaffAttendanceRepository attendanceRepo) {
+            StaffAttendanceRepository attendanceRepo,
+            PrescriptionItemRepository prescriptionItemRepo,
+            NotificationRepository notificationRepo) {
         
         return args -> {
             // 1. Initialize Users / Roles
@@ -59,15 +61,18 @@ public class DataInitializer {
                 System.out.println(">> Created Default Lab User: shyam@gmail.com / 1234");
             }
 
-            // Clear old dummy data from the persistent database (Selective)
-            attendanceRepo.deleteAll();
-            shiftRepo.deleteAll();
-            labReportRepository.deleteAll();
-            labRequestRepository.deleteAll();
-            prescriptionRepository.deleteAll();
-            visitRepository.deleteAll();
-            appointmentRepository.deleteAll();
-            patientRepository.deleteAll();
+            // Clear old dummy data only if specifically requested or if database is empty
+            // notificationRepo.deleteAll();
+            // attendanceRepo.deleteAll();
+            // shiftRepo.deleteAll();
+            // labReportRepository.deleteAll();
+            // labRequestRepository.deleteAll();
+            // prescriptionItemRepo.deleteAll(); 
+            // prescriptionRepository.deleteAll();
+            // invoiceRepo.deleteAll(); 
+            // visitRepository.deleteAll();
+            // appointmentRepository.deleteAll();
+            // patientRepository.deleteAll();
 
             // 2. Initialize Lab Tests
             if (labTestRepo.count() == 0) {
@@ -111,7 +116,7 @@ public class DataInitializer {
                 p1.setDateOfBirth(LocalDate.of(1995, 8, 15));
                 p1.setContactNumber("+91 98765 43210");
                 p1.setPriority("High");
-                p1.setDeliveryStatus("Pending Pickup");
+                p1.setDeliveryStatus("Not Required");
                 patientRepository.save(p1);
                 
                 Patient p2 = new Patient();
@@ -121,7 +126,7 @@ public class DataInitializer {
                 p2.setDateOfBirth(LocalDate.of(1982, 11, 22));
                 p2.setContactNumber("9988776655");
                 p2.setPriority("Normal");
-                p2.setDeliveryStatus("Not Required");
+                p2.setDeliveryStatus("Pending Pickup");
                 patientRepository.save(p2);
                 
                 System.out.println(">> Sample patients initialized.");
@@ -162,6 +167,7 @@ public class DataInitializer {
                 Invoice inv = new Invoice();
                 inv.setPatient(p);
                 inv.setTotalAmount(500.0);
+                inv.setTaxAmount(23.81); // Example tax for total 500
                 inv.setPaymentMethod("Cash");
                 inv.setPaymentStatus("Paid");
                 inv.setInvoiceNumber("INV-SAMPLE-001");

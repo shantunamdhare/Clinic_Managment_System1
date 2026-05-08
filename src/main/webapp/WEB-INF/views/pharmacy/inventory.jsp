@@ -18,6 +18,22 @@
         .badge-success { background: #ecfdf5; color: #10b981; }
         .badge-warning { background: #fffbeb; color: #f59e0b; }
         .badge-danger { background: #fef2f2; color: #ef4444; }
+        
+        .btn-primary { background: #4f46e5; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .btn-primary:hover { background: #4338ca; }
+        .btn-outline { background: transparent; border: 1px solid #e2e8f0; color: #64748b; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .btn-outline:hover { background: #f8fafc; }
+        
+        .add-form-container { display: none; background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        .form-group label { font-size: 13px; font-weight: 600; color: #64748b; }
+        .form-group input, .form-group select { padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; }
+        .form-actions { margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end; }
+        
+        .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
+        .alert-success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+        .alert-danger { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
     </style>
 </head>
 <body>
@@ -44,8 +60,68 @@
                 </div>
             </header>
             <div class="grid-card">
-                <div class="card-header"><h2><i class="fas fa-pills"></i> Inventory & Stock Tracking</h2></div>
+                <div class="card-header">
+                    <h2><i class="fas fa-pills"></i> Inventory & Stock Tracking</h2>
+                    <button class="btn-primary" onclick="toggleAddForm()">
+                        <i class="fas fa-plus me-2"></i> Add New Medicine
+                    </button>
+                </div>
                 <div class="card-body">
+                    <!-- Flash Messages -->
+                    <c:if test="${not empty successMessage}">
+                        <div class="alert alert-success"><i class="fas fa-check-circle me-2"></i> ${successMessage}</div>
+                    </c:if>
+                    <c:if test="${not empty errorMessage}">
+                        <div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i> ${errorMessage}</div>
+                    </c:if>
+
+                    <!-- Add Medicine Form -->
+                    <div id="addMedicineForm" class="add-form-container">
+                        <h3 style="margin-bottom: 20px; font-size: 18px; color: #1e293b;">Register New Medicine Stock</h3>
+                        <form action="/pharmacy/inventory/add" method="POST">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Medicine Name</label>
+                                    <input type="text" name="name" placeholder="e.g. Paracetamol" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Category</label>
+                                    <select name="category" required>
+                                        <option value="Tablet">Tablet</option>
+                                        <option value="Syrup">Syrup</option>
+                                        <option value="Capsule">Capsule</option>
+                                        <option value="Injection">Injection</option>
+                                        <option value="Ointment">Ointment</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Manufacturer</label>
+                                    <input type="text" name="manufacturer" placeholder="e.g. GSK" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Stock Quantity</label>
+                                    <input type="number" name="stockLevel" min="0" placeholder="0" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Unit Price (₹)</label>
+                                    <input type="number" name="price" step="0.01" min="0" placeholder="0.00" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Expiry Date</label>
+                                    <input type="date" name="expiryDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Batch Number</label>
+                                    <input type="text" name="batchNumber" placeholder="e.g. BT-999" required>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn-outline" onclick="toggleAddForm()">Cancel</button>
+                                <button type="submit" class="btn-primary">Save Medicine</button>
+                            </div>
+                        </form>
+                    </div>
                     <table>
                         <thead><tr><th>Medicine Name</th><th>Batch #</th><th>Stock</th><th>Price</th><th>Expiry Date</th><th>Status</th></tr></thead>
                         <tbody>
@@ -70,5 +146,16 @@
             </div>
         </main>
     </div>
+    <script>
+        function toggleAddForm() {
+            const form = document.getElementById('addMedicineForm');
+            if (form.style.display === 'block') {
+                form.style.display = 'none';
+            } else {
+                form.style.display = 'block';
+                form.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    </script>
 </body>
 </html>
