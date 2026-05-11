@@ -39,13 +39,22 @@ public class DataInitializer {
         return args -> {
             // 1. Initialize Users / Roles
             seedUser(userRepository, passwordEncoder, "admin@gmail.com", "admin123", "Admin", "System Admin");
-            seedUser(userRepository, passwordEncoder, "doctor@gmail.com", "1234", "Doctor", "Dr. Emily Chen");
-            seedUser(userRepository, passwordEncoder, "receptionist@gmail.com", "1234", "Receptionist", "Sarah Receptionist");
-            seedUser(userRepository, passwordEncoder, "pharmacy@gmail.com", "1234", "Pharmacy", "John Pharmacist");
-            seedUser(userRepository, passwordEncoder, "delivery@gmail.com", "1234", "Delivery", "Mike Delivery");
-            seedUser(userRepository, passwordEncoder, "recep@gmail.com", "1234", "RECEPTIONIST", "Riya Sharma");
-            seedUser(userRepository, passwordEncoder, "pharmacist@gmail.com", "1234", "Pharmacy", "Arjun Sharma");
 
+            // --- Database Cleanup: Remove unwanted seed users from previous runs ---
+            List<String> usersToDelete = List.of(
+                "doctor@gmail.com", "receptionist@gmail.com", "pharmacy@gmail.com", 
+                "delivery@gmail.com", "recep@gmail.com", "pharmacist@gmail.com"
+            );
+            for (String email : usersToDelete) {
+                userRepository.findByEmail(email).ifPresent(u -> {
+                    // Delete associated records first to avoid constraint violations
+                    shiftRepo.deleteAll(shiftRepo.findByUser(u));
+                    attendanceRepo.deleteAll(attendanceRepo.findByStaff(u));
+                    notificationRepo.deleteAll(notificationRepo.findByUserOrderByCreatedAtDesc(u));
+                    userRepository.delete(u);
+                    System.out.println(">> Deleted unwanted user: " + email);
+                });
+            }
             // Lab User with specific details
             if (userRepository.findByEmail("shyam@gmail.com").isEmpty()) {
                 User labUser = new User();
@@ -119,72 +128,16 @@ public class DataInitializer {
             }
 
             // 3. Initialize Patients
-            if (patientRepository.count() == 0) {
-                Patient p1 = new Patient();
-                p1.setName("Emily Johnson");
-                p1.setPatientId("PID-5042");
-                p1.setGender("Female");
-                p1.setDateOfBirth(LocalDate.of(1995, 8, 15));
-                p1.setContactNumber("+91 98765 43210");
-                p1.setPriority("High");
-                p1.setDeliveryStatus("Not Required");
-                patientRepository.save(p1);
-                
-                Patient p2 = new Patient();
-                p2.setName("Robert Wilson");
-                p2.setPatientId("PID-6021");
-                p2.setGender("Male");
-                p2.setDateOfBirth(LocalDate.of(1982, 11, 22));
-                p2.setContactNumber("9988776655");
-                p2.setPriority("Normal");
-                p2.setDeliveryStatus("Pending Pickup");
-                patientRepository.save(p2);
-                
-                System.out.println(">> Sample patients initialized.");
-            }
+
             
             // Initialize Pharmacy Medicines
-            if (medicineRepo.count() == 0) {
-                medicineRepo.save(new Medicine("Paracetamol 500mg", "Tablet", "GSK", 100, 20.0, LocalDate.now().plusYears(2), "BT-001"));
-                medicineRepo.save(new Medicine("Amoxicillin 250mg", "Capsule", "Pfizer", 5, 150.0, LocalDate.now().plusMonths(1), "BT-002"));
-                medicineRepo.save(new Medicine("Cough Syrup", "Syrup", "Abbott", 50, 85.0, LocalDate.now().plusMonths(6), "BT-003"));
-                medicineRepo.save(new Medicine("Insulin Glargine", "Injection", "Sanofi", 12, 1200.0, LocalDate.now().plusDays(15), "BT-004"));
-                System.out.println(">> Sample medicines initialized.");
-            }
+
 
             // Initialize Staff Shifts and Attendance for some users
-            userRepository.findByEmail("pharmacist@gmail.com").ifPresent(pharmacist -> {
-                if (shiftRepo.findByUser(pharmacist).isEmpty()) {
-                    StaffShift shift = new StaffShift();
-                    shift.setUser(pharmacist);
-                    shift.setDayOfWeek("Monday");
-                    shift.setStartTime(LocalTime.of(9, 0));
-                    shift.setEndTime(LocalTime.of(17, 0));
-                    shiftRepo.save(shift);
-                }
-                if (attendanceRepo.findByStaff(pharmacist).isEmpty()) {
-                    StaffAttendance att = new StaffAttendance();
-                    att.setStaff(pharmacist);
-                    att.setDate(LocalDate.now());
-                    att.setCheckIn(LocalTime.now().minusHours(1));
-                    att.setStatus("Present");
-                    attendanceRepo.save(att);
-                }
-            });
+
 
             // Initialize Sample Invoice
-            if (invoiceRepo.count() == 0 && !patientRepository.findAll().isEmpty()) {
-                Patient p = patientRepository.findAll().get(0);
-                Invoice inv = new Invoice();
-                inv.setPatient(p);
-                inv.setTotalAmount(500.0);
-                inv.setTaxAmount(23.81); // Example tax for total 500
-                inv.setPaymentMethod("Cash");
-                inv.setPaymentStatus("Paid");
-                inv.setInvoiceNumber("INV-SAMPLE-001");
-                inv.setInvoiceDate(LocalDateTime.now());
-                invoiceRepo.save(inv);
-            }
+
             
             System.out.println(">> Database initialization complete and stable.");
         };

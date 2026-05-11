@@ -7,145 +7,195 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory | MediCare+ Pharmacy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/pharmacy.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { text-align: left; padding: 12px; border-bottom: 2px solid #e2e8f0; color: #64748b; font-size: 13px; text-transform: uppercase; }
-        td { padding: 14px 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-        .badge-pill { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-        .badge-success { background: #ecfdf5; color: #10b981; }
-        .badge-warning { background: #fffbeb; color: #f59e0b; }
-        .badge-danger { background: #fef2f2; color: #ef4444; }
-        
-        .btn-primary { background: #4f46e5; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-        .btn-primary:hover { background: #4338ca; }
-        .btn-outline { background: transparent; border: 1px solid #e2e8f0; color: #64748b; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-        .btn-outline:hover { background: #f8fafc; }
-        
-        .add-form-container { display: none; background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
-        .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        .form-group { display: flex; flex-direction: column; gap: 8px; }
-        .form-group label { font-size: 13px; font-weight: 600; color: #64748b; }
-        .form-group input, .form-group select { padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; }
-        .form-actions { margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end; }
-        
-        .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
-        .alert-success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
-        .alert-danger { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        .form-control-premium {
+            height: 50px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border);
+            padding: 0 20px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .form-control-premium:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-light);
+        }
+        .add-inventory-card {
+            display: none;
+            background: white;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow-lg);
+            animation: slideDown 0.4s ease-out;
+        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
     <div class="pharmacy-container">
+        <!-- Sidebar -->
         <aside class="sidebar">
-            <div class="sidebar-logo"><i class="fas fa-plus-square"></i> <span>MediCare+ <span>Pharmacy</span></span></div>
+            <div class="sidebar-logo">
+                <i class="fas fa-prescription-bottle-alt"></i>
+                <span>MediCare+ <span>Pharmacy</span></span>
+            </div>
             <nav class="sidebar-nav">
-                <a href="/pharmacy-dashboard" class="nav-link"><i class="fas fa-th-large"></i> Dashboard</a>
-                <a href="/pharmacy/inventory" class="nav-link active"><i class="fas fa-pills"></i> Stock & Expiry</a>
+                <a href="/pharmacy-dashboard" class="nav-link"><i class="fas fa-grid-2"></i> Dashboard</a>
+                <a href="/pharmacy/inventory" class="nav-link active"><i class="fas fa-pills"></i> Inventory</a>
                 <a href="/pharmacy/billing" class="nav-link"><i class="fas fa-file-invoice-dollar"></i> Medicine Issue</a>
                 <a href="/pharmacy/sales" class="nav-link"><i class="fas fa-chart-line"></i> Sales Summary</a>
-                <a href="/pharmacy/staff" class="nav-link"><i class="fas fa-users"></i> Staff & Shifts</a>
+                <a href="/pharmacy/staff" class="nav-link"><i class="fas fa-users-gear"></i> Staff Management</a>
+                <a href="/pharmacy/leave" class="nav-link"><i class="fas fa-calendar-minus"></i> Leave Request</a>
             </nav>
-            <div class="sidebar-footer"><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></div>
+            <div class="sidebar-footer">
+                <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
         </aside>
+
         <main class="main-content">
             <header class="main-header">
-                <div class="header-search"><i class="fas fa-search"></i><input type="text" placeholder="Search medicines..."></div>
+                <div class="header-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search medicines by name, batch, or manufacturer...">
+                </div>
                 <div class="header-user">
-                    <div class="user-profile">
-                        <img src="https://ui-avatars.com/api/?name=${user.fullName}&background=4f46e5&color=fff" alt="User">
-                        <div class="user-info"><span class="name">${user.fullName}</span><span class="role">Pharmacist</span></div>
-                    </div>
+                    <a href="/pharmacy/profile" class="text-decoration-none">
+                        <div class="user-profile">
+                            <c:choose>
+                                <c:when test="${not empty user.profileImage}">
+                                    <img src="${user.profileImage}" alt="User">
+                                </c:when>
+                                <c:otherwise>
+                                    <img src="https://ui-avatars.com/api/?name=${user.fullName}&background=4f46e5&color=fff&bold=true" alt="User">
+                                </c:otherwise>
+                            </c:choose>
+                            <div class="user-info">
+                                <span class="name">${user.fullName}</span>
+                                <span class="role">Chief Pharmacist</span>
+                            </div>
+                        </div>
+                    </a>
                 </div>
             </header>
+
+            <c:if test="${not empty successMessage}">
+                <div class="alert alert-success border-0 shadow-sm d-flex align-items-center gap-3 mb-4" style="border-radius: 16px;">
+                    <i class="fas fa-check-circle fs-5"></i>
+                    <span class="fw-bold">${successMessage}</span>
+                </div>
+            </c:if>
+
+            <!-- Add Inventory Form -->
+            <div id="addMedicineForm" class="add-inventory-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="fw-bold m-0" style="font-size: 20px; color: var(--text-main);">Register New Stock</h3>
+                    <button class="btn btn-light rounded-circle" onclick="toggleAddForm()"><i class="fas fa-times"></i></button>
+                </div>
+                <form action="/pharmacy/inventory/add" method="POST">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <label class="payment-label">Medicine Name</label>
+                            <input type="text" name="name" class="form-control form-control-premium" placeholder="e.g. Paracetamol" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="payment-label">Category</label>
+                            <select name="category" class="form-select form-control-premium" required>
+                                <option value="Tablet">Tablet</option>
+                                <option value="Syrup">Syrup</option>
+                                <option value="Capsule">Capsule</option>
+                                <option value="Injection">Injection</option>
+                                <option value="Ointment">Ointment</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="payment-label">Manufacturer</label>
+                            <input type="text" name="manufacturer" class="form-control form-control-premium" placeholder="e.g. GSK Pharma" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="payment-label">Stock Quantity</label>
+                            <input type="number" name="stockLevel" min="0" class="form-control form-control-premium" placeholder="0" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="payment-label">Unit Price (₹)</label>
+                            <input type="number" name="price" step="0.01" min="0" class="form-control form-control-premium" placeholder="0.00" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="payment-label">Expiry Date</label>
+                            <input type="date" name="expiryDate" class="form-control form-control-premium" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="payment-label">Batch Number</label>
+                            <input type="text" name="batchNumber" class="form-control form-control-premium" placeholder="e.g. BT-2024" required>
+                        </div>
+                    </div>
+                    <div class="mt-4 d-flex gap-3">
+                        <button type="submit" class="btn btn-primary px-5 py-3 rounded-12 fw-bold shadow-sm">
+                            <i class="fas fa-plus me-2"></i> Save to Inventory
+                        </button>
+                    </div>
+                </form>
+            </div>
+
             <div class="grid-card">
                 <div class="card-header">
-                    <h2><i class="fas fa-pills"></i> Inventory & Stock Tracking</h2>
-                    <button class="btn-primary" onclick="toggleAddForm()">
+                    <h2><i class="fas fa-warehouse text-primary"></i> Current Stock Status</h2>
+                    <button class="btn-action-main" onclick="toggleAddForm()">
                         <i class="fas fa-plus me-2"></i> Add New Medicine
                     </button>
                 </div>
-                <div class="card-body">
-                    <!-- Flash Messages -->
-                    <c:if test="${not empty successMessage}">
-                        <div class="alert alert-success"><i class="fas fa-check-circle me-2"></i> ${successMessage}</div>
-                    </c:if>
-                    <c:if test="${not empty errorMessage}">
-                        <div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i> ${errorMessage}</div>
-                    </c:if>
-
-                    <!-- Add Medicine Form -->
-                    <div id="addMedicineForm" class="add-form-container">
-                        <h3 style="margin-bottom: 20px; font-size: 18px; color: #1e293b;">Register New Medicine Stock</h3>
-                        <form action="/pharmacy/inventory/add" method="POST">
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label>Medicine Name</label>
-                                    <input type="text" name="name" placeholder="e.g. Paracetamol" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Category</label>
-                                    <select name="category" required>
-                                        <option value="Tablet">Tablet</option>
-                                        <option value="Syrup">Syrup</option>
-                                        <option value="Capsule">Capsule</option>
-                                        <option value="Injection">Injection</option>
-                                        <option value="Ointment">Ointment</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Manufacturer</label>
-                                    <input type="text" name="manufacturer" placeholder="e.g. GSK" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Stock Quantity</label>
-                                    <input type="number" name="stockLevel" min="0" placeholder="0" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Unit Price (₹)</label>
-                                    <input type="number" name="price" step="0.01" min="0" placeholder="0.00" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Expiry Date</label>
-                                    <input type="date" name="expiryDate" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Batch Number</label>
-                                    <input type="text" name="batchNumber" placeholder="e.g. BT-999" required>
-                                </div>
-                            </div>
-                            <div class="form-actions">
-                                <button type="button" class="btn-outline" onclick="toggleAddForm()">Cancel</button>
-                                <button type="submit" class="btn-primary">Save Medicine</button>
-                            </div>
-                        </form>
-                    </div>
-                    <table>
-                        <thead><tr><th>Medicine Name</th><th>Batch #</th><th>Stock</th><th>Price</th><th>Expiry Date</th><th>Status</th></tr></thead>
-                        <tbody>
-                            <c:forEach var="med" items="${medicines}">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="mb-0">
+                            <thead>
                                 <tr>
-                                    <td><strong>${med.name}</strong></td>
-                                    <td>${med.batchNumber}</td>
-                                    <td>${med.stockLevel} units</td>
-                                    <td>₹${med.price}</td>
-                                    <td>${med.expiryDate}</td>
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${med.stockLevel <= 10}"><span class="badge-pill badge-danger">Low Stock</span></c:when>
-                                            <c:otherwise><span class="badge-pill badge-success">Available</span></c:otherwise>
-                                        </c:choose>
-                                    </td>
+                                    <th>Medicine Name</th>
+                                    <th>Manufacturer</th>
+                                    <th>Batch #</th>
+                                    <th>Stock Level</th>
+                                    <th>Unit Price</th>
+                                    <th>Expiry</th>
+                                    <th>Status</th>
                                 </tr>
-                            </c:forEach>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="med" items="${medicines}">
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold text-dark">${med.name}</div>
+                                            <div class="text-muted" style="font-size: 11px;">${med.category}</div>
+                                        </td>
+                                        <td>${med.manufacturer}</td>
+                                        <td><span class="badge bg-light text-secondary border px-2 py-1">${med.batchNumber}</span></td>
+                                        <td><span class="fw-bold">${med.stockLevel}</span> units</td>
+                                        <td>₹${med.price}</td>
+                                        <td>
+                                            <span class="small ${med.expiryDate.isBefore(java.time.LocalDate.now().plusMonths(3)) ? 'text-danger fw-bold' : ''}">
+                                                ${med.expiryDate}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${med.stockLevel <= 10}"><span class="badge-pill badge-danger">Low Stock</span></c:when>
+                                                <c:otherwise><span class="badge-pill badge-success">Optimal</span></c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
+
     <script>
         function toggleAddForm() {
             const form = document.getElementById('addMedicineForm');
@@ -153,7 +203,7 @@
                 form.style.display = 'none';
             } else {
                 form.style.display = 'block';
-                form.scrollIntoView({ behavior: 'smooth' });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
     </script>
