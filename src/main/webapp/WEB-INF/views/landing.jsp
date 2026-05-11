@@ -199,6 +199,36 @@
             font-weight: 600 !important;
             font-size: 14px !important;
         }
+
+        /* WhatsApp Floating Button - Round Icon Version */
+        .whatsapp-float {
+            position: fixed !important;
+            bottom: 40px !important;
+            right: 40px !important;
+            background: #25d366 !important;
+            color: white !important;
+            width: 60px !important;
+            height: 60px !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-decoration: none !important;
+            box-shadow: 0 12px 30px rgba(37, 211, 102, 0.45) !important;
+            z-index: 99999 !important;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+            border: 2px solid rgba(255, 255, 255, 0.2) !important;
+        }
+        .whatsapp-float:hover {
+            transform: translateY(-8px) scale(1.1) rotate(10deg) !important;
+            box-shadow: 0 18px 40px rgba(37, 211, 102, 0.5) !important;
+            background: #20ba5a !important;
+        }
+        .whatsapp-icon {
+            width: 32px !important;
+            height: 32px !important;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)) !important;
+        }
     </style>
 </head>
 <body>
@@ -246,24 +276,7 @@
                 </h2>
                 <p>Manage appointments, patients, labs, pharmacy, billing, staff and more &mdash; from a single, secure and intelligent platform.</p>
 
-                <div class="hero-features">
-                    <div class="hero-feature-card">
-                        <div class="feature-icon secure">&#x1F6E1;</div>
-                        <span>Secure &amp; Reliable</span>
-                    </div>
-                    <div class="hero-feature-card">
-                        <div class="feature-icon cloud">&#x2601;</div>
-                        <span>Cloud Based</span>
-                    </div>
-                    <div class="hero-feature-card">
-                        <div class="feature-icon analytics">&#x1F4CA;</div>
-                        <span>Real-time Analytics</span>
-                    </div>
-                    <div class="hero-feature-card">
-                        <div class="feature-icon mobile">&#x1F4F1;</div>
-                        <span>Mobile Friendly</span>
-                    </div>
-                </div>
+
             </div>
 
             <!-- Right Side - Login/Register Modal -->
@@ -349,7 +362,8 @@
                                 <div class="form-group">
                                     <span class="input-icon">&#x1F464;</span>
                                     <select name="role" id="registerRoleSelect" class="form-select" required onchange="toggleRoleFields()">
-
+                                        <option value="" disabled selected>Select Your Role</option>
+                                        <option value="Admin">Admin</option>
                                         <option value="Doctor">Doctor</option>
                                         <option value="Receptionist">Receptionist</option>
                                         <option value="Patient">Patient</option>
@@ -490,8 +504,8 @@
                                          <input type="text" name="staffPhone" id="staffPhone" class="form-input" placeholder="Contact Number">
                                      </div>
                                      <div class="form-group" style="margin-bottom: 10px;">
-                                         <span class="input-icon">&#x1F3AB;</span>
-                                         <input type="text" name="staffId" id="staffId" class="form-input" placeholder="Staff Employee ID">
+                                         <span class="input-icon">&#x1F464;</span>
+                                         <input type="text" name="staffId" id="staffId" class="form-input" placeholder="Staff Role (e.g. Nurse, Technician)" required>
                                      </div>
                                      <div class="form-group" style="margin-bottom: 0;">
                                          <span class="input-icon">&#x1F3E5;</span>
@@ -830,10 +844,15 @@
           </div>
     
           <!-- Right Form -->
-          <form class="contact-form">
-            <input type="text" placeholder="Your Name" required />
-            <input type="email" placeholder="Your Email" required />
-            <textarea placeholder="Your Message" required></textarea>
+          <form class="contact-form" action="/submit-contact" method="post">
+            <c:if test="${not empty contactSuccess}">
+                <div style="background: #ecfdf5; color: #059669; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; text-align: center; border: 1px solid #10b981;">
+                    ${contactSuccess}
+                </div>
+            </c:if>
+            <input type="text" name="name" placeholder="Your Name" required />
+            <input type="email" name="email" placeholder="Your Email" required />
+            <textarea name="message" placeholder="Your Message" required></textarea>
             <button type="submit">Send Message</button>
           </form>
         </div>
@@ -888,9 +907,10 @@
             <h3>Newsletter</h3>
             <p>Subscribe to our newsletter to get updates and offers.</p>
             <div class="newsletter-form">
-              <input type="email" placeholder="Enter your email" />
-              <button type="button">Subscribe</button>
+              <input type="email" id="newsletterEmail" placeholder="Enter your email" />
+              <button type="button" onclick="subscribeNewsletter()">Subscribe</button>
             </div>
+            <div id="newsletterStatus" style="margin-top: 12px; font-size: 13px; font-weight: 700; display: none; color: #10b981; animation: fadeIn 0.3s ease;"></div>
           </div>
         </div>
 
@@ -1156,6 +1176,33 @@
                 }
             }
         }
+        function subscribeNewsletter() {
+            const emailInput = document.getElementById('newsletterEmail');
+            const statusDiv = document.getElementById('newsletterStatus');
+            const email = emailInput.value;
+            
+            if (email && email.includes('@')) {
+                // Send to server
+                fetch('/newsletter/subscribe?email=' + encodeURIComponent(email), {
+                    method: 'POST'
+                }).then(response => {
+                    statusDiv.innerText = "✓ Thank you! You've been subscribed.";
+                    statusDiv.style.display = "block";
+                    statusDiv.style.color = "#10b981";
+                    emailInput.value = "";
+                    setTimeout(() => { statusDiv.style.display = "none"; }, 5000);
+                }).catch(err => {
+                    statusDiv.innerText = "⚠ Server error. Please try again.";
+                    statusDiv.style.display = "block";
+                    statusDiv.style.color = "#ef4444";
+                });
+            } else {
+                statusDiv.innerText = "⚠ Please enter a valid email address.";
+                statusDiv.style.display = "block";
+                statusDiv.style.color = "#ef4444";
+            }
+        }
+
         // Hero Background Slider Logic
         document.addEventListener("DOMContentLoaded", function () {
           const heroImages = [
@@ -1199,6 +1246,11 @@
         });
 
     </script>
+
+    <!-- WhatsApp Integration Button -->
+    <a href="https://wa.me/919876543210" class="whatsapp-float" target="_blank" title="Chat with us on WhatsApp">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="whatsapp-icon" alt="WhatsApp">
+    </a>
 
 </body>
 </html>

@@ -59,6 +59,15 @@ public class MainController {
     private StaffShiftRepository staffShiftRepo;
 
     @Autowired
+    private VisitorMessageRepository visitorMessageRepository;
+
+    @Autowired
+    private LeaveRequestRepository leaveRequestRepository;
+
+    @Autowired
+    private NewsletterRepository newsletterRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -260,6 +269,7 @@ public class MainController {
 
         // All staff
         model.addAttribute("allUsers", userRepository.findAll());
+        model.addAttribute("allAttendances", attendanceRepo.findAll());
 
         // Recent appointments
         model.addAttribute("recentAppointments", appointmentRepository.findTop10ByOrderByAppointmentDateDescAppointmentTimeDesc());
@@ -295,9 +305,57 @@ public class MainController {
                     return map;
                 })
                 .collect(java.util.stream.Collectors.toList());
-        model.addAttribute("pendingBills", pendingBills);
+        // Visitor messages
+        model.addAttribute("visitorMessages", visitorMessageRepository.findAllByOrderBySubmittedAtDesc());
+
+        // Staff Leave Requests
+        model.addAttribute("leaveRequests", leaveRequestRepository.findAllByOrderBySubmittedAtDesc());
+
+        // Newsletter Subscriptions
+        model.addAttribute("newsletterSubscriptions", newsletterRepository.findAllByOrderBySubscribedAtDesc());
+        model.addAttribute("totalSubscribers", newsletterRepository.count());
 
         return "admin-dashboard";
+    }
+
+    @PostMapping("/newsletter/subscribe")
+    public String subscribeNewsletter(@RequestParam String email, RedirectAttributes ra) {
+        if (newsletterRepository.findByEmail(email).isPresent()) {
+            ra.addFlashAttribute("newsletterError", "This email is already subscribed!");
+        } else {
+            newsletterRepository.save(new Newsletter(email));
+            ra.addFlashAttribute("newsletterSuccess", "Thank you for subscribing!");
+        }
+        return "redirect:/";
+    }
+
+    @PostMapping("/admin/newsletter/send")
+    public String sendNewsletter(@RequestParam String subject, @RequestParam String message, RedirectAttributes ra) {
+        // Logic to "send" emails (in a real app, this would use JavaMailSender)
+        long count = newsletterRepository.count();
+        ra.addFlashAttribute("newsletterSuccess", "Update successfully sent to " + count + " subscribers!");
+        return "redirect:/admin-dashboard#newsletter-section";
+    }
+
+    @PostMapping("/admin/newsletter/remove/{id}")
+    public String removeSubscriber(@PathVariable Long id, RedirectAttributes ra) {
+        newsletterRepository.deleteById(id);
+        ra.addFlashAttribute("newsletterSuccess", "Subscriber removed successfully.");
+        return "redirect:/admin-dashboard#newsletter-section";
+    }
+
+    @PostMapping("/submit-contact")
+    public String submitContact(
+            @RequestParam String name,
+            @RequestParam String email,
+            @RequestParam String message,
+            RedirectAttributes redirectAttributes) {
+        
+        VisitorMessage visitorMessage = new VisitorMessage(name, email, message);
+        visitorMessageRepository.save(visitorMessage);
+        
+        redirectAttributes.addFlashAttribute("contactSuccess", "Thank you for your message! We will get back to you soon.");
+        return "redirect:/#contact";
     }
 
     @GetMapping("/doctor-dashboard")
@@ -561,6 +619,9 @@ public class MainController {
                 .findFirst()
                 .orElse(null);
         model.addAttribute("todayAtt", todayAtt);
+        
+        // Staff Leave History
+        model.addAttribute("myLeaveRequests", leaveRequestRepository.findByUserOrderBySubmittedAtDesc(user));
         
         return "staff-dashboard";
     }
@@ -1030,4 +1091,48 @@ public class MainController {
             default: return "redirect:/";
         }
     }
+    @PostMapping("/staff/apply-leave")
+    public String applyLeave(
+            @RequestParam String reason,
+            @RequestParam String startDate,
+            @RequestParam String endDate,
+            HttpSession session,
+            RedirectAttributes ra) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/";
+
+        try {
+            LeaveRequest lr = new LeaveRequest(user, reason, LocalDate.parse(startDate), LocalDate.parse(endDate));
+            leaveRequestRepository.save(lr);
+            ra.addFlashAttribute("successMessage", "Leave request submitted successfully!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Error submitting leave request: " + e.getMessage());
+        }
+        return "redirect:/staff-dashboard";
+    }
+
+    @PostMapping("/admin/approve-leave")
+    public String approveLeave(@RequestParam Long id, RedirectAttributes ra) {
+        Optional<LeaveRequest> opt = leaveRequestRepository.findById(id);
+        if (opt.isPresent()) {
+            LeaveRequest lr = opt.get();
+            lr.setStatus("Approved");
+            leaveRequestRepository.save(lr);
+            ra.addFlashAttribute("successMessage", "Leave request approved!");
+        }
+        return "redirect:/admin-dashboard";
+    }
+
+    @PostMapping("/admin/reject-leave")
+    public String rejectLeave(@RequestParam Long id, RedirectAttributes ra) {
+        Optional<LeaveRequest> opt = leaveRequestRepository.findById(id);
+        if (opt.isPresent()) {
+            LeaveRequest lr = opt.get();
+            lr.setStatus("Rejected");
+            leaveRequestRepository.save(lr);
+            ra.addFlashAttribute("successMessage", "Leave request rejected!");
+        }
+        return "redirect:/admin-dashboard";
+    }
 }
+
