@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -367,6 +368,57 @@ public class MainController {
         model.addAttribute("visitTimeline", visitRepository.findByPatientOrderByVisitDateDesc(patient));
         model.addAttribute("doctors", userRepository.findByRole("Doctor"));
 
+        // Dynamic Stats Calculation
+        LocalDate today = LocalDate.now();
+        String phoneStr = patient.getContactNumber();
+        
+        // 1. Upcoming Appointment
+        String upcomingApptStr = "No appointments";
+        List<Appointment> allAppts;
+        if (phoneStr != null && !phoneStr.equalsIgnoreCase("N/A")) {
+            allAppts = appointmentRepository.findByPatient_ContactNumberOrderByAppointmentDateDesc(phoneStr);
+        } else {
+            allAppts = appointmentRepository.findByPatientOrderByAppointmentDateDesc(patient);
+        }
+        
+        Optional<Appointment> nextAppt = allAppts.stream()
+            .filter(a -> a.getAppointmentDate().isAfter(today) || (a.getAppointmentDate().isEqual(today) && a.getAppointmentTime().isAfter(LocalTime.now())))
+            .sorted(Comparator.comparing(Appointment::getAppointmentDate).thenComparing(Appointment::getAppointmentTime))
+            .findFirst();
+        
+        if (nextAppt.isPresent()) {
+            upcomingApptStr = nextAppt.get().getAppointmentDate().format(DateTimeFormatter.ofPattern("MMM dd")) + ", " + 
+                            nextAppt.get().getAppointmentTime().format(DateTimeFormatter.ofPattern("hh:mm a"));
+        }
+        model.addAttribute("upcomingApptStr", upcomingApptStr);
+
+        // 2. Active Prescriptions
+        long activeRXCount = 0;
+        List<Prescription> allRX;
+        if (phoneStr != null && !phoneStr.equalsIgnoreCase("N/A")) {
+            allRX = prescriptionRepository.findByPatient_ContactNumberOrderByCreatedAtDesc(phoneStr);
+        } else {
+            allRX = prescriptionRepository.findByPatient(patient);
+        }
+        activeRXCount = allRX.stream()
+            .filter(p -> !"Dispensed".equalsIgnoreCase(p.getStatus()))
+            .count();
+        model.addAttribute("activeRXCount", activeRXCount);
+
+        // 3. Pending Bills
+        double pendingAmount = 0;
+        List<Invoice> allInvoices;
+        if (phoneStr != null && !phoneStr.equalsIgnoreCase("N/A")) {
+            allInvoices = invoiceRepository.findByPatient_ContactNumberOrderByInvoiceDateDesc(phoneStr);
+        } else {
+            allInvoices = invoiceRepository.findByPatient(patient);
+        }
+        pendingAmount = allInvoices.stream()
+            .filter(i -> "Pending".equalsIgnoreCase(i.getPaymentStatus()) || "Partially Paid".equalsIgnoreCase(i.getPaymentStatus()))
+            .mapToDouble(Invoice::getTotalAmount)
+            .sum();
+        model.addAttribute("pendingAmount", pendingAmount);
+
         return "patient-dashboard";
     }
 
@@ -537,6 +589,11 @@ public class MainController {
         patient.setPatientId("PID-" + (int)(Math.random() * 9000 + 1000));
         patient.setDeliveryStatus("External".equalsIgnoreCase(processingType) ? "Pending Pickup" : "Not Required");
         patient.setLastVisit(LocalDate.now().toString());
+        
+        if ("External".equalsIgnoreCase(processingType)) {
+            patient.setSourceHospital("MediCare+ Main Clinic");
+            patient.setDestinationHospital("External Partner Lab");
+        }
 
         patientRepository.save(patient);
 
@@ -698,6 +755,8 @@ public class MainController {
                 patient.setDeliveryStatus("Pending Pickup");
                 patient.setDeliveryAssignedTo(optPartner.get().getFullName());
                 patient.setDeliveryBoyPhone(optPartner.get().getPhone());
+                patient.setSourceHospital("MediCare+ Main Clinic");
+                patient.setDestinationHospital("External Partner Lab");
                 patientRepository.save(patient);
             }
         } else {
@@ -938,6 +997,24 @@ public class MainController {
             redirectAttributes.addFlashAttribute("successMessage", "Performance rating updated for " + staff.getFullName());
         }
         return "redirect:/admin-dashboard";
+    }
+
+    @GetMapping("/view-report/{id}")
+    public String viewReportGeneral(@PathVariable Long id, HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/";
+        
+        Optional<LabReport> optReport = labReportRepository.findById(id);
+        if (optReport.isPresent()) {
+            LabReport report = optReport.get();
+            model.addAttribute("report", report);
+            // In case the report-view template expects a 'doctor' attribute specifically
+            if (report.getRequest() != null && report.getRequest().getDoctor() != null) {
+                model.addAttribute("doctor", report.getRequest().getDoctor());
+            }
+            return "doctor/report-view";
+        }
+        return "redirect:/patient-dashboard";
     }
 
     private String redirectToDashboard(String role) {

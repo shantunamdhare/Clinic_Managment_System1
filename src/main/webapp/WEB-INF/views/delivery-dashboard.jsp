@@ -683,8 +683,11 @@
                                                 <div style="font-size: 11px; color: var(--gray-500);">${task.patientId}</div>
                                             </td>
                                             <td>
-                                                <div style="font-size: 13px; font-weight: 600;">${task.sourceHospital}</div>
-                                                <div style="font-size: 10px; color: var(--primary); font-weight: 700;">→ ${task.destinationHospital}</div>
+                                                <div style="font-size: 13px; font-weight: 600;">${not empty task.sourceHospital ? task.sourceHospital : 'Main Clinic'}</div>
+                                                <div style="font-size: 10px; color: var(--primary); font-weight: 700; display: flex; align-items: center; gap: 4px;">
+                                                    <span class="material-symbols-outlined" style="font-size: 12px;">trending_flat</span>
+                                                    ${not empty task.destinationHospital ? task.destinationHospital : 'External Lab'}
+                                                </div>
                                             </td>
                                             <td>
                                                 <div style="font-size: 13px;">${not empty task.lastVisit ? task.lastVisit : 'Today'}</div>

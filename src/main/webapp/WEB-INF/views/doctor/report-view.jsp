@@ -72,7 +72,7 @@
                 </div>
                 <div class="info-item">
                     <div class="info-label">Gender / Age</div>
-                    <div class="info-value">${report.request.patient.gender} / ${report.request.patient.age}</div>
+                    <div class="info-value">${report.request.patient.gender} / ${not empty report.request.patient.age ? report.request.patient.age : 'N/A'}</div>
                 </div>
             </div>
             <div class="info-card">

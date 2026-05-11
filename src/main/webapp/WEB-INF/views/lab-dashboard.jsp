@@ -630,7 +630,7 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <button class="btn-action btn-primary" style="background: var(--primary); color: white; border: none;" onclick="prepareCollection(${req.id}, '${req.patient.name}', '${req.test.name}')">
+                                                <button class="btn-action btn-primary" style="background: var(--primary); color: white; border: none;" onclick="openCollectionModal(${req.id}, '${req.patient.name}', '${req.test.name}')">
                                                     <span class="material-symbols-outlined">biotech</span> Process
                                                 </button>
                                             </td>

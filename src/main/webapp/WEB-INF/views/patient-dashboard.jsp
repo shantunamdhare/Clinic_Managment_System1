@@ -176,7 +176,7 @@
                     <div class="user-avatar">${user.fullName.substring(0,1)}</div>
                     <div class="user-info">
                         <h1>Hello, ${user.fullName}</h1>
-                        <p>ID: PAT-2024-${user.id} &bull; Blood Group: O+</p>
+                        <p>ID: ${patientDetails.patientId} &bull; Blood Group: ${not empty patientDetails.bloodGroup ? patientDetails.bloodGroup : 'N/A'}</p>
                     </div>
                 </div>
                 <div class="top-actions">
@@ -446,14 +446,13 @@
 
         function viewReportDetails(id, test, date, result, file) {
             document.getElementById('detailTitle').innerText = 'Lab Report - ' + test;
-            document.getElementById('detailBody').innerHTML = `
-                <p><strong>Test Date:</strong> ${date}</p>
-                <p><strong>Result Summary:</strong> ${result || 'Pending'}</p>
-                <div style="margin-top:20px; padding:15px; background:#f8fafc; border-radius:12px; text-align:center;">
-                    <p style="margin-bottom:10px; font-weight:600;">Full Report File</p>
-                    <a href="${file}" class="btn-primary" style="text-decoration:none; display:inline-block;" download>Download PDF</a>
-                </div>
-            `;
+            document.getElementById('detailBody').innerHTML = 
+                '<p><strong>Test Date:</strong> ' + date + '</p>' +
+                '<p><strong>Result Summary:</strong> ' + (result ? result : 'Pending') + '</p>' +
+                '<div style="margin-top:20px; padding:15px; background:#f8fafc; border-radius:12px; text-align:center;">' +
+                    '<p style="margin-bottom:10px; font-weight:600;">Full Clinical Report</p>' +
+                    '<a href="/view-report/' + id + '" class="btn-primary" style="text-decoration:none; display:inline-block;" target="_blank">Download / View Report</a>' +
+                '</div>';
             openModal('detailModal');
         }
 

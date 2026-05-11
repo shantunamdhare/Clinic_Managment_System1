@@ -349,7 +349,7 @@
                                 <div class="form-group">
                                     <span class="input-icon">&#x1F464;</span>
                                     <select name="role" id="registerRoleSelect" class="form-select" required onchange="toggleRoleFields()">
-                                        <option value="Admin" selected>Admin</option>
+
                                         <option value="Doctor">Doctor</option>
                                         <option value="Receptionist">Receptionist</option>
                                         <option value="Patient">Patient</option>
