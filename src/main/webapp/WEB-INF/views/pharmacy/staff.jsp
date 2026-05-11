@@ -20,17 +20,23 @@
 <body>
     <div class="pharmacy-container">
         <aside class="sidebar">
-            <div class="sidebar-logo"><i class="fas fa-plus-square"></i> <span>MediCare+ <span>Pharmacy</span></span></div>
+            <div class="sidebar-logo">
+                <i class="fas fa-prescription-bottle-alt"></i>
+                <span>MediCare+ <span>Pharmacy</span></span>
+            </div>
             <nav class="sidebar-nav">
-                <a href="/pharmacy-dashboard" class="nav-link"><i class="fas fa-th-large"></i> Dashboard</a>
-                <a href="/pharmacy/inventory" class="nav-link"><i class="fas fa-pills"></i> Stock & Expiry</a>
+                <a href="/pharmacy-dashboard" class="nav-link"><i class="fas fa-grid-2"></i> Dashboard</a>
+                <a href="/pharmacy/inventory" class="nav-link"><i class="fas fa-pills"></i> Inventory</a>
                 <a href="/pharmacy/billing" class="nav-link"><i class="fas fa-file-invoice-dollar"></i> Medicine Issue</a>
                 <a href="/pharmacy/sales" class="nav-link"><i class="fas fa-chart-line"></i> Sales Summary</a>
                 <a href="/pharmacy/staff" class="nav-link active"><i class="fas fa-users-gear"></i> Staff Management</a>
                 <a href="/pharmacy/leave" class="nav-link"><i class="fas fa-calendar-minus"></i> Leave Request</a>
             </nav>
-            <div class="sidebar-footer"><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></div>
+            <div class="sidebar-footer">
+                <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
         </aside>
+
         <main class="main-content">
             <header class="main-header">
                 <div class="header-search"><i class="fas fa-search"></i><input type="text" placeholder="Search staff..."></div>
@@ -81,57 +87,36 @@
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 24px;">
-                <div class="grid-card">
-                    <div class="card-header"><h2><i class="fas fa-id-card"></i> Staff Profile</h2></div>
-                    <div class="card-body" style="text-align: center;">
-                        <img src="https://placehold.co/400x250/4f46e5/ffffff?text=Chief+Pharmacist\nArjun+Sharma" alt="ID Card" style="width: 100%; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                        <div style="padding: 15px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
-                            <h3 style="margin: 0; color: #1e293b;">${user.fullName}</h3>
-                            <p style="color: #64748b; font-size: 14px; margin: 5px 0 0 0;">Pharmacy License: #PH-2024-089</p>
-                        </div>
-                    </div>
-                    <div class="card-header" style="border-top: 1px solid #f1f5f9;"><h2><i class="fas fa-clock"></i> Current Shifts</h2></div>
-                    <div class="card-body">
-                        <c:forEach var="shift" items="${allShifts}">
-                            <div style="padding: 15px; background: #f8fafc; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e2e8f0;">
-                                <div style="display: flex; align-items: center; gap: 12px;">
-                                    <img src="https://ui-avatars.com/api/?name=${shift.staff.fullName}&background=random" style="width: 32px; height: 32px; border-radius: 50%;">
-                                    <div>
-                                        <strong style="display: block;">${shift.staff.fullName}</strong>
-                                        <small style="color: #64748b;">${shift.dayOfWeek} | ${shift.startTime} - ${shift.endTime}</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </c:forEach>
-                    </div>
+            <div class="grid-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-calendar-check"></i> Attendance Log</h2>
                 </div>
-                <div class="grid-card">
-                    <div class="card-header"><h2><i class="fas fa-calendar-check"></i> Attendance Log</h2></div>
-                    <div class="card-body">
-                        <table>
-                            <thead>
+                <div class="card-body">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Staff Name</th>
+                                <th>Date</th>
+                                <th>Check-In</th>
+                                <th>Check-Out</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach var="att" items="${allAttendance}">
                                 <tr>
-                                    <th>Staff Name</th>
-                                    <th>Date</th>
-                                    <th>Check-In</th>
-                                    <th>Check-Out</th>
-                                    <th>Status</th>
+                                    <td><strong>${att.staff.fullName}</strong></td>
+                                    <td>${att.date}</td>
+                                    <td>${att.checkIn}</td>
+                                    <td>${att.checkOut != null ? att.checkOut : '--'}</td>
+                                    <td><span class="badge-pill">${att.status}</span></td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                <c:forEach var="att" items="${allAttendance}">
-                                    <tr>
-                                        <td><strong>${att.staff.fullName}</strong></td>
-                                        <td>${att.date}</td>
-                                        <td>${att.checkIn}</td>
-                                        <td>${att.checkOut != null ? att.checkOut : '--'}</td>
-                                        <td><span class="badge-pill">${att.status}</span></td>
-                                    </tr>
-                                </c:forEach>
-                            </tbody>
-                        </table>
-                    </div>
+                            </c:forEach>
+                            <c:if test="${empty allAttendance}">
+                                <tr><td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">No attendance records found.</td></tr>
+                            </c:if>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </main>

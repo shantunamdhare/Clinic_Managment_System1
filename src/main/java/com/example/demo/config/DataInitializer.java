@@ -34,7 +34,8 @@ public class DataInitializer {
             StaffShiftRepository shiftRepo,
             StaffAttendanceRepository attendanceRepo,
             PrescriptionItemRepository prescriptionItemRepo,
-            NotificationRepository notificationRepo) {
+            NotificationRepository notificationRepo,
+            LeaveRequestRepository leaveRequestRepo) {
         
         return args -> {
             // 1. Initialize Users / Roles
@@ -51,6 +52,9 @@ public class DataInitializer {
                     shiftRepo.deleteAll(shiftRepo.findByUser(u));
                     attendanceRepo.deleteAll(attendanceRepo.findByStaff(u));
                     notificationRepo.deleteAll(notificationRepo.findByUserOrderByCreatedAtDesc(u));
+                    leaveRequestRepo.deleteAll(leaveRequestRepo.findByUserOrderBySubmittedAtDesc(u));
+                    // Also delete prescriptions where this user is the doctor
+                    prescriptionRepository.deleteAll(prescriptionRepository.findByDoctorOrderByCreatedAtDesc(u));
                     userRepository.delete(u);
                     System.out.println(">> Deleted unwanted user: " + email);
                 });

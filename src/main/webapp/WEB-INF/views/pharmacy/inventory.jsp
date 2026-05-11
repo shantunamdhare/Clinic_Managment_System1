@@ -91,6 +91,68 @@
                 </div>
             </c:if>
 
+            <!-- Active Alerts (Stock & Expiry) -->
+            <c:if test="${not empty lowStockMedicines || not empty expiringSoonMedicines}">
+                <div id="inventoryAlertSection" class="grid-card mb-4 border-warning border-opacity-25" style="transition: all 0.5s ease;">
+                    <div class="card-header bg-warning bg-opacity-10">
+                        <h2 class="text-warning"><i class="fas fa-triangle-exclamation"></i> Inventory Intelligence & Alerts</h2>
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge bg-warning text-dark rounded-pill px-3">${lowStockMedicines.size() + expiringSoonMedicines.size()} Alerts Active</span>
+                            <button class="btn btn-sm btn-link text-warning p-0" onclick="document.getElementById('inventoryAlertSection').style.display='none'"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="quick-status-grid">
+                            <!-- Low Stock Side -->
+                            <div class="status-list">
+                                <h6 class="fw-bold mb-3 d-flex align-items-center gap-2" style="font-size: 12px; color: var(--secondary);">
+                                    <i class="fas fa-circle text-warning" style="font-size: 8px;"></i> STOCK ALERTS
+                                </h6>
+                                <c:forEach var="med" items="${lowStockMedicines}" end="2">
+                                    <div class="status-item border-warning border-opacity-10">
+                                        <div class="status-icon" style="background: var(--warning-light); color: var(--warning);"><i class="fas fa-arrow-trend-down"></i></div>
+                                        <div class="status-info">
+                                            <span class="status-tag" style="color: var(--warning);">CRITICAL STOCK</span>
+                                            <span class="status-name">${med.name}</span>
+                                            <span class="status-desc">${med.stockLevel} units remaining (Batch: ${med.batchNumber})</span>
+                                        </div>
+                                        <button class="btn-mini-action btn-mini-low" onclick="toggleAddForm()">Restock</button>
+                                    </div>
+                                </c:forEach>
+                                <c:if test="${empty lowStockMedicines}">
+                                    <div class="text-center py-4 bg-light rounded-4 opacity-50">
+                                        <p class="small text-muted mb-0">No low stock alerts</p>
+                                    </div>
+                                </c:if>
+                            </div>
+
+                            <!-- Expiry Side -->
+                            <div class="status-list">
+                                <h6 class="fw-bold mb-3 d-flex align-items-center gap-2" style="font-size: 12px; color: var(--secondary);">
+                                    <i class="fas fa-circle text-danger" style="font-size: 8px;"></i> EXPIRY TRACKER
+                                </h6>
+                                <c:forEach var="med" items="${expiringSoonMedicines}" end="5">
+                                    <div class="status-item border-danger border-opacity-10">
+                                        <div class="status-icon" style="background: var(--danger-light); color: var(--danger);"><i class="fas fa-hourglass-half"></i></div>
+                                        <div class="status-info">
+                                            <span class="status-tag" style="color: var(--danger);">NEAR EXPIRY</span>
+                                            <span class="status-name">${med.name}</span>
+                                            <span class="status-desc">Expires on: <strong>${med.expiryDate}</strong></span>
+                                        </div>
+                                        <button class="btn-mini-action btn-mini-expiry" onclick="alert('Action taken: Logged for disposal/return')">Action</button>
+                                    </div>
+                                </c:forEach>
+                                <c:if test="${empty expiringSoonMedicines}">
+                                    <div class="text-center py-4 bg-light rounded-4 opacity-50">
+                                        <p class="small text-muted mb-0">No upcoming expirations</p>
+                                    </div>
+                                </c:if>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </c:if>
+
             <!-- Add Inventory Form -->
             <div id="addMedicineForm" class="add-inventory-card">
                 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -176,7 +238,7 @@
                                         <td><span class="fw-bold">${med.stockLevel}</span> units</td>
                                         <td>₹${med.price}</td>
                                         <td>
-                                            <span class="small ${med.expiryDate.isBefore(java.time.LocalDate.now().plusMonths(3)) ? 'text-danger fw-bold' : ''}">
+                                            <span class="small fw-bold ${expiringIds.contains(med.id) ? 'text-danger' : 'text-muted'}">
                                                 ${med.expiryDate}
                                             </span>
                                         </td>
@@ -206,6 +268,20 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
+
+        // Auto-hide alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const alertSection = document.getElementById('inventoryAlertSection');
+            if (alertSection) {
+                setTimeout(() => {
+                    alertSection.style.opacity = '0';
+                    alertSection.style.transform = 'translateY(-20px)';
+                    setTimeout(() => {
+                        alertSection.style.display = 'none';
+                    }, 500); // Wait for transition
+                }, 5000);
+            }
+        });
     </script>
 </body>
 </html>

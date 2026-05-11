@@ -449,6 +449,29 @@ tr:hover td {
 .btn-mini-expiry { background: var(--danger-light); color: var(--danger); }
 .btn-mini-expiry:hover { background: var(--danger); color: white; }
 
+.btn-action-main {
+    padding: 10px 24px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.btn-action-main:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    color: white;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
     width: 8px;

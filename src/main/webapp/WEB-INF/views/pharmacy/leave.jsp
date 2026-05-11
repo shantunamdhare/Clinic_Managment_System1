@@ -153,7 +153,7 @@
                                                 ${req.startDate} <i class="fas fa-long-arrow-alt-right mx-1 text-muted"></i> ${req.endDate}
                                             </div>
                                             <div class="text-muted" style="font-size: 11px;">
-                                                Submitted on: ${req.createdAt}
+                                                Submitted on: ${req.submittedAt}
                                             </div>
                                         </div>
                                         <span class="leave-status-badge status-${req.status.toLowerCase()}">
