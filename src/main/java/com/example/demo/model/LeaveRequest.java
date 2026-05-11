@@ -13,16 +13,27 @@ public class LeaveRequest {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(nullable = false)
     private String reason;
+
+    @Column(nullable = false)
     private LocalDate startDate;
+
+    @Column(nullable = false)
     private LocalDate endDate;
-    private String status; // Pending, Approved, Rejected
+
+    @Column(nullable = false)
+    private String status = "Pending"; // Pending, Approved, Rejected
+
     private LocalDateTime submittedAt;
 
+    private String adminRemarks;
+
     public LeaveRequest() {
+        this.submittedAt = LocalDateTime.now();
     }
 
     public LeaveRequest(User user, String reason, LocalDate startDate, LocalDate endDate) {
@@ -88,5 +99,13 @@ public class LeaveRequest {
 
     public void setSubmittedAt(LocalDateTime submittedAt) {
         this.submittedAt = submittedAt;
+    }
+
+    public String getAdminRemarks() {
+        return adminRemarks;
+    }
+
+    public void setAdminRemarks(String adminRemarks) {
+        this.adminRemarks = adminRemarks;
     }
 }
