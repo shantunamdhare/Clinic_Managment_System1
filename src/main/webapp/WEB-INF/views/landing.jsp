@@ -540,60 +540,60 @@
         <div class="features-grid">
     
           <div class="feature-card">
-            <div class="feature-image-top" style="height: 170px !important; overflow: hidden !important; border-radius: 12px !important; margin-bottom: 20px !important; display: block !important;">
-              <img src="https://images.pexels.com/photos/7089020/pexels-photo-7089020.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&fit=crop" alt="Appointment Management" style="width: 100% !important; height: 170px !important; min-height: 170px !important; max-height: 170px !important; object-fit: cover !important; display: block !important; border-radius: 12px !important;" />
+            <div class="feature-image-top">
+              <img src="https://images.pexels.com/photos/7089020/pexels-photo-7089020.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&fit=crop" alt="Smart Scheduling">
             </div>
-            <div class="feature-content" style="padding: 0 !important;">
+            <div class="feature-content">
               <h3>Appointment Management</h3>
               <p>Schedule, track and manage patient appointments efficiently.</p>
             </div>
           </div>
     
           <div class="feature-card">
-            <div class="feature-image-top" style="height: 170px !important; overflow: hidden !important; border-radius: 12px !important; margin-bottom: 20px !important; display: block !important;">
-              <img src="https://images.pexels.com/photos/4386464/pexels-photo-4386464.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&fit=crop" alt="Patient Records" style="width: 100% !important; height: 170px !important; min-height: 170px !important; max-height: 170px !important; object-fit: cover !important; display: block !important; border-radius: 12px !important;" />
+            <div class="feature-image-top">
+              <img src="https://images.pexels.com/photos/7089401/pexels-photo-7089401.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&fit=crop" alt="Patient Care">
             </div>
-            <div class="feature-content" style="padding: 0 !important;">
+            <div class="feature-content">
               <h3>Patient Records</h3>
               <p>Maintain complete patient history, reports and profiles.</p>
             </div>
           </div>
     
           <div class="feature-card">
-            <div class="feature-image-top" style="height: 170px !important; overflow: hidden !important; border-radius: 12px !important; margin-bottom: 20px !important; display: block !important;">
-              <img src="https://images.pexels.com/photos/3825539/pexels-photo-3825539.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&fit=crop" alt="Lab Integration" style="width: 100% !important; height: 170px !important; min-height: 170px !important; max-height: 170px !important; object-fit: cover !important; display: block !important; border-radius: 12px !important;" />
+            <div class="feature-image-top">
+              <img src="https://images.pexels.com/photos/3825539/pexels-photo-3825539.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&fit=crop" alt="Lab Integration">
             </div>
-            <div class="feature-content" style="padding: 0 !important;">
+            <div class="feature-content">
               <h3>Lab Integration</h3>
               <p>Manage test requests, results and lab workflows efficiently.</p>
             </div>
           </div>
     
           <div class="feature-card">
-            <div class="feature-image-top" style="height: 170px !important; overflow: hidden !important; border-radius: 12px !important; margin-bottom: 20px !important; display: block !important;">
-              <img src="https://images.pexels.com/photos/3652103/pexels-photo-3652103.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&fit=crop" alt="Pharmacy Management" style="width: 100% !important; height: 170px !important; min-height: 170px !important; max-height: 170px !important; object-fit: cover !important; display: block !important; border-radius: 12px !important;" />
+            <div class="feature-image-top">
+              <img src="https://images.pexels.com/photos/3845126/pexels-photo-3845126.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&fit=crop" alt="Pharmacy Lab">
             </div>
-            <div class="feature-content" style="padding: 0 !important;">
+            <div class="feature-content">
               <h3>Pharmacy Management</h3>
               <p>Handle medicines, prescriptions and stock tracking.</p>
             </div>
           </div>
     
           <div class="feature-card">
-            <div class="feature-image-top" style="height: 170px !important; overflow: hidden !important; border-radius: 12px !important; margin-bottom: 20px !important; display: block !important;">
-              <img src="https://images.pexels.com/photos/5849581/pexels-photo-5849581.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&fit=crop" alt="Billing & Payments" style="width: 100% !important; height: 170px !important; min-height: 170px !important; max-height: 170px !important; object-fit: cover !important; display: block !important; border-radius: 12px !important;" />
+            <div class="feature-image-top">
+              <img src="https://images.pexels.com/photos/5849581/pexels-photo-5849581.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&fit=crop" alt="Billing & Payments">
             </div>
-            <div class="feature-content" style="padding: 0 !important;">
+            <div class="feature-content">
               <h3>Billing & Payments</h3>
               <p>Generate invoices and manage payments securely.</p>
             </div>
           </div>
     
           <div class="feature-card">
-            <div class="feature-image-top" style="height: 170px !important; overflow: hidden !important; border-radius: 12px !important; margin-bottom: 20px !important; display: block !important;">
-              <img src="https://images.pexels.com/photos/3184435/pexels-photo-3184435.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&fit=crop" alt="Staff Management" style="width: 100% !important; height: 170px !important; min-height: 170px !important; max-height: 170px !important; object-fit: cover !important; display: block !important; border-radius: 12px !important;" />
+            <div class="feature-image-top">
+              <img src="https://images.pexels.com/photos/5452293/pexels-photo-5452293.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&fit=crop" alt="Staff Management">
             </div>
-            <div class="feature-content" style="padding: 0 !important;">
+            <div class="feature-content">
               <h3>Staff Management</h3>
               <p>Manage staff roles, schedules and daily operations.</p>
             </div>
@@ -637,7 +637,7 @@
     
           <div class="module-card">
             <div class="module-image-top">
-              <img src="https://images.pexels.com/photos/3844581/pexels-photo-3844581.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Medical Receptionist" style="width: 100%; height: 100%; object-fit: cover;" />
+              <img src="https://images.pexels.com/photos/3844581/pexels-photo-3844581.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Medical Receptionist" />
             </div>
             <div class="module-content">
               <div class="module-title-row">
@@ -757,10 +757,26 @@
         </div>
 
         <div class="about-cards">
-          <div class="about-card">Doctor Management</div>
-          <div class="about-card">Patient Records</div>
-          <div class="about-card">Lab Reports</div>
-          <div class="about-card">Pharmacy & Billing</div>
+          <div class="about-card">
+            <div class="about-icon">👨‍⚕️</div>
+            <h3>Doctor Management</h3>
+            <p>Complete control over doctor schedules and consultations.</p>
+          </div>
+          <div class="about-card">
+            <div class="about-icon">📋</div>
+            <h3>Patient Records</h3>
+            <p>Secure digital storage for all patient history and reports.</p>
+          </div>
+          <div class="about-card">
+            <div class="about-icon">🔬</div>
+            <h3>Lab Reports</h3>
+            <p>Real-time tracking of lab tests and automated results.</p>
+          </div>
+          <div class="about-card">
+            <div class="about-icon">💊</div>
+            <h3>Pharmacy & Billing</h3>
+            <p>Integrated inventory and automated billing system.</p>
+          </div>
         </div>
       </div>
     </section>
@@ -1237,6 +1253,7 @@
 
             index = (index + 1) % heroImages.length;
           }
+
 
           changeHeroBackground();
           setInterval(changeHeroBackground, 5000);

@@ -34,27 +34,58 @@ public class DataInitializer {
             StaffShiftRepository shiftRepo,
             StaffAttendanceRepository attendanceRepo,
             PrescriptionItemRepository prescriptionItemRepo,
-            NotificationRepository notificationRepo) {
+            NotificationRepository notificationRepo,
+            LeaveRequestRepository leaveRequestRepository,
+            AvailabilityRepository availabilityRepo,
+            ScheduleRepository scheduleRepo,
+            AttendanceRepository legacyAttendanceRepo,
+            ShiftRepository legacyShiftRepo,
+            PerformanceRepository performanceRepo,
+            NoShowRecordRepository noShowRepo) {
         
         return args -> {
+            // --- Comprehensive Database Cleanup (to avoid foreign key violations) ---
+            System.out.println(">> Performing pre-initialization database cleanup...");
+            
+            // 1. Delete dependent child records first
+            notificationRepo.deleteAll();
+            attendanceRepo.deleteAll();
+            shiftRepo.deleteAll();
+            leaveRequestRepository.deleteAll();
+            availabilityRepo.deleteAll();
+            scheduleRepo.deleteAll();
+            legacyAttendanceRepo.deleteAll();
+            legacyShiftRepo.deleteAll();
+            performanceRepo.deleteAll();
+            noShowRepo.deleteAll();
+            
+            // 2. Delete main entity records
+            labReportRepository.deleteAll();
+            labRequestRepository.deleteAll();
+            prescriptionRepository.deleteAll();
+            visitRepository.deleteAll();
+            appointmentRepository.deleteAll();
+            invoiceRepo.deleteAll();
+            patientRepository.deleteAll();
+            
+            System.out.println(">> Database cleanup complete.");
+
             // 1. Initialize Users / Roles
             seedUser(userRepository, passwordEncoder, "admin@gmail.com", "admin123", "Admin", "System Admin");
 
             // --- Database Cleanup: Remove unwanted seed users from previous runs ---
             List<String> usersToDelete = List.of(
                 "doctor@gmail.com", "receptionist@gmail.com", "pharmacy@gmail.com", 
-                "delivery@gmail.com", "recep@gmail.com", "pharmacist@gmail.com"
+                "delivery@gmail.com", "recep@gmail.com", "pharmacist@gmail.com",
+                "rahul.staff@gmail.com"
             );
             for (String email : usersToDelete) {
                 userRepository.findByEmail(email).ifPresent(u -> {
-                    // Delete associated records first to avoid constraint violations
-                    shiftRepo.deleteAll(shiftRepo.findByUser(u));
-                    attendanceRepo.deleteAll(attendanceRepo.findByStaff(u));
-                    notificationRepo.deleteAll(notificationRepo.findByUserOrderByCreatedAtDesc(u));
                     userRepository.delete(u);
                     System.out.println(">> Deleted unwanted user: " + email);
                 });
             }
+
             // Lab User with specific details
             if (userRepository.findByEmail("shyam@gmail.com").isEmpty()) {
                 User labUser = new User();
@@ -69,30 +100,6 @@ public class DataInitializer {
                 userRepository.save(labUser);
                 System.out.println(">> Created Default Lab User: shyam@gmail.com / 1234");
             }
-       // Clear old dummy data only if specifically requested or if database is empty
-            // notificationRepo.deleteAll();
-            // attendanceRepo.deleteAll();
-            // shiftRepo.deleteAll();
-            // labReportRepository.deleteAll();
-            // labRequestRepository.deleteAll();
-            // prescriptionItemRepo.deleteAll(); 
-            // prescriptionRepository.deleteAll();
-            // invoiceRepo.deleteAll(); 
-            // visitRepository.deleteAll();
-            // appointmentRepository.deleteAll();
-            // patientRepository.deleteAll();
-
-            // Clear old dummy data from the persistent database (Selective)
-            attendanceRepo.deleteAll();
-            shiftRepo.deleteAll();
-            labReportRepository.deleteAll();
-            labRequestRepository.deleteAll();
-            prescriptionRepository.deleteAll();
-            visitRepository.deleteAll();
-            appointmentRepository.deleteAll();
-            invoiceRepo.deleteAll();
-            patientRepository.deleteAll();
-
 
             // 2. Initialize Lab Tests
             if (labTestRepo.count() == 0) {
@@ -116,6 +123,28 @@ public class DataInitializer {
                     labTestRepo.save(lt);
                 }
                 System.out.println(">> Initialized default lab tests.");
+            }
+
+            // Initialize Sample Staff and Leave Requests for Visibility
+            if (userRepository.findByEmail("rahul.staff@gmail.com").isEmpty()) {
+                User staffUser = new User();
+                staffUser.setFullName("Rahul Sharma");
+                staffUser.setEmail("rahul.staff@gmail.com");
+                staffUser.setPassword(passwordEncoder.encode("1234"));
+                staffUser.setRole("Staff");
+                staffUser.setPhone("9876543210");
+                staffUser = userRepository.save(staffUser);
+
+                LeaveRequest lr1 = new LeaveRequest(staffUser, "Family emergency and personal reasons", LocalDate.now().plusDays(2), LocalDate.now().plusDays(5));
+                lr1.setStatus("Pending");
+                leaveRequestRepository.save(lr1);
+
+                LeaveRequest lr2 = new LeaveRequest(staffUser, "Medical checkup and rest", LocalDate.now().minusDays(10), LocalDate.now().minusDays(8));
+                lr2.setStatus("Approved");
+                lr2.setAdminRemarks("Approved on health grounds");
+                leaveRequestRepository.save(lr2);
+
+                System.out.println(">> Seeded sample staff and leave requests for visibility.");
             }
 
             // Initialize Default Departments
