@@ -84,7 +84,7 @@ public class DoctorDashboardController {
         // Refresh from DB to avoid detached entity issues
         User doctor = userRepository.findById(doctorSession.getId()).orElse(doctorSession);
 
-        long totalPatients = patientRepo.count();
+        long totalPatients = patientRepo.countByDoctor(doctor);
         long todayAppointments = appointmentRepo.countByDoctorAndAppointmentDate(doctor, LocalDate.now());
         long pendingLabReports = labRequestRepo.countByDoctorAndStatus(doctor, "Pending");
 
@@ -167,9 +167,9 @@ public class DoctorDashboardController {
 
         List<Patient> patients;
         if (search != null && !search.isBlank()) {
-            patients = patientRepo.findByNameContainingIgnoreCase(search.trim());
+            patients = patientRepo.findByDoctorAndNameContaining(doctor, search.trim());
         } else {
-            patients = patientRepo.findAll();
+            patients = patientRepo.findByDoctor(doctor);
         }
         model.addAttribute("doctor", doctor);
         model.addAttribute("patients", patients);
@@ -234,7 +234,7 @@ public class DoctorDashboardController {
         User doctor = userRepository.findById(doctorSession.getId()).orElse(doctorSession);
 
         model.addAttribute("doctor", doctor);
-        model.addAttribute("patients", patientRepo.findAll());
+        model.addAttribute("patients", patientRepo.findByDoctor(doctor));
         return "doctor/emr";
     }
 
@@ -280,7 +280,7 @@ public class DoctorDashboardController {
         List<Visit> recentVisits = visitRepo.findByDoctorOrderByVisitDateDesc(doctor);
         model.addAttribute("doctor", doctor);
         model.addAttribute("visits", recentVisits);
-        model.addAttribute("patients", patientRepo.findAll());
+        model.addAttribute("patients", patientRepo.findByDoctor(doctor));
 
         if (visitId != null) {
             visitRepo.findById(visitId).ifPresent(v -> {
@@ -432,7 +432,7 @@ public class DoctorDashboardController {
         User doctor = userRepository.findById(doctorSession.getId()).orElse(doctorSession);
 
         model.addAttribute("doctor", doctor);
-        model.addAttribute("patients", patientRepo.findAll());
+        model.addAttribute("patients", patientRepo.findByDoctor(doctor));
         model.addAttribute("labTests", labTestRepo.findAll());
         model.addAttribute("laboratories", userRepository.findByRole("Lab"));
         model.addAttribute("requests", labRequestRepo.findByDoctor(doctor));
@@ -478,23 +478,7 @@ public class DoctorDashboardController {
         if (doctorSession == null) return "redirect:/";
         User doctor = userRepository.findById(doctorSession.getId()).orElse(doctorSession);
 
-        // Robust retrieval: Get reports where doctor is assigned OR patients the doctor has seen
-        final Long currentDoctorId = doctor.getId();
-        final List<Appointment> doctorAppointments = appointmentRepo.findByDoctor(doctor);
-        
-        List<LabReport> reports = labReportRepo.findAll().stream()
-            .filter(r -> {
-                LabRequest req = r.getRequest();
-                if (req == null) return false;
-                // Directly assigned
-                if (req.getDoctor() != null && req.getDoctor().getId().equals(currentDoctorId)) return true;
-                // Same patient as doctor's appointments
-                String patientName = req.getPatient() != null ? req.getPatient().getName() : null;
-                if (patientName == null) return false;
-                return doctorAppointments.stream()
-                    .anyMatch(a -> a.getPatient() != null && patientName.equalsIgnoreCase(a.getPatient().getName()));
-            })
-            .collect(java.util.stream.Collectors.toList());
+        List<LabReport> reports = labReportRepo.findByRequest_Doctor(doctor);
 
         model.addAttribute("doctor", doctor);
         model.addAttribute("reports", reports);
@@ -538,6 +522,11 @@ public class DoctorDashboardController {
         if (doctor == null) return "redirect:/";
 
         LocalDate date = LocalDate.parse(availableDate);
+        if (date.isBefore(LocalDate.now())) {
+            ra.addFlashAttribute("error", "Cannot set availability for past dates.");
+            return "redirect:/doctor/availability";
+        }
+
         LocalTime start = LocalTime.parse(startTime);
         LocalTime end = LocalTime.parse(endTime);
 

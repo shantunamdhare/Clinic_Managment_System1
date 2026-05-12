@@ -279,4 +279,20 @@ public class User {
     public void setHospitalName(String hospitalName) {
         this.hospitalName = hospitalName;
     }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getGovIdNumber() {
+        return govIdNumber;
+    }
+
+    public void setGovIdNumber(String govIdNumber) {
+        this.govIdNumber = govIdNumber;
+    }
 }

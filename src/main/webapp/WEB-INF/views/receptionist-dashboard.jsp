@@ -551,12 +551,16 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Date</label>
-                                <input type="date" class="form-control" name="date" required>
+                                <input type="date" class="form-control" name="date" id="bookingDate" required min="<%= LocalDate.now().toString() %>">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Time Slot</label>
                                 <input type="time" class="form-control" name="time" required>
                             </div>
+                        </div>
+                        <div id="availabilityInfo" class="mt-3" style="display:none">
+                            <label class="form-label text-primary small fw-bold"><i class="fas fa-clock me-1"></i> Doctor Availability Slots</label>
+                            <div id="availabilitySlots" class="d-flex flex-wrap gap-2"></div>
                         </div>
                     </form>
                 </div>
@@ -673,9 +677,24 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
-            }).then(res => res.json()).then(app => {
+            }).then(res => {
+                if (!res.ok) {
+                    // Try to get error message from response
+                    return res.text().then(text => { 
+                        let msg = text;
+                        try {
+                           const json = JSON.parse(text);
+                           msg = json.message || text;
+                        } catch(e) {}
+                        throw new Error(msg); 
+                    });
+                }
+                return res.json();
+            }).then(app => {
                 alert('Booking Confirmed! Token: #' + app.tokenNumber);
                 location.reload();
+            }).catch(err => {
+                alert('Error: ' + err.message);
             });
         }
 
@@ -688,6 +707,74 @@
                 body: formData
             }).then(() => location.reload());
         }
+
+        // Availability Fetcher
+        function fetchAvailability() {
+            const doctorId = document.querySelector('select[name="doctorId"]').value;
+            const date = document.querySelector('input[name="date"]').value;
+            const slotsDiv = document.getElementById('availabilitySlots');
+            const infoDiv = document.getElementById('availabilityInfo');
+
+            if (!doctorId || !date) return;
+
+            // IMPORTANT: Use string concatenation (not template literals) for JS vars here.
+            // JSP EL runs server-side and would replace ${doctorId} / ${date} with empty
+            // strings before the browser ever sees the JS, sending ?doctorId=&date= to the server.
+            const url = '${pageContext.request.contextPath}/receptionist/doctor/availability'
+                      + '?doctorId=' + doctorId + '&date=' + date;
+
+            slotsDiv.innerHTML = '<small class="text-muted"><i class="fas fa-spinner fa-spin me-1"></i>Loading slots...</small>';
+            infoDiv.style.display = 'block';
+
+            fetch(url)
+                .then(res => {
+                    if (!res.ok) {
+                        return res.json().then(err => { throw new Error(err.message || 'Failed to fetch availability'); });
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    slotsDiv.innerHTML = '';
+                    if (Array.isArray(data) && data.length > 0) {
+                        data.forEach(slot => {
+                            const badge = document.createElement('span');
+                            badge.className = 'badge bg-light text-dark border px-3 py-2';
+                            badge.style.cursor = 'pointer';
+                            badge.style.fontSize = '0.8rem';
+
+                            // startTime and endTime are plain "HH:mm:ss" strings from the DTO
+                            const startTime = slot.startTime ? slot.startTime.substring(0, 5) : '';
+                            const endTime   = slot.endTime   ? slot.endTime.substring(0, 5)   : '';
+
+                            badge.innerHTML = '<i class="fas fa-clock me-1 text-primary"></i>' + startTime + ' - ' + endTime;
+                            badge.onclick = () => {
+                                document.querySelector('input[name="time"]').value = startTime;
+                                document.querySelectorAll('#availabilitySlots span').forEach(s => {
+                                    s.classList.remove('bg-primary', 'text-white');
+                                    s.classList.add('bg-light', 'text-dark');
+                                });
+                                badge.classList.remove('bg-light', 'text-dark');
+                                badge.classList.add('bg-primary', 'text-white');
+                            };
+                            slotsDiv.appendChild(badge);
+                        });
+                        infoDiv.style.display = 'block';
+                    } else {
+                        slotsDiv.innerHTML = '<small class="text-warning"><i class="fas fa-exclamation-circle me-1"></i>No slots available for this date.</small>';
+                        infoDiv.style.display = 'block';
+                    }
+                })
+                .catch(err => {
+                    console.error('Availability fetch error:', err);
+                    slotsDiv.innerHTML = '<small class="text-danger"><i class="fas fa-times-circle me-1"></i>Error loading availability: ' + (err.message || 'Please try again.') + '</small>';
+                    infoDiv.style.display = 'block';
+                });
+        }
+
+        document.querySelector('select[name="doctorId"]').addEventListener('change', fetchAvailability);
+        document.querySelector('input[name="date"]').addEventListener('change', fetchAvailability);
     </script>
+
+
 </body>
 </html>

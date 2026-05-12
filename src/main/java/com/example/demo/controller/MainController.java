@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
@@ -66,6 +67,9 @@ public class MainController {
 
     @Autowired
     private NotificationRepository notificationRepo;
+
+    @Autowired
+    private com.example.demo.service.ReceptionistService receptionistService;
 
     // ========================
     // Landing Page
@@ -460,7 +464,9 @@ public class MainController {
                 appt.setAppointmentTime(LocalTime.parse(time));
                 appt.setPurpose(purpose);
                 appt.setStatus("Pending");
-                appointmentRepository.save(appt);
+                
+                // Use service for validation and booking
+                receptionistService.bookAppointment(appt);
                 
                 redirectAttributes.addFlashAttribute("successMessage", "Appointment booked successfully for " + date + " at " + time);
             } else {
@@ -1030,4 +1036,172 @@ public class MainController {
             default: return "redirect:/";
         }
     }
+    @GetMapping("/api/doctor/availability")
+    @ResponseBody
+    public List<Map<String, Object>> getPatientSideAvailability(@RequestParam Long doctorId, @RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate date) {
+        // Return a lightweight DTO instead of full Availability entity
+        // to avoid Jackson serializing the embedded User (password, LONGTEXT profileImage, etc.)
+        List<Availability> slots = receptionistService.getDoctorAvailability(doctorId, date);
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Availability slot : slots) {
+            Map<String, Object> dto = new HashMap<>();
+            dto.put("id", slot.getId());
+            dto.put("availableDate", slot.getAvailableDate().toString());
+            dto.put("startTime", slot.getStartTime().toString());
+            dto.put("endTime", slot.getEndTime().toString());
+            result.add(dto);
+        }
+        return result;
+    }
+    
+    @GetMapping("/api/test/create-availability")
+    @ResponseBody
+    public String createTestAvailability() {
+        try {
+            // Try to get doctor ID 9 specifically (Dr. doc5)
+            User doctor = userRepository.findById(9L).orElse(null);
+            if (doctor == null) {
+                // Fallback to any doctor
+                List<User> doctors = userRepository.findByRole("Doctor");
+                if (doctors.isEmpty()) {
+                    return "No doctors found in database. Please create a doctor account first.";
+                }
+                doctor = doctors.get(0);
+            }
+            
+            LocalDate today = LocalDate.now();
+            
+            // Create multiple slots for today
+            LocalTime[] startTimes = {LocalTime.of(9, 0), LocalTime.of(10, 30), LocalTime.of(14, 0), LocalTime.of(15, 30)};
+            LocalTime[] endTimes = {LocalTime.of(10, 0), LocalTime.of(11, 30), LocalTime.of(15, 0), LocalTime.of(16, 30)};
+            
+            for (int i = 0; i < startTimes.length; i++) {
+                Availability slot = new Availability();
+                slot.setDoctor(doctor);
+                slot.setAvailableDate(today);
+                slot.setStartTime(startTimes[i]);
+                slot.setEndTime(endTimes[i]);
+                availabilityRepository.save(slot);
+            }
+            
+            return "Created 4 availability slots for Dr. " + doctor.getFullName() + " (ID: " + doctor.getId() + ") for " + today;
+        } catch (Exception e) {
+            return "Error: " + e.getMessage() + " - Stack trace: " + e.toString();
+        }
+    }
+    
+    @GetMapping("/api/test/create-doc5-availability")
+    @ResponseBody
+    public String createDoc5Availability() {
+        try {
+            // Create availability specifically for doctor ID 9 (Dr. doc5)
+            User doctor = userRepository.findById(9L).orElse(null);
+            if (doctor == null) {
+                return "Doctor with ID 9 not found";
+            }
+            
+            LocalDate today = LocalDate.now();
+            
+            // Create multiple slots for today
+            LocalTime[] startTimes = {LocalTime.of(9, 0), LocalTime.of(10, 30), LocalTime.of(14, 0), LocalTime.of(15, 30)};
+            LocalTime[] endTimes = {LocalTime.of(10, 0), LocalTime.of(11, 30), LocalTime.of(15, 0), LocalTime.of(16, 30)};
+            
+            for (int i = 0; i < startTimes.length; i++) {
+                Availability slot = new Availability();
+                slot.setDoctor(doctor);
+                slot.setAvailableDate(today);
+                slot.setStartTime(startTimes[i]);
+                slot.setEndTime(endTimes[i]);
+                availabilityRepository.save(slot);
+            }
+            
+            return "Created 4 availability slots for Dr. " + doctor.getFullName() + " (ID: 9) for " + today;
+        } catch (Exception e) {
+            return "Error: " + e.getMessage() + " - Stack trace: " + e.toString();
+        }
+    }
+    
+    @GetMapping("/api/test/check-data")
+    @ResponseBody
+    public String checkData() {
+        try {
+            List<User> doctors = userRepository.findByRole("Doctor");
+            List<Availability> availabilities = availabilityRepository.findAll();
+            
+            StringBuilder result = new StringBuilder();
+            result.append("Doctors: ").append(doctors.size()).append(", Availability slots: ").append(availabilities.size()).append("\n");
+            
+            for (User doctor : doctors) {
+                result.append("Doctor ID: ").append(doctor.getId()).append(", Name: ").append(doctor.getFullName()).append("\n");
+            }
+            
+            for (Availability slot : availabilities) {
+                result.append("Slot: Doctor ID ").append(slot.getDoctor().getId())
+                      .append(" on ").append(slot.getAvailableDate())
+                      .append(" from ").append(slot.getStartTime()).append(" to ").append(slot.getEndTime()).append("\n");
+            }
+            
+            return result.toString();
+        } catch (Exception e) {
+            return "Error checking data: " + e.getMessage();
+        }
+    }
+    
+    @GetMapping("/api/test/create-all-availability")
+    @ResponseBody
+    public String createAllAvailability() {
+        try {
+            List<User> doctors = userRepository.findByRole("Doctor");
+            LocalDate today = LocalDate.now();
+            
+            StringBuilder result = new StringBuilder();
+            
+            for (User doctor : doctors) {
+                // Create today's slots
+                LocalTime[] startTimes = {LocalTime.of(9, 0), LocalTime.of(10, 30), LocalTime.of(14, 0), LocalTime.of(15, 30)};
+                LocalTime[] endTimes = {LocalTime.of(10, 0), LocalTime.of(11, 30), LocalTime.of(15, 0), LocalTime.of(16, 30)};
+                
+                for (int i = 0; i < startTimes.length; i++) {
+                    Availability slot = new Availability();
+                    slot.setDoctor(doctor);
+                    slot.setAvailableDate(today);
+                    slot.setStartTime(startTimes[i]);
+                    slot.setEndTime(endTimes[i]);
+                    availabilityRepository.save(slot);
+                }
+                
+                result.append("Created 4 slots for Dr. ").append(doctor.getFullName()).append(" (ID: ").append(doctor.getId()).append(") on ").append(today).append("\n");
+            }
+            
+            return result.toString();
+        } catch (Exception e) {
+            return "Error creating availability: " + e.getMessage();
+        }
+    }
+    
+    @GetMapping("/api/test/create-doctor1-availability")
+    @ResponseBody
+    public String createDoctor1Availability() {
+        try {
+            User doctor = userRepository.findById(1L).orElse(null);
+            if (doctor == null) {
+                return "No doctor found with ID 1";
+            }
+            
+            LocalDate today = LocalDate.now();
+            
+            // Create one simple slot for today
+            Availability slot = new Availability();
+            slot.setDoctor(doctor);
+            slot.setAvailableDate(today);
+            slot.setStartTime(LocalTime.of(9, 0));
+            slot.setEndTime(LocalTime.of(10, 0));
+            availabilityRepository.save(slot);
+            
+            return "Created availability slot for Dr. " + doctor.getFullName() + " (ID: 1) on " + today;
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
+        }
+    }
 }
+
