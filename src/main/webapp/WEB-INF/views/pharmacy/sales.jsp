@@ -20,15 +20,21 @@
 <body>
     <div class="pharmacy-container">
         <aside class="sidebar">
-            <div class="sidebar-logo"><i class="fas fa-plus-square"></i> <span>MediCare+ <span>Pharmacy</span></span></div>
+            <div class="sidebar-logo">
+                <i class="fas fa-prescription-bottle-alt"></i>
+                <span>MediCare+ <span>Pharmacy</span></span>
+            </div>
             <nav class="sidebar-nav">
-                <a href="/pharmacy-dashboard" class="nav-link"><i class="fas fa-th-large"></i> Dashboard</a>
-                <a href="/pharmacy/inventory" class="nav-link"><i class="fas fa-pills"></i> Stock & Expiry</a>
+                <a href="/pharmacy-dashboard" class="nav-link"><i class="fas fa-grid-2"></i> Dashboard</a>
+                <a href="/pharmacy/inventory" class="nav-link"><i class="fas fa-pills"></i> Inventory</a>
                 <a href="/pharmacy/billing" class="nav-link"><i class="fas fa-file-invoice-dollar"></i> Medicine Issue</a>
                 <a href="/pharmacy/sales" class="nav-link active"><i class="fas fa-chart-line"></i> Sales Summary</a>
-                <a href="/pharmacy/staff" class="nav-link"><i class="fas fa-users"></i> Staff & Shifts</a>
+                <a href="/pharmacy/staff" class="nav-link"><i class="fas fa-users-gear"></i> Staff Management</a>
+                <a href="/pharmacy/leave" class="nav-link"><i class="fas fa-calendar-minus"></i> Leave Request</a>
             </nav>
-            <div class="sidebar-footer"><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></div>
+            <div class="sidebar-footer">
+                <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
         </aside>
         <main class="main-content">
             <header class="main-header">

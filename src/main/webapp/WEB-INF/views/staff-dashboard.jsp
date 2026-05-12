@@ -285,6 +285,10 @@
                     <span class="material-symbols-outlined">trending_up</span>
                     Performance
                 </a>
+                <a href="#" class="nav-item" id="nav-leave" onclick="switchTab(event, 'leave')">
+                    <span class="material-symbols-outlined">running_with_errors</span>
+                    Leave Request
+                </a>
                 <a href="#" class="nav-item" id="nav-profile" onclick="switchTab(event, 'profile')">
                     <span class="material-symbols-outlined">person</span>
                     My Profile
@@ -498,7 +502,12 @@
                                         <td>${att.checkOut != null ? att.checkOut : '---'}</td>
                                         <td>
                                             <div class="attendance-status">
-                                                <span class="status-dot dot-present"></span> ${att.status}
+                                                <c:choose>
+                                                    <c:when test="${att.status == 'Present'}"><span class="status-dot dot-present"></span></c:when>
+                                                    <c:when test="${att.status == 'Absent'}"><span class="status-dot dot-absent"></span></c:when>
+                                                    <c:otherwise><span class="status-dot dot-late"></span></c:otherwise>
+                                                </c:choose>
+                                                ${att.status}
                                             </div>
                                         </td>
                                         <td>
@@ -573,7 +582,58 @@
                     </div>
                 </div>
 
-                <!-- Performance Tab -->
+                <!-- Performance Tab content ends here -->
+
+                <!-- Leave Request Tab -->
+                <div id="leave" class="tab-content">
+                    <div class="page-header">
+                        <h1 class="page-title">Leave Applications</h1>
+                        <button onclick="openModal('leaveModal')" class="btn-primary staff-bg-gradient">
+                            <span class="material-symbols-outlined">add</span>
+                            Apply for Leave
+                        </button>
+                    </div>
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h2 class="section-title">My Leave History</h2>
+                        </div>
+                        <div style="padding: 24px;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Reason</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                        <th>Status</th>
+                                        <th>Submitted At</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <c:forEach var="lr" items="${myLeaveRequests}">
+                                        <tr>
+                                            <td style="font-weight: 500;">${lr.reason}</td>
+                                            <td>${lr.startDate}</td>
+                                            <td>${lr.endDate}</td>
+                                            <td>
+                                                <c:choose>
+                                                    <c:when test="${lr.status == 'Approved'}"><span style="color: var(--success); font-weight: 700;">Approved</span></c:when>
+                                                    <c:when test="${lr.status == 'Rejected'}"><span style="color: var(--error); font-weight: 700;">Rejected</span></c:when>
+                                                    <c:otherwise><span style="color: var(--warning); font-weight: 700;">Pending</span></c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                            <td style="font-size: 11px; color: var(--gray-400);">${lr.submittedAt}</td>
+                                        </tr>
+                                    </c:forEach>
+                                    <c:if test="${empty myLeaveRequests}">
+                                        <tr>
+                                            <td colspan="5" style="text-align: center; padding: 40px; color: var(--gray-400);">No leave requests found.</td>
+                                        </tr>
+                                    </c:if>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
                 <div id="performance" class="tab-content">
                     <div class="page-header">
                         <h1 class="page-title">Performance Analytics</h1>
@@ -689,6 +749,37 @@
                 <div style="margin-top: 25px;">
                     <button type="submit" class="btn-primary staff-bg-gradient" style="width: 100%; justify-content: center;">
                         Confirm Check Out
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Leave Request Modal -->
+    <div id="leaveModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Apply for Leave</h3>
+                <span class="material-symbols-outlined close-modal" onclick="closeModal('leaveModal')">close</span>
+            </div>
+            <form action="/staff/apply-leave" method="post">
+                <div class="form-group">
+                    <label>Reason for Leave</label>
+                    <textarea name="reason" class="form-input" required style="width: 100%; height: 100px; border-radius: 8px; border: 1px solid var(--gray-200); padding: 10px; font-family: inherit; font-size: 14px;"></textarea>
+                </div>
+                <div class="form-group" style="display: flex; gap: 10px;">
+                    <div style="flex: 1;">
+                        <label>Start Date</label>
+                        <input type="date" name="startDate" class="form-input" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--gray-200);">
+                    </div>
+                    <div style="flex: 1;">
+                        <label>End Date</label>
+                        <input type="date" name="endDate" class="form-input" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--gray-200);">
+                    </div>
+                </div>
+                <div style="margin-top: 25px;">
+                    <button type="submit" class="btn-primary staff-bg-gradient" style="width: 100%; justify-content: center; padding: 14px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer;">
+                        Submit Request
                     </button>
                 </div>
             </form>

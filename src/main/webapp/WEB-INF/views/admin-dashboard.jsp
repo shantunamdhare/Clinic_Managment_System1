@@ -24,7 +24,11 @@
         .sidebar-brand h2 { font-size:22px; font-weight:800; background:linear-gradient(135deg,#10b981,#34d399);
             -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
         .sidebar-brand span { font-size:11px; color:#94a3b8; }
-        .sidebar-nav { flex:1; padding:20px 12px; display:flex; flex-direction:column; gap:4px; overflow-y:auto; }
+        .sidebar-nav { 
+            flex:1; padding:20px 12px; display:flex; flex-direction:column; gap:4px; 
+            overflow-y:auto; -ms-overflow-style: none; scrollbar-width: none; 
+        }
+        .sidebar-nav::-webkit-scrollbar { display: none; }
         .nav-item {
             display:flex; align-items:center; gap:12px; padding:11px 16px; border-radius:10px;
             color:#a7f3d0; font-size:14px; font-weight:500; cursor:pointer; transition:all .2s;
@@ -61,53 +65,71 @@
         .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-bottom:28px; }
         .stat-box {
             background:#ffffff;
-            border:1px solid #DCFCE7; border-radius:16px; padding:24px;
-            transition:transform .2s, box-shadow .2s; position:relative; overflow:hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border:1px solid rgba(16,185,129,0.08); border-radius:20px; padding:24px;
+            transition:all .3s cubic-bezier(0.4, 0, 0.2, 1); position:relative; overflow:hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            display: flex; flex-direction: column;
         }
-        .stat-box:hover { transform:translateY(-3px); box-shadow:0 8px 30px rgba(16,185,129,0.1); }
+        .stat-box:hover { transform:translateY(-5px); box-shadow:0 12px 30px rgba(16,185,129,0.12); border-color:rgba(16,185,129,0.2); }
         .stat-box::before {
-            content:''; position:absolute; top:0; left:0; right:0; height:3px;
-            background:linear-gradient(90deg,#10b981,#34d399); border-radius:16px 16px 0 0;
+            content:''; position:absolute; top:0; left:0; right:0; height:4px;
+            background:linear-gradient(90deg,#10b981,#34d399); border-radius:20px 20px 0 0;
+            opacity: 0.8;
         }
         .stat-box.green::before { background:linear-gradient(90deg,#10b981,#34d399); }
         .stat-box.orange::before { background:linear-gradient(90deg,#f59e0b,#fbbf24); }
         .stat-box.red::before { background:linear-gradient(90deg,#ef4444,#f87171); }
-        .stat-box .stat-icon { font-size:32px; margin-bottom:12px; }
-        .stat-box h3 { font-size:32px; font-weight:800; color:#064e3b; margin-bottom:4px; }
-        .stat-box p { font-size:13px; color:#64748b; font-weight:500; }
-        .stat-box .stat-sub { font-size:11px; color:#10b981; margin-top:6px; font-weight:600; }
+        .stat-box .stat-icon { 
+            font-size:32px; margin-bottom:12px; 
+            width: 56px; height: 56px; background: rgba(16,185,129,0.05);
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 14px; color: #10b981;
+        }
+        .stat-box.orange .stat-icon { background: rgba(245,158,11,0.05); color: #f59e0b; }
+        .stat-box.red .stat-icon { background: rgba(239,68,68,0.05); color: #ef4444; }
+        
+        .stat-box h3 { font-size:32px; font-weight:800; color:#064e3b; margin-bottom:4px; letter-spacing: -1px; }
+        .stat-box p { font-size:14px; color:#64748b; font-weight:600; }
+        .stat-box .stat-sub { font-size:12px; color:#10b981; margin-top:8px; font-weight:700; opacity: 0.8; }
 
         /* Section Title */
         .section-title {
-            font-size:18px; font-weight:700; color:#064e3b; margin-bottom:16px;
-            display:flex; align-items:center; gap:10px;
+            font-size:20px; font-weight:800; color:#064e3b; margin-bottom:20px;
+            display:flex; align-items:center; gap:12px;
         }
-        .section-title .title-icon { font-size:20px; }
+        .section-title .title-icon { 
+            font-size:22px; width: 40px; height: 40px; background: rgba(16,185,129,0.1);
+            display: flex; align-items: center; justify-content: center; border-radius: 10px;
+        }
 
         /* Cards Grid */
-        .cards-row { display:grid; grid-template-columns:repeat(2,1fr); gap:20px; margin-bottom:28px; }
+        .cards-row { display:grid; grid-template-columns:repeat(2,1fr); gap:24px; margin-bottom:28px; }
 
         .card {
             background:#ffffff;
-            border:1px solid #DCFCE7; border-radius:16px; padding:24px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border:1px solid rgba(16,185,129,0.06); border-radius:24px; padding:32px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s ease;
         }
-        .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
-        .card-header h3 { font-size:16px; font-weight:700; color:#064e3b; }
+        .card:hover { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); }
+        .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
+        .card-header h3 { font-size:18px; font-weight:800; color:#064e3b; }
 
         /* Table */
-        .data-table { width:100%; border-collapse:collapse; }
+        .data-table { width:100%; border-collapse:separate; border-spacing: 0 8px; }
         .data-table th {
-            text-align:left; padding:10px 14px; font-size:12px; font-weight:600;
-            color:#64748b; text-transform:uppercase; letter-spacing:.5px;
-            border-bottom:1px solid rgba(255,255,255,0.06);
+            text-align:left; padding:12px 16px; font-size:11px; font-weight:700;
+            color:#94a3b8; text-transform:uppercase; letter-spacing:1px;
+            border-bottom: 2px solid #f8fafc;
         }
         .data-table td {
-            padding:12px 14px; font-size:13px; color:#cbd5e1;
-            border-bottom:1px solid rgba(255,255,255,0.04);
+            padding:16px; font-size:14px; color:#1e293b;
+            background: #ffffff; transition: all 0.2s ease;
+            border-top: 1px solid #f8fafc; border-bottom: 1px solid #f8fafc;
         }
-        .data-table tr:hover td { background:rgba(108,99,255,0.04); }
+        .data-table td:first-child { border-left: 1px solid #f8fafc; border-radius: 12px 0 0 12px; }
+        .data-table td:last-child { border-right: 1px solid #f8fafc; border-radius: 0 12px 12px 0; }
+        .data-table tr:hover td { background:#f0fdf4; border-color: #dcfce7; }
 
         /* Badges */
         .badge {
@@ -225,6 +247,12 @@
             <a class="nav-item" href="javascript:void(0)" onclick="showSection('staff-section', this)">
                 <span class="nav-icon">&#x1F465;</span> Staff Management
             </a>
+            <a class="nav-item" href="javascript:void(0)" onclick="showSection('staff-requests-section', this)">
+                <span class="nav-icon">&#x1F4DD;</span> Staff Requests
+            </a>
+            <a class="nav-item" href="javascript:void(0)" onclick="showSection('visitors-messages-section', this)">
+                <span class="nav-icon">&#x1F4E8;</span> Visitors Messages
+            </a>
             <a class="nav-item" href="javascript:void(0)" onclick="showSection('appointments-section', this)">
                 <span class="nav-icon">&#x1F4C5;</span> Appointments
             </a>
@@ -236,6 +264,9 @@
             </a>
             <a class="nav-item" href="javascript:void(0)" onclick="showSection('health-section', this)">
                 <span class="nav-icon">&#x1F6E1;</span> System Health
+            </a>
+            <a class="nav-item" href="javascript:void(0)" onclick="showSection('newsletter-section', this)">
+                <span class="nav-icon">&#x1F4E7;</span> Newsletter
             </a>
             <a class="nav-item" href="javascript:void(0)" onclick="showSection('analytics-section', this)">
                 <span class="nav-icon">&#x1F4C8;</span> Analytics
@@ -287,21 +318,6 @@
                 </div>
             </div>
 
-            <!-- Appointment Status Mini Stats -->
-            <div class="mini-stats">
-                <div class="mini-stat">
-                    <h4>${completedAppointments}</h4>
-                    <p>&#x2705; Completed</p>
-                </div>
-                <div class="mini-stat">
-                    <h4>${pendingAppointments}</h4>
-                    <p>&#x23F3; Pending</p>
-                </div>
-                <div class="mini-stat">
-                    <h4>${cancelledAppointments}</h4>
-                    <p>&#x274C; Cancelled</p>
-                </div>
-            </div>
 
             <!-- Alerts, Stocks & Bills Row -->
             <div class="cards-triple" style="margin-top:20px;">
@@ -363,6 +379,65 @@
                                 </div>
                             </div>
                         </c:forEach>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cards-row" style="margin-top:20px;">
+                <!-- Pending Staff Requests Summary -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>&#x1F4DD; Pending Staff Requests</h3>
+                        <a href="javascript:void(0)" onclick="showSection('staff-requests-section', document.querySelectorAll('.nav-item')[2])" style="font-size:12px; color:#10b981; text-decoration:none; font-weight:700;">Manage All</a>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        <c:choose>
+                            <c:when test="${not empty leaveRequests}">
+                                <c:forEach var="req" items="${leaveRequests}" varStatus="loop">
+                                    <c:if test="${req.status == 'Pending' && loop.index < 4}">
+                                        <div style="padding:16px; background:rgba(16,185,129,0.03); border:1px solid rgba(16,185,129,0.08); border-radius:16px; transition:0.2s;">
+                                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                                                <div style="font-weight:750; color:#064e3b; font-size:15px;">${req.user.fullName}</div>
+                                                <span class="badge badge-pending" style="font-size:10px;">Pending</span>
+                                            </div>
+                                            <div style="font-size:13px; color:#475569; line-height:1.5;">${req.reason}</div>
+                                            <div style="font-size:11px; color:#94a3b8; margin-top:10px; font-weight:600;">&#x1F4C5; ${req.startDate} to ${req.endDate}</div>
+                                        </div>
+                                    </c:if>
+                                </c:forEach>
+                            </c:when>
+                            <c:otherwise>
+                                <div style="text-align:center; padding:40px 20px; color:#94a3b8;">
+                                    <div style="font-size:30px; margin-bottom:10px;">&#x1F4DD;</div>
+                                    <p style="font-size:13px;">No pending leave requests</p>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                </div>
+
+                <!-- Quick Access / Summary -->
+                <div class="card" style="background:linear-gradient(135deg, #064e3b, #065f46); border:none;">
+                    <div class="card-header">
+                        <h3 style="color:#fff;">&#x1F680; Quick Overview</h3>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                        <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:18px; border:1px solid rgba(255,255,255,0.1);">
+                            <div style="font-size:24px; font-weight:800; color:#10b981;">${totalStaff}</div>
+                            <div style="font-size:11px; color:#a7f3d0; text-transform:uppercase; font-weight:700; margin-top:4px;">Total Staff</div>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:18px; border:1px solid rgba(255,255,255,0.1);">
+                            <div style="font-size:24px; font-weight:800; color:#fbbf24;">${totalSubscribers}</div>
+                            <div style="font-size:11px; color:#fde68a; text-transform:uppercase; font-weight:700; margin-top:4px;">Subscribers</div>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:18px; border:1px solid rgba(255,255,255,0.1);">
+                            <div style="font-size:24px; font-weight:800; color:#f87171;">${totalLabUsers}</div>
+                            <div style="font-size:11px; color:#fecaca; text-transform:uppercase; font-weight:700; margin-top:4px;">Lab Partners</div>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:18px; border:1px solid rgba(255,255,255,0.1);">
+                            <div style="font-size:24px; font-weight:800; color:#6C63FF;">${totalReceptionists}</div>
+                            <div style="font-size:11px; color:#c4b5fd; text-transform:uppercase; font-weight:700; margin-top:4px;">Reception</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -522,6 +597,88 @@
             </div>
         </div>
 
+        <!-- Newsletter Subscriptions Section -->
+        <div id="newsletter-section" class="content-section">
+            <div class="section-title">
+                <span class="title-icon">&#x1F4E7;</span> Newsletter Management
+            </div>
+            
+            <div class="cards-row">
+                <div class="card" style="background: #ffffff; border: 1px solid #DCFCE7;">
+                    <div class="card-header">
+                        <h3 style="color: #064e3b;">&#x1F465; Community Overview</h3>
+                        <span class="badge badge-role">${totalSubscribers} Subscribers</span>
+                    </div>
+                    <p style="font-size: 13px; color: #64748b; margin-bottom: 20px;">
+                        Manage your newsletter community and keep your audience engaged with the latest updates.
+                    </p>
+                    
+                    <div style="background: #f0fdf4; border: 1px solid #dcfce7; padding: 25px; border-left: 5px solid #10b981; border-radius: 16px;">
+                        <h4 style="margin-bottom: 10px; color: #064e3b; font-weight: 800;">📢 Send Update to All</h4>
+                        <p style="font-size: 12px; color: #64748b; margin-bottom: 15px;">Send a blast email to all ${totalSubscribers} subscribed users.</p>
+                        <c:if test="${not empty newsletterSuccess}">
+                            <div style="background: #ecfdf5; color: #065f46; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; font-weight: 600; border: 1px solid #d1fae5;">
+                                &#x2705; ${newsletterSuccess}
+                            </div>
+                        </c:if>
+                        <form action="${pageContext.request.contextPath}/admin/newsletter/send" method="POST">
+                            <div class="form-group" style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 8px; font-size: 13px; color: #475569; font-weight: 600;">Subject</label>
+                                <input type="text" name="subject" placeholder="e.g. New Clinic Timings" required style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #dcfce7; background: #fff; color: #1e293b; outline: none;" />
+                            </div>
+                            <div class="form-group">
+                                <label style="display: block; margin-bottom: 8px; font-size: 13px; color: #475569; font-weight: 600;">Message Content</label>
+                                <textarea name="message" style="width: 100%; padding: 12px; border-radius: 10px; background: #ffffff; border: 1px solid #dcfce7; color: #1e293b; min-height: 120px; outline: none; font-family: inherit;" placeholder="Write your announcement here..." required></textarea>
+                            </div>
+                            <button type="submit" style="width: 100%; margin-top: 15px; padding: 14px; background: #10b981; color: #fff; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">Send Update Now</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card" style="background: #ffffff; border: 1px solid #DCFCE7;">
+                    <div class="card-header">
+                        <h3 style="color: #064e3b;">📧 Active Subscriptions</h3>
+                    </div>
+                    <div style="max-height: 500px; overflow-y: auto;">
+                        <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                            <thead style="background: #f8fafc; position: sticky; top: 0; z-index: 1;">
+                                <tr>
+                                    <th style="padding: 12px; text-align: left; font-size: 11px; color: #64748b; text-transform: uppercase; border-bottom: 2px solid #f1f5f9;">Email Address</th>
+                                    <th style="padding: 12px; text-align: left; font-size: 11px; color: #64748b; text-transform: uppercase; border-bottom: 2px solid #f1f5f9;">Joined</th>
+                                    <th style="padding: 12px; text-align: right; font-size: 11px; color: #64748b; text-transform: uppercase; border-bottom: 2px solid #f1f5f9;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:choose>
+                                    <c:when test="${not empty newsletterSubscriptions}">
+                                        <c:forEach var="sub" items="${newsletterSubscriptions}">
+                                            <tr style="border-bottom: 1px solid #f8fafc;">
+                                                <td style="padding: 14px 12px; color: #1e293b; font-weight: 600; font-size: 14px;">${sub.email}</td>
+                                                <td style="padding: 14px 12px; color: #64748b; font-size: 12px;">${sub.subscribedAt}</td>
+                                                <td style="padding: 14px 12px; text-align: right;">
+                                                    <form action="${pageContext.request.contextPath}/admin/newsletter/remove/${sub.id}" method="POST" style="display: inline;">
+                                                        <button type="submit" style="padding: 6px 12px; border-radius: 8px; background: #fef2f2; color: #ef4444; border: 1px solid #fee2e2; font-size: 11px; cursor: pointer; font-weight: 700; transition: 0.2s;" onclick="return confirm('Are you sure you want to remove this subscriber?')">Remove</button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <tr>
+                                            <td colspan="3" style="text-align:center; padding: 60px; color: #94a3b8;">
+                                                <div style="font-size: 40px; margin-bottom: 10px; opacity: 0.3;">&#x1F4EC;</div>
+                                                <p style="font-size: 14px; font-weight: 500;">No active subscriptions yet</p>
+                                            </td>
+                                        </tr>
+                                    </c:otherwise>
+                                </c:choose>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Analytics Section -->
         <div id="analytics-section" class="content-section">
             <div class="section-title">
@@ -618,10 +775,9 @@
             </div>
         </div>
 
-        <!-- Staff Management Section -->
         <div id="staff-section" class="content-section">
             <div class="section-title">
-                <span class="title-icon">&#x1F465;</span> Staff Management & Directory
+                <span class="title-icon">&#x1F465;</span> Staff Directory & Management
             </div>
 
             <!-- Role-wise Staff Count -->
@@ -658,49 +814,55 @@
                 </div>
             </div>
 
-            <!-- Staff Directory Table -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>&#x1F4CB; All Registered Users</h3>
-                    <span class="badge badge-role">Total: ${totalUsers}</span>
-                </div>
-                <c:choose>
-                    <c:when test="${not empty allUsers}">
-                        <table class="data-table">
-                            <thead>
-                                <tr><th>Name</th><th>Role</th><th>Attendance</th><th>Check-In</th><th>Check-Out</th><th>Shift</th><th>Action</th></tr>
-                            </thead>
-                            <tbody>
-                                <c:forEach var="u" items="${allUsers}">
-                                    <c:if test="${u.role != 'Admin' && u.role != 'Doctor' && u.role != 'Delivery'}">
-                                    <tr>
-                                        <td>
-                                            <div style="display:flex; align-items:center; gap:10px;">
-                                                <div class="staff-avatar" style="width:32px; height:32px; font-size:13px; border-radius:8px;">
-                                                    ${u.fullName.substring(0,1)}
+                <div class="card">
+                    <div class="card-header">
+                        <h3>&#x1F4CB; Staff Directory</h3>
+                        <span class="badge badge-role" style="background:#10b981; color:#fff;">Total Users: ${totalUsers}</span>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="padding-left:20px;">Name & Email</th>
+                                <th>Role</th>
+                                <th>Attendance</th>
+                                <th>Check-In</th>
+                                <th>Check-Out</th>
+                                <th>Shift Timing</th>
+                                <th style="text-align:right; padding-right:20px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach var="u" items="${allUsers}">
+                                <c:if test="${u.role != 'Admin'}">
+                                <tr>
+                                        <td style="padding-left:20px;">
+                                            <div style="display:flex; align-items:center; gap:12px;">
+                                                <div class="staff-avatar" style="width:36px; height:36px; font-size:14px; border-radius:10px; background:linear-gradient(135deg, #10b981, #34d399); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700;">
+                                                    ${u.fullName != null && u.fullName.length() > 0 ? u.fullName.substring(0,1).toUpperCase() : '?'}
                                                 </div>
                                                 <div>
-                                                    <div style="font-weight:600;">${u.fullName}</div>
-                                                    <div style="font-size:11px; color:#64748b;">${u.email}</div>
+                                                    <div style="font-weight:700; color:#0f172a;">${u.fullName}</div>
+                                                    <div style="font-size:12px; color:#64748b;">${u.email}</div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td><span class="badge badge-role">${u.role}</span></td>
+                                        <td><span class="badge badge-role" style="background:rgba(16,185,129,0.1); color:#059669; border:1px solid rgba(16,185,129,0.2);">${u.role}</span></td>
                                         <td>
                                             <c:choose>
-                                                <c:when test="${u.attendanceStatus == 'Present'}"><span class="badge badge-completed">Present</span></c:when>
-                                                <c:when test="${u.attendanceStatus == 'Absent'}"><span class="badge badge-cancelled">Absent</span></c:when>
-                                                <c:otherwise><span class="badge badge-pending">Pending</span></c:otherwise>
+                                                <c:when test="${u.attendanceStatus == 'Present'}"><span class="badge" style="background:#dcfce7; color:#166534; border:1px solid #bbf7d0;">Present</span></c:when>
+                                                <c:when test="${u.attendanceStatus == 'Absent'}"><span class="badge" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca;">Absent</span></c:when>
+                                                <c:when test="${u.attendanceStatus == 'Half Day'}"><span class="badge" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a;">Half Day</span></c:when>
+                                                <c:otherwise><span class="badge" style="background:#f1f5f9; color:#475569; border:1px solid #e2e8f0;">Pending</span></c:otherwise>
                                             </c:choose>
                                         </td>
-                                        <td>${u.checkInTime != null && u.checkInTime != 'null' ? u.checkInTime : '--:--'}</td>
-                                        <td>${u.checkOutTime != null && u.checkOutTime != 'null' ? u.checkOutTime : '--:--'}</td>
-                                        <td><span class="badge badge-role" style="background:rgba(255,255,255,0.05);">${u.shiftTiming != null ? u.shiftTiming : 'Not Assigned'}</span></td>
-                                        <td>
-                                            <div style="display:flex; gap:5px;">
-                                                <button onclick="openAttendanceModal('${u.id}', '${u.fullName}', '${u.attendanceStatus}')" title="Attendance" style="background:rgba(16,185,129,0.1); border:none; padding:6px; border-radius:6px; color:#34d399; cursor:pointer;">&#x2705;</button>
-                                                <button onclick="openShiftModal('${u.id}', '${u.fullName}')" title="Assign Shift" style="background:rgba(108,99,255,0.1); border:none; padding:6px; border-radius:6px; color:#a78bfa; cursor:pointer;">&#x231B;</button>
-                                                <button onclick="openPerformanceModal('${u.id}', '${u.fullName}')" title="Rating" style="background:rgba(245,158,11,0.1); border:none; padding:6px; border-radius:6px; color:#fbbf24; cursor:pointer;">&#x2B50;</button>
+                                        <td style="font-weight:600; color:#334155;">${u.checkInTime != null && u.checkInTime != 'null' ? u.checkInTime : '--:--'}</td>
+                                        <td style="font-weight:600; color:#334155;">${u.checkOutTime != null && u.checkOutTime != 'null' ? u.checkOutTime : '--:--'}</td>
+                                        <td><span class="badge" style="background:rgba(108,99,255,0.05); color:#6366f1; border:1px solid rgba(108,99,255,0.1); font-weight:600;">${u.shiftTiming != null ? u.shiftTiming : 'Not Assigned'}</span></td>
+                                        <td style="text-align:right; padding-right:20px;">
+                                            <div style="display:flex; gap:8px; justify-content:flex-end;">
+                                                <button onclick="openAttendanceModal('${u.id}', '${u.fullName}', '${u.attendanceStatus}')" title="Mark Attendance" style="background:#f0fdf4; border:1px solid #dcfce7; padding:8px; border-radius:8px; color:#16a34a; cursor:pointer; transition:0.2s;">&#x2705;</button>
+                                                <button onclick="openShiftModal('${u.id}', '${u.fullName}')" title="Assign Shift" style="background:#f5f3ff; border:1px solid #ddd6fe; padding:8px; border-radius:8px; color:#7c3aed; cursor:pointer; transition:0.2s;">&#x231B;</button>
+                                                <button onclick="openReportModal('${u.id}', '${u.fullName}')" title="View Report" style="background:#eff6ff; border:1px solid #dbeafe; padding:8px; border-radius:8px; color:#2563eb; cursor:pointer; transition:0.2s;">📊</button>
                                             </div>
                                         </td>
                                     </tr>
@@ -708,14 +870,6 @@
                                 </c:forEach>
                             </tbody>
                         </table>
-                    </c:when>
-                    <c:otherwise>
-                        <div class="empty-state">
-                            <div class="empty-icon">&#x1F465;</div>
-                            <p>No users registered</p>
-                        </div>
-                    </c:otherwise>
-                </c:choose>
                 </div>
 
 
@@ -739,125 +893,105 @@
                             </c:forEach>
                         </tbody>
                     </table>
+
                 </div>
             </div>
 
-            <!-- Staff Performance Card -->
-            <div class="card" style="margin-top:20px;">
-                <div class="card-header">
-                    <h3>&#x2B50; Performance Metrics</h3>
-                </div>
-                <table class="data-table">
-                    <thead>
-                        <tr><th>Name</th><th>Role</th><th>Rating</th><th>Status</th></tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach var="u" items="${allUsers}">
-                            <c:if test="${u.role != 'Admin' && u.role != 'Doctor' && u.role != 'Delivery' && u.performanceRating != null}">
-                                <tr>
-                                    <td>${u.fullName}</td>
-                                    <td>${u.role}</td>
-                                    <td style="color:#fbbf24;">
-                                        <c:forEach begin="1" end="${u.performanceRating}">&#x2B50;</c:forEach>
-                                    </td>
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${u.performanceRating >= 4}"><span class="badge badge-completed">Excellent</span></c:when>
-                                            <c:when test="${u.performanceRating == 3}"><span class="badge badge-pending">Average</span></c:when>
-                                            <c:otherwise><span class="badge badge-cancelled">Poor</span></c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                </tr>
-                            </c:if>
-                        </c:forEach>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        </div>
-
-        <!-- Analytics Section -->
-        <div id="analytics-section" class="content-section">
+        <!-- Visitors Messages Section -->
+        <div id="visitors-messages-section" class="content-section">
             <div class="section-title">
-                <span class="title-icon">&#x1F4C8;</span> Performance & Reports
+                <span class="title-icon">&#x1F4E8;</span> Visitors Messages
             </div>
-            
-            <div class="cards-row">
-                <div class="card">
-                    <div class="card-header">
-                        <h3>&#x1F4C8; Analytics Overview</h3>
-                    </div>
-                    <div class="mini-stats" style="margin-bottom:16px;">
-                        <div class="mini-stat">
-                            <h4>${totalVisits}</h4>
-                            <p>Total Visits</p>
-                        </div>
-                        <div class="mini-stat">
-                            <h4>${totalAppointments}</h4>
-                            <p>All Appointments</p>
-                        </div>
-                        <div class="mini-stat">
-                            <h4>${pendingLabRequests}</h4>
-                            <p>Lab Requests</p>
-                        </div>
-                    </div>
-                    <div style="padding:16px; border-radius:12px; background:rgba(108,99,255,0.06); border:1px solid rgba(108,99,255,0.1); margin-bottom:12px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <div>
-                                <div style="font-size:12px; color:#64748b; margin-bottom:4px;">Patient Growth</div>
-                                <div style="font-size:22px; font-weight:800; color:#a78bfa;">${totalPatients} patients</div>
-                            </div>
-                            <div style="font-size:28px;">&#x1F4C8;</div>
-                        </div>
-                    </div>
-                    <div style="padding:16px; border-radius:12px; background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.1);">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <div>
-                                <div style="font-size:12px; color:#64748b; margin-bottom:4px;">Revenue Trend</div>
-                                <div style="font-size:22px; font-weight:800; color:#34d399;">${completedAppointments} completed</div>
-                            </div>
-                            <div style="font-size:28px;">&#x1F4B0;</div>
-                        </div>
-                    </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3>&#x1F4E8; Recent Messages from Visitors</h3>
                 </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h3>&#x1F9A0; Disease Patterns</h3>
-                    </div>
-                    <div class="data-list">
-                        <div style="margin-bottom:12px;">
-                            <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;">
-                                <span>Viral Fever</span>
-                                <span style="color:#a78bfa;">42%</span>
-                            </div>
-                            <div style="height:6px; background:rgba(255,255,255,0.05); border-radius:10px; overflow:hidden;">
-                                <div style="width:42%; height:100%; background:#6C63FF;"></div>
-                            </div>
+                <c:choose>
+                    <c:when test="${not empty visitorMessages}">
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>Name</th><th>Email</th><th>Message</th><th>Date</th></tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="msg" items="${visitorMessages}">
+                                    <tr>
+                                        <td style="font-weight:600; color:#10b981;">${msg.name}</td>
+                                        <td>${msg.email}</td>
+                                        <td style="max-width:300px; white-space:normal; line-height:1.4; color: #334155;">${msg.message}</td>
+                                        <td style="font-size:11px; color:#64748b;">${msg.submittedAt}</td>
+                                    </tr>
+                                </c:forEach>
+                            </tbody>
+                        </table>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="empty-state">
+                            <div class="empty-icon">&#x1F4E8;</div>
+                            <p>No messages from visitors yet</p>
                         </div>
-                        <div style="margin-bottom:12px;">
-                            <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;">
-                                <span>Hypertension</span>
-                                <span style="color:#a78bfa;">28%</span>
-                            </div>
-                            <div style="height:6px; background:rgba(255,255,255,0.05); border-radius:10px; overflow:hidden;">
-                                <div style="width:28%; height:100%; background:#8E2DE2;"></div>
-                            </div>
-                        </div>
-                        <div style="margin-bottom:12px;">
-                            <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;">
-                                <span>Diabetes Type II</span>
-                                <span style="color:#a78bfa;">15%</span>
-                            </div>
-                            <div style="height:6px; background:rgba(255,255,255,0.05); border-radius:10px; overflow:hidden;">
-                                <div style="width:15%; height:100%; background:#a78bfa;"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </div>
+
+        <!-- Staff Requests Section -->
+        <div id="staff-requests-section" class="content-section">
+            <div class="section-title">
+                <span class="title-icon">&#x1F4DD;</span> Staff Leave Requests
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3>&#x1F4DD; Pending & Recent Requests</h3>
+                </div>
+                <c:choose>
+                    <c:when test="${not empty leaveRequests}">
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>Staff Name</th><th>Role</th><th>Reason</th><th>Period</th><th>Status</th><th>Action</th></tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="req" items="${leaveRequests}">
+                                    <tr>
+                                        <td style="font-weight:600; color: #10b981;">${req.user.fullName}</td>
+                                        <td><span class="badge badge-role">${req.user.role}</span></td>
+                                        <td style="max-width:200px; white-space:normal; color: #334155;">${req.reason}</td>
+                                        <td style="color: #475569;">${req.startDate} to ${req.endDate}</td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${req.status == 'Approved'}"><span class="badge badge-completed">Approved</span></c:when>
+                                                <c:when test="${req.status == 'Rejected'}"><span class="badge badge-cancelled">Rejected</span></c:when>
+                                                <c:otherwise><span class="badge badge-pending">Pending</span></c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td>
+                                            <c:if test="${req.status == 'Pending'}">
+                                                <div style="display:flex; gap:5px;">
+                                                    <form action="/admin/approve-leave" method="post" style="display:inline;">
+                                                        <input type="hidden" name="id" value="${req.id}">
+                                                        <button type="submit" style="background:#10b981; color:#fff; border:none; padding:6px 12px; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; transition: 0.2s;">Approve</button>
+                                                    </form>
+                                                    <form action="/admin/reject-leave" method="post" style="display:inline;">
+                                                        <input type="hidden" name="id" value="${req.id}">
+                                                        <button type="submit" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; transition: 0.2s;">Reject</button>
+                                                    </form>
+                                                </div>
+                                            </c:if>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </tbody>
+                        </table>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="empty-state">
+                            <div class="empty-icon">&#x1F4DD;</div>
+                            <p>No staff requests at the moment</p>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+        </div>
+
 
         <!-- System Health Section -->
         <div id="health-section" class="content-section">
@@ -922,11 +1056,84 @@
                 <select name="status" id="attStatus">
                     <option value="Present">Present</option>
                     <option value="Absent">Absent</option>
+                    <option value="Half Day">Half Day</option>
                 </select>
             </div>
             <button type="submit" class="modal-btn">Update Attendance</button>
             <button type="button" onclick="closeModal('attendanceModal')" style="background:transparent; color:#64748b; border:none; width:100%; margin-top:10px; cursor:pointer;">Cancel</button>
         </form>
+    </div>
+</div>
+
+<!-- Attendance Report Modal (White Theme) -->
+<div id="attendanceReportModal" class="modal">
+    <div class="modal-content" style="max-width: 1000px; background: #ffffff; color: #0f172a; border-radius: 28px; padding: 40px; width: 95%; margin: 2% auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 1px solid rgba(0,0,0,0.05); max-height: 90vh; overflow-y: auto;">
+        <div class="modal-header" style="border-bottom: 2px solid #f1f5f9; padding-bottom: 25px; margin-bottom: 35px; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="color: #0f172a; font-size: 28px; font-weight: 900; margin: 0; letter-spacing: -0.5px;">📊 Attendance Report</h3>
+            <span id="reportStaffName" style="background: #f1f5f9; color: #4338ca; padding: 10px 24px; border-radius: 14px; font-size: 16px; font-weight: 800; border: 1px solid #e2e8f0;"></span>
+        </div>
+
+        <!-- Summary Cards Centered -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-bottom: 45px;">
+            <div style="background: #f0fdf4; border: 2px solid #dcfce7; padding: 30px 20px; border-radius: 24px; text-align: center; box-shadow: 0 10px 15px -3px rgba(22, 163, 74, 0.05);">
+                <div style="font-size: 42px; font-weight: 900; color: #15803d;" id="totalPresent">0</div>
+                <p style="color: #166534; font-size: 13px; font-weight: 800; margin-top: 10px; text-transform: uppercase; letter-spacing: 1px;">Present Days</p>
+            </div>
+            <div style="background: #fef2f2; border: 2px solid #fee2e2; padding: 30px 20px; border-radius: 24px; text-align: center; box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.05);">
+                <div style="font-size: 42px; font-weight: 900; color: #b91c1c;" id="totalAbsent">0</div>
+                <p style="color: #991b1b; font-size: 13px; font-weight: 800; margin-top: 10px; text-transform: uppercase; letter-spacing: 1px;">Absent Days</p>
+            </div>
+            <div style="background: #fffbeb; border: 2px solid #fef3c7; padding: 30px 20px; border-radius: 24px; text-align: center; box-shadow: 0 10px 15px -3px rgba(217, 119, 6, 0.05);">
+                <div style="font-size: 42px; font-weight: 900; color: #b45309;" id="totalHalfDay">0</div>
+                <p style="color: #92400e; font-size: 13px; font-weight: 800; margin-top: 10px; text-transform: uppercase; letter-spacing: 1px;">Half Days</p>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1.3fr; gap: 40px;">
+            <!-- Monthly Summary Table -->
+            <div>
+                <h4 style="font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    📅 Monthly Summary
+                </h4>
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead style="background: #f8fafc;">
+                            <tr>
+                                <th style="padding: 16px 20px; text-align: left; font-size: 12px; color: #475569; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid #f1f5f9;">Month</th>
+                                <th style="padding: 16px; text-align: center; font-size: 12px; color: #16a34a; font-weight: 800; border-bottom: 2px solid #f1f5f9;">P</th>
+                                <th style="padding: 16px; text-align: center; font-size: 12px; color: #dc2626; font-weight: 800; border-bottom: 2px solid #f1f5f9;">A</th>
+                                <th style="padding: 16px; text-align: center; font-size: 12px; color: #d97706; font-weight: 800; border-bottom: 2px solid #f1f5f9;">H</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportMonthlyBody" style="font-size: 14px; color: #334155;"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Detailed History Log -->
+            <div>
+                <h4 style="font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    📝 Detailed History
+                </h4>
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; overflow-y: auto; max-height: 320px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead style="background: #f8fafc; position: sticky; top: 0; z-index: 10;">
+                            <tr>
+                                <th style="padding: 16px 25px; text-align: left; font-size: 12px; color: #475569; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid #f1f5f9;">Date</th>
+                                <th style="padding: 16px 25px; text-align: right; font-size: 12px; color: #475569; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid #f1f5f9;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportDetailedBody" style="font-size: 14px; color: #334155;"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 45px; display: flex; justify-content: flex-end;">
+            <button type="button" onclick="closeModal('attendanceReportModal')" style="padding: 16px 50px; background: #0f172a; color: white; border: none; border-radius: 16px; font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.3);">
+                Close Report
+            </button>
+        </div>
     </div>
 </div>
 
@@ -963,27 +1170,7 @@
     </div>
 </div>
 
-<!-- Performance Modal -->
-<div id="performanceModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header"><h3>Rate Performance: <span id="perfName"></span></h3></div>
-        <form action="/admin/update-performance" method="POST">
-            <input type="hidden" name="userId" id="perfUserId">
-            <div class="form-group">
-                <label>Rating (1-5)</label>
-                <select name="rating">
-                    <option value="5">5 Stars (Excellent)</option>
-                    <option value="4">4 Stars (Good)</option>
-                    <option value="3">3 Stars (Average)</option>
-                    <option value="2">2 Stars (Poor)</option>
-                    <option value="1">1 Star (Very Poor)</option>
-                </select>
-            </div>
-            <button type="submit" class="modal-btn">Save Rating</button>
-            <button type="button" onclick="closeModal('performanceModal')" style="background:transparent; color:#64748b; border:none; width:100%; margin-top:10px; cursor:pointer;">Cancel</button>
-        </form>
-    </div>
-</div>
+
 
 <script>
 function showSection(sectionId, element) {
@@ -1007,16 +1194,88 @@ function openAttendanceModal(id, name, status) {
     document.getElementById('attendanceModal').style.display = 'block';
 }
 
+const allAttendances = [
+    <c:forEach var="a" items="${allAttendances}" varStatus="status">
+        {
+            userId: "${a.user.id}",
+            date: "${a.date}",
+            status: "${a.status}"
+        }${not status.last ? ',' : ''}
+    </c:forEach>
+];
+
+function openReportModal(userId, name) {
+    document.getElementById('reportStaffName').innerText = name;
+    
+    const userAtts = allAttendances.filter(a => a.userId == userId).sort((a,b) => new Date(b.date) - new Date(a.date));
+    
+    let present = 0;
+    let absent = 0;
+    let halfDay = 0;
+    
+    const monthlyData = {};
+    const detailedBody = document.getElementById('reportDetailedBody');
+    detailedBody.innerHTML = '';
+    
+    userAtts.forEach(a => {
+        if (a.status === 'Present') present++;
+        else if (a.status === 'Absent') absent++;
+        else if (a.status === 'Half Day') halfDay++;
+        
+        const dateObj = new Date(a.date);
+        const monthYear = dateObj.toLocaleString('default', { month: 'long', year: 'numeric' });
+        
+        if (!monthlyData[monthYear]) {
+            monthlyData[monthYear] = { present: 0, absent: 0, halfDay: 0 };
+        }
+        
+        if (a.status === 'Present') monthlyData[monthYear].present++;
+        else if (a.status === 'Absent') monthlyData[monthYear].absent++;
+        else if (a.status === 'Half Day') monthlyData[monthYear].halfDay++;
+        
+        // Add to detailed log
+        let statusColor = '#16a34a';
+        if (a.status === 'Absent') statusColor = '#dc2626';
+        if (a.status === 'Half Day') statusColor = '#d97706';
+        
+        const row = `<tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 12px 20px; color: #475569; font-weight: 500;">${a.date}</td>
+            <td style="padding: 12px 20px; text-align: right;"><span style="color: ${statusColor}; font-weight: 700; font-size: 11px; text-transform: uppercase;">${a.status}</span></td>
+        </tr>`;
+        detailedBody.innerHTML += row;
+    });
+    
+    document.getElementById('totalPresent').innerText = present;
+    document.getElementById('totalAbsent').innerText = absent;
+    document.getElementById('totalHalfDay').innerText = halfDay;
+    
+    const tbody = document.getElementById('reportMonthlyBody');
+    tbody.innerHTML = '';
+    
+    const sortedMonths = Object.keys(monthlyData).sort((a,b) => new Date(b) - new Date(a));
+    
+    if (sortedMonths.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:60px; color:#64748b; font-style:italic; font-size:16px; font-weight:600;">No attendance records found for this staff member</td></tr>';
+        detailedBody.innerHTML = '<tr><td colspan="2" style="text-align:center; padding:60px; color:#64748b; font-style:italic; font-size:16px; font-weight:600;">No detailed history available</td></tr>';
+    } else {
+        sortedMonths.forEach(month => {
+            const row = `<tr style="border-bottom: 1px solid #f1f5f9;">
+                <td style="padding: 16px 20px; font-weight:700; color: #1e293b;">${month}</td>
+                <td style="padding: 16px; text-align: center; color:#16a34a; font-weight:900; font-size:15px;">${monthlyData[month].present}</td>
+                <td style="padding: 16px; text-align: center; color:#dc2626; font-weight:900; font-size:15px;">${monthlyData[month].absent}</td>
+                <td style="padding: 16px; text-align: center; color:#d97706; font-weight:900; font-size:15px;">${monthlyData[month].halfDay}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+    }
+    
+    document.getElementById('attendanceReportModal').style.display = 'block';
+}
+
 function openShiftModal(id, name) {
     document.getElementById('shiftUserId').value = id;
     document.getElementById('shiftName').innerText = name;
     document.getElementById('shiftModal').style.display = 'block';
-}
-
-function openPerformanceModal(id, name) {
-    document.getElementById('perfUserId').value = id;
-    document.getElementById('perfName').innerText = name;
-    document.getElementById('performanceModal').style.display = 'block';
 }
 
 function closeModal(id) {
@@ -1031,6 +1290,20 @@ window.onclick = function(event) {
         event.target.style.display = "none";
     }
 }
+
+// Handle hash-based section toggling on load
+window.addEventListener('load', function() {
+    const hash = window.location.hash;
+    if (hash) {
+        const sectionId = hash.substring(1);
+        const section = document.getElementById(sectionId);
+        if (section && section.classList.contains('content-section')) {
+            // Find the corresponding nav item
+            const navItem = document.querySelector(`.nav-item[onclick*="${sectionId}"]`);
+            showSection(sectionId, navItem);
+        }
+    }
+});
 </script>
 </body>
 </html>

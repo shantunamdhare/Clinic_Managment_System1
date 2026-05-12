@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -50,6 +51,9 @@ public class PharmacyController {
 
     @Autowired
     private MedicineRepository medicineRepository;
+
+    @Autowired
+    private LeaveRequestRepository leaveRequestRepository;
 
     @GetMapping("/pharmacy-dashboard")
     public String dashboard(Model model, HttpSession session) {
@@ -142,6 +146,10 @@ public class PharmacyController {
         
         model.addAttribute("user", user);
         model.addAttribute("medicines", pharmacyService.getAllMedicines());
+        model.addAttribute("lowStockMedicines", pharmacyService.getLowStockMedicines());
+        List<Medicine> expiring = pharmacyService.getExpiringMedicines();
+        model.addAttribute("expiringSoonMedicines", expiring);
+        model.addAttribute("expiringIds", expiring.stream().map(Medicine::getId).collect(java.util.stream.Collectors.toSet()));
         return "pharmacy/inventory";
     }
 
@@ -330,5 +338,72 @@ public class PharmacyController {
             ra.addFlashAttribute("errorMessage", "Error adding medicine: " + e.getMessage());
         }
         return "redirect:/pharmacy/inventory";
+    }
+    @GetMapping("/pharmacy/profile")
+    @SuppressWarnings("unused")
+    public String profile(Model model, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null || !"Pharmacy".equals(user.getRole())) return "redirect:/";
+        model.addAttribute("user", user);
+        return "pharmacy/profile";
+    }
+
+    @PostMapping("/pharmacy/profile/update")
+    public String updateProfile(@ModelAttribute User updatedUser, HttpSession session, RedirectAttributes ra) {
+        User currentUser = (User) session.getAttribute("user");
+        if (currentUser == null || !"Pharmacy".equals(currentUser.getRole())) return "redirect:/";
+        
+        currentUser.setFullName(updatedUser.getFullName());
+        currentUser.setEmail(updatedUser.getEmail());
+        currentUser.setPhone(updatedUser.getPhone());
+        currentUser.setGender(updatedUser.getGender());
+        currentUser.setPharmacyName(updatedUser.getPharmacyName());
+        currentUser.setPharmacyAddress(updatedUser.getPharmacyAddress());
+        currentUser.setPharmacyLicense(updatedUser.getPharmacyLicense());
+        
+        // Handle profile image if provided (assuming base64 for now as per model)
+        if (updatedUser.getProfileImage() != null && !updatedUser.getProfileImage().isEmpty()) {
+            currentUser.setProfileImage(updatedUser.getProfileImage());
+        }
+        
+        pharmacyService.updateUser(currentUser);
+        session.setAttribute("user", currentUser);
+        ra.addFlashAttribute("successMessage", "Profile updated successfully!");
+        
+        return "redirect:/pharmacy/profile";
+    }
+
+    @GetMapping("/pharmacy/leave")
+    public String leaveRequests(Model model, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null || !"Pharmacy".equals(user.getRole())) return "redirect:/";
+        
+        model.addAttribute("user", user);
+        model.addAttribute("leaveRequests", leaveRequestRepository.findByUserOrderBySubmittedAtDesc(user));
+        return "pharmacy/leave";
+    }
+
+    @PostMapping("/pharmacy/leave/submit")
+    public String submitLeave(@RequestParam String startDate,
+                              @RequestParam String endDate,
+                              @RequestParam String reason,
+                              HttpSession session,
+                              RedirectAttributes ra) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/";
+        
+        try {
+            LeaveRequest lr = new LeaveRequest();
+            lr.setUser(user);
+            lr.setStartDate(LocalDate.parse(startDate));
+            lr.setEndDate(LocalDate.parse(endDate));
+            lr.setReason(reason);
+            lr.setStatus("Pending");
+            leaveRequestRepository.save(lr);
+            ra.addFlashAttribute("successMessage", "Leave request submitted successfully!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Error submitting leave: " + e.getMessage());
+        }
+        return "redirect:/pharmacy/leave";
     }
 }
