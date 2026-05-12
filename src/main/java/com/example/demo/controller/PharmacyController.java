@@ -146,6 +146,10 @@ public class PharmacyController {
         
         model.addAttribute("user", user);
         model.addAttribute("medicines", pharmacyService.getAllMedicines());
+        model.addAttribute("lowStockMedicines", pharmacyService.getLowStockMedicines());
+        List<Medicine> expiring = pharmacyService.getExpiringMedicines();
+        model.addAttribute("expiringSoonMedicines", expiring);
+        model.addAttribute("expiringIds", expiring.stream().map(Medicine::getId).collect(java.util.stream.Collectors.toSet()));
         return "pharmacy/inventory";
     }
 

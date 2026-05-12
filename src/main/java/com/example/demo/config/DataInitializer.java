@@ -33,7 +33,6 @@ public class DataInitializer {
             InvoiceRepository invoiceRepo,
             StaffShiftRepository shiftRepo,
             StaffAttendanceRepository attendanceRepo,
-            PrescriptionItemRepository prescriptionItemRepo,
             NotificationRepository notificationRepo,
             LeaveRequestRepository leaveRequestRepository,
             AvailabilityRepository availabilityRepo,
@@ -81,6 +80,13 @@ public class DataInitializer {
             );
             for (String email : usersToDelete) {
                 userRepository.findByEmail(email).ifPresent(u -> {
+                    // Delete associated records first to avoid constraint violations
+                    shiftRepo.deleteAll(shiftRepo.findByUser(u));
+                    attendanceRepo.deleteAll(attendanceRepo.findByStaff(u));
+                    notificationRepo.deleteAll(notificationRepo.findByUserOrderByCreatedAtDesc(u));
+                    leaveRequestRepository.deleteAll(leaveRequestRepository.findByUserOrderBySubmittedAtDesc(u));
+                    // Also delete prescriptions where this user is the doctor
+                    prescriptionRepository.deleteAll(prescriptionRepository.findByDoctorOrderByCreatedAtDesc(u));
                     userRepository.delete(u);
                     System.out.println(">> Deleted unwanted user: " + email);
                 });

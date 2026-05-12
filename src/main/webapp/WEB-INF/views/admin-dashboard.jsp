@@ -893,11 +893,9 @@
                             </c:forEach>
                         </tbody>
                     </table>
+
                 </div>
             </div>
-
-
-        </div>
 
         <!-- Visitors Messages Section -->
         <div id="visitors-messages-section" class="content-section">
