@@ -440,12 +440,16 @@
                 <div class="form-row" style="display:flex; gap:10px; margin-bottom:15px;">
                     <div style="flex:1;">
                         <label>Date</label>
-                        <input type="date" name="date" class="form-input" required style="width:100%; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
+                        <input type="date" name="date" class="form-input" required min="<%=java.time.LocalDate.now()%>" style="width:100%; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
                     </div>
                     <div style="flex:1;">
                         <label>Time</label>
                         <input type="time" name="time" class="form-input" required style="width:100%; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
                     </div>
+                </div>
+                <div id="availabilityInfo" class="form-group" style="display:none; margin-top:15px;">
+                    <label style="color:#4f46e5; font-size:12px; font-weight:700;"><i class="fas fa-clock"></i> Available Slots</label>
+                    <div id="availabilitySlots" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;"></div>
                 </div>
                 <div class="form-group">
                     <label>Purpose of Visit</label>
@@ -517,6 +521,126 @@
                 '</div>';
             openModal('detailModal');
         }
+
+        // Availability Fetcher - Simple Working Version
+        function fetchAvailability() {
+            const doctorSelect = document.querySelector('select[name="doctorId"]');
+            const dateInput = document.querySelector('input[name="date"]');
+            const slotsDiv = document.getElementById('availabilitySlots');
+            const infoDiv = document.getElementById('availabilityInfo');
+
+            if (!doctorSelect || !dateInput || !slotsDiv || !infoDiv) {
+                console.error('Required elements not found');
+                return;
+            }
+
+            const doctorId = doctorSelect.value;
+            const date = dateInput.value;
+
+            if (!doctorId || !date) {
+                slotsDiv.innerHTML = '<small style="color:#64748b; font-size:11px;">Please select doctor and date</small>';
+                infoDiv.style.display = 'block';
+                return;
+            }
+
+            const url = '<%=request.getContextPath()%>/api/doctor/availability?doctorId=' + doctorId + '&date=' + date;
+            
+            // Clear and show loading
+            slotsDiv.innerHTML = '<small style="color:#4f46e5; font-size:11px;">Loading...</small>';
+            infoDiv.style.display = 'block';
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(slots => {
+                    console.log('Slots received:', slots);
+                    slotsDiv.innerHTML = '';
+                    
+                    if (slots && slots.length > 0) {
+                        slots.forEach(slot => {
+                            const slotElement = document.createElement('span');
+                            slotElement.style.cssText = `
+                                display: inline-block;
+                                padding: 6px 12px;
+                                margin: 4px;
+                                background: #f8fafc;
+                                border: 1px solid #e2e8f0;
+                                border-radius: 20px;
+                                color: #64748b;
+                                font-size: 11px;
+                                font-weight: 600;
+                                cursor: pointer;
+                                transition: all 0.2s ease;
+                            `;
+                            
+                            // Format time (HH:mm:ss to HH:mm)
+                            const startTime = slot.startTime ? slot.startTime.substring(0, 5) : 'N/A';
+                            const endTime = slot.endTime ? slot.endTime.substring(0, 5) : 'N/A';
+                            
+                            slotElement.textContent = startTime + ' - ' + endTime;
+                            
+                            slotElement.onclick = function() {
+                                // Update time input
+                                const timeInput = document.querySelector('input[name="time"]');
+                                if (timeInput) {
+                                    timeInput.value = startTime;
+                                }
+                                
+                                // Update visual selection
+                                document.querySelectorAll('#availabilitySlots span').forEach(el => {
+                                    el.style.background = '#f8fafc';
+                                    el.style.color = '#64748b';
+                                    el.style.borderColor = '#e2e8f0';
+                                });
+                                slotElement.style.background = '#4f46e5';
+                                slotElement.style.color = '#ffffff';
+                                slotElement.style.borderColor = '#4f46e5';
+                            };
+                            
+                            slotElement.onmouseover = function() {
+                                this.style.background = '#e0e7ff';
+                                this.style.borderColor = '#4f46e5';
+                            };
+                            
+                            slotElement.onmouseout = function() {
+                                if (this.style.color === '#ffffff') {
+                                    this.style.background = '#4f46e5';
+                                    this.style.borderColor = '#4f46e5';
+                                } else {
+                                    this.style.background = '#f8fafc';
+                                    this.style.borderColor = '#e2e8f0';
+                                }
+                            };
+                            
+                            slotsDiv.appendChild(slotElement);
+                        });
+                    } else {
+                        slotsDiv.innerHTML = '<small style="color:#64748b; font-size:11px;">No slots available for this date</small>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    slotsDiv.innerHTML = '<small style="color:#ef4444; font-size:11px;">Error loading slots</small>';
+                });
+        }
+
+        // Simple event listener setup
+        document.addEventListener('DOMContentLoaded', function() {
+            const doctorSelect = document.querySelector('select[name="doctorId"]');
+            const dateInput = document.querySelector('input[name="date"]');
+            
+            if (doctorSelect) {
+                doctorSelect.addEventListener('change', fetchAvailability);
+            }
+            
+            if (dateInput) {
+                dateInput.addEventListener('change', fetchAvailability);
+            }
+        });
 
         // Close modal on click outside
         window.onclick = function(event) {

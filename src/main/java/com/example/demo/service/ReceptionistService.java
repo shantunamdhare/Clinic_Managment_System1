@@ -36,6 +36,9 @@ public class ReceptionistService {
     @Autowired
     private NoShowRecordRepository noShowRecordRepository;
 
+    @Autowired
+    private AvailabilityRepository availabilityRepository;
+
     // --- Patient Management ---
 
     public Patient registerPatient(Patient patient) {
@@ -74,6 +77,19 @@ public class ReceptionistService {
     // --- Appointment Management ---
 
     public Appointment bookAppointment(Appointment appointment) {
+        // 1. Date Validation: No previous dates
+        if (appointment.getAppointmentDate().isBefore(LocalDate.now())) {
+            throw new RuntimeException("Cannot book appointments for past dates.");
+        }
+
+        // 2. Availability Validation
+        boolean isAvailable = availabilityRepository.countAvailableSlots(
+                appointment.getDoctor(), appointment.getAppointmentDate(), appointment.getAppointmentTime()) > 0;
+        
+        if (!isAvailable) {
+            throw new RuntimeException("Doctor is not available at the selected time. Please check their availability slots.");
+        }
+
         // Auto-generate appointment ID
         long count = appointmentRepository.count();
         appointment.setAppointmentId("APP-" + (1001 + count));
@@ -93,6 +109,20 @@ public class ReceptionistService {
 
     public void rescheduleAppointment(Long id, LocalDate newDate, LocalTime newTime) {
         Appointment appointment = appointmentRepository.findById(id).orElseThrow();
+        
+        // 1. Date Validation
+        if (newDate.isBefore(LocalDate.now())) {
+            throw new RuntimeException("Cannot reschedule to a past date.");
+        }
+
+        // 2. Availability Validation
+        boolean isAvailable = availabilityRepository.countAvailableSlots(
+                appointment.getDoctor(), newDate, newTime) > 0;
+        
+        if (!isAvailable) {
+            throw new RuntimeException("Doctor is not available at the new selected time.");
+        }
+
         appointment.setAppointmentDate(newDate);
         appointment.setAppointmentTime(newTime);
         // Reset token for new date
@@ -176,6 +206,11 @@ public class ReceptionistService {
 
     public List<Department> getAllDepartments() {
         return departmentRepository.findAll();
+    }
+
+    public List<Availability> getDoctorAvailability(Long doctorId, LocalDate date) {
+        User doctor = userRepository.findById(doctorId).orElseThrow();
+        return availabilityRepository.findByDoctorAndAvailableDateOrderByStartTimeAsc(doctor, date);
     }
 
     // --- Attendance, Shifts & Performance ---

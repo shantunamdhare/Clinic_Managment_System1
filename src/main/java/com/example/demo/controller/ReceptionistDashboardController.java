@@ -174,6 +174,26 @@ public class ReceptionistDashboardController {
         return Map.of(); // Placeholder
     }
 
+    @GetMapping("/doctor/availability")
+    @ResponseBody
+    public List<Map<String, Object>> getAvailability(
+            @RequestParam Long doctorId,
+            @RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) LocalDate date) {
+        // Return a lightweight DTO instead of full Availability entity
+        // to avoid Jackson serializing the embedded User (password, LONGTEXT profileImage, etc.)
+        List<Availability> slots = receptionistService.getDoctorAvailability(doctorId, date);
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Availability slot : slots) {
+            Map<String, Object> dto = new HashMap<>();
+            dto.put("id", slot.getId());
+            dto.put("availableDate", slot.getAvailableDate().toString());
+            dto.put("startTime", slot.getStartTime().toString());
+            dto.put("endTime", slot.getEndTime().toString());
+            result.add(dto);
+        }
+        return result;
+    }
+
     // --- Rescheduling ---
     @PostMapping("/appointment/reschedule")
     public String reschedule(@RequestParam Long id, 
