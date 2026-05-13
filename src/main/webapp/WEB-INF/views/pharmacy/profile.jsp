@@ -275,7 +275,9 @@
                             </div>
 
                             <div class="d-flex justify-content-end gap-3 mt-4">
-                                <button type="reset" class="btn btn-light px-4 py-2" style="border-radius: 10px; font-weight: 600;">Cancel</button>
+                                <button type="button" class="btn btn-outline-primary px-4 py-2" data-bs-toggle="modal" data-bs-target="#changePasswordModal" style="border-radius: 10px; font-weight: 600; border-width: 2px;">
+                                    <i class="fas fa-key me-2"></i>Change Password
+                                </button>
                                 <button type="submit" class="btn-save">Save Professional Profile</button>
                             </div>
                         </form>
@@ -283,6 +285,47 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 24px;">
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <h5 class="modal-title fw-bold" style="font-size: 1.25rem;"><i class="fas fa-lock text-primary me-2"></i>Update Security</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="text-muted small mb-4">Protect your account by creating a strong, unique password.</p>
+                    <form action="/change-password" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Current Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0" style="border-radius: 10px 0 0 10px;"><i class="fas fa-shield-alt text-muted"></i></span>
+                                <input type="password" name="currentPassword" class="form-control border-start-0" style="border-radius: 0 10px 10px 0;" placeholder="••••••••" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">New Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0" style="border-radius: 10px 0 0 10px;"><i class="fas fa-key text-muted"></i></span>
+                                <input type="password" name="newPassword" class="form-control border-start-0" style="border-radius: 0 10px 10px 0;" placeholder="Minimum 8 characters" required>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Confirm New Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0" style="border-radius: 10px 0 0 10px;"><i class="fas fa-check-double text-muted"></i></span>
+                                <input type="password" name="confirmPassword" class="form-control border-start-0" style="border-radius: 0 10px 10px 0;" placeholder="Repeat your new password" required>
+                            </div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary py-3 fw-bold" style="border-radius: 12px; background: var(--pharmacy-primary); border: none; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);">Update Password Now</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

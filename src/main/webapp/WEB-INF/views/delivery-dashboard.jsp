@@ -464,6 +464,10 @@
                     <span class="material-symbols-outlined">person</span>
                     Profile
                 </a>
+                <a class="nav-item" id="nav-leave" onclick="showSection('leave-section')">
+                    <span class="material-symbols-outlined">event_busy</span>
+                    Leave Request
+                </a>
                 <a href="/logout" class="nav-item" style="margin-top: auto; color: var(--danger);">
                     <span class="material-symbols-outlined">logout</span>
                     Logout
@@ -480,7 +484,7 @@
                 </div>
                 
                 <div class="header-actions">
-                    <div class="user-profile" onclick="showSection('profile-section')">
+                    <div class="user-profile" onclick="document.getElementById('editProfileModal').style.display='flex'">
                         <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Delivery" alt="Delivery Boy">
                         <div class="user-info">
                             <span class="user-name">${user.fullName}</span>
@@ -720,39 +724,177 @@
                     </div>
                 </div>
 
+
+                <!-- LEAVE SECTION -->
+                <div id="leave-section" class="dashboard-page" style="display: none;">
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <span class="material-symbols-outlined" style="color: var(--warning);">event_busy</span>
+                                Leave Management
+                            </h2>
+                            <button class="btn-action btn-update" onclick="document.getElementById('leaveModal').style.display='flex'">
+                                <span class="material-symbols-outlined">add</span>
+                                Apply for Leave
+                            </button>
+                        </div>
+
+                        <c:if test="${not empty successMessage}">
+                            <div style="background: #e6fcf5; color: #087f5b; padding: 15px; border-radius: 12px; margin-bottom: 20px; font-weight: 600;">
+                                ${successMessage}
+                            </div>
+                        </c:if>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Leave Period</th>
+                                    <th>Type</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="lr" items="${leaveRequests}">
+                                    <tr>
+                                        <td>${lr.startDate} to ${lr.endDate}</td>
+                                        <td><span class="status-badge status-received">${lr.leaveType != null ? lr.leaveType : 'Full Day'}</span></td>
+                                        <td>${lr.reason}</td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${lr.status == 'Approved'}"><span class="status-badge status-delivered">Approved</span></c:when>
+                                                <c:when test="${lr.status == 'Rejected'}"><span class="status-badge status-received" style="background:#fff5f5; color:#e03131;">Rejected</span></c:when>
+                                                <c:otherwise><span class="status-badge status-pending">Pending</span></c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                                <c:if test="${empty leaveRequests}">
+                                    <tr>
+                                        <td colspan="4" style="text-align: center; padding: 40px; color: var(--gray-400);">No leave requests found.</td>
+                                    </tr>
+                                </c:if>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
                 <!-- PROFILE SECTION -->
                 <div id="profile-section" class="dashboard-page" style="display: none;">
-                    <div class="profile-container">
-                        <div class="profile-header">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Delivery" class="profile-avatar-large" alt="Avatar">
-                            <div>
-                                <h1 style="font-size: 32px; font-weight: 800; margin-bottom: 5px;">${user.fullName}</h1>
-                                <p style="font-size: 18px; opacity: 0.9; font-weight: 500;">Logistics Executive</p>
+                    <div class="section-card" style="padding: 0; overflow: hidden; background: transparent; box-shadow: none;">
+                        <div class="profile-container" style="max-width: 100%; margin: 0;">
+                            <div class="profile-header" style="margin-bottom: 32px; box-shadow: var(--shadow-md);">
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Delivery" class="profile-avatar-large" alt="Avatar">
+                                <div style="flex: 1;">
+                                    <h1 style="font-size: 32px; font-weight: 800; margin-bottom: 5px; color: white;">${user.fullName}</h1>
+                                    <p style="font-size: 18px; opacity: 0.9; font-weight: 500; color: white;">Logistics Executive</p>
+                                </div>
+                                <button class="btn-action btn-update" style="background: white; color: var(--primary); padding: 12px 24px; border-radius: 12px; border: none; font-weight: 700;" onclick="document.getElementById('editProfileModal').style.display='flex'">
+                                    <span class="material-symbols-outlined">edit</span>
+                                    Edit Profile
+                                </button>
                             </div>
-                        </div>
-                        
-                        <div class="profile-info-grid">
-                            <div class="profile-card">
-                                <p class="profile-label">Full Name</p>
-                                <p class="profile-value">${user.fullName}</p>
-                            </div>
-                            <div class="profile-card">
-                                <p class="profile-label">Email Address</p>
-                                <p class="profile-value">${user.email}</p>
-                            </div>
-                            <div class="profile-card">
-                                <p class="profile-label">Phone Number</p>
-                                <p class="profile-value">${not empty user.phone ? user.phone : 'Not Provided'}</p>
-                            </div>
-                            <div class="profile-card">
-                                <p class="profile-label">Vehicle Type</p>
-                                <p class="profile-value">${not empty user.vehicleType ? user.vehicleType : 'Not Provided'}</p>
+                            
+                            <div class="profile-info-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+                                <div class="profile-card">
+                                    <p class="profile-label">Full Name</p>
+                                    <p class="profile-value">${user.fullName}</p>
+                                </div>
+                                <div class="profile-card">
+                                    <p class="profile-label">Email Address</p>
+                                    <p class="profile-value">${user.email}</p>
+                                </div>
+                                <div class="profile-card">
+                                    <p class="profile-label">Phone Number</p>
+                                    <p class="profile-value">${not empty user.phone ? user.phone : 'Not Provided'}</p>
+                                </div>
+                                <div class="profile-card">
+                                    <p class="profile-label">Vehicle Type</p>
+                                    <p class="profile-value">${not empty user.vehicleType ? user.vehicleType : 'Not Provided'}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- LEAVE MODAL -->
+    <div id="leaveModal" class="receipt-modal">
+        <div class="receipt-card" style="width: 500px;">
+            <div style="text-align: center; margin-bottom: 24px;">
+                <h3 style="font-size: 20px; font-weight: 800; color: var(--gray-900);">Apply for Leave</h3>
+                <p style="font-size: 13px; color: var(--gray-500);">Submit your request for Admin approval</p>
+            </div>
+            <form action="/delivery/leave/apply" method="POST">
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 12px; font-weight: 700; color: var(--gray-500); margin-bottom: 8px;">LEAVE TYPE</label>
+                    <select name="leaveType" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--gray-200); font-weight: 600;" required>
+                        <option value="Full Day">Full Day</option>
+                        <option value="Half Day">Half Day</option>
+                    </select>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: 700; color: var(--gray-500); margin-bottom: 8px;">START DATE</label>
+                        <input type="date" name="startDate" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--gray-200);" required>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: 700; color: var(--gray-500); margin-bottom: 8px;">END DATE</label>
+                        <input type="date" name="endDate" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--gray-200);" required>
+                    </div>
+                </div>
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; font-size: 12px; font-weight: 700; color: var(--gray-500); margin-bottom: 8px;">REASON</label>
+                    <textarea name="reason" rows="3" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--gray-200);" placeholder="Reason for leave..." required></textarea>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" class="btn-action" style="flex: 1; justify-content: center; background: var(--gray-100); color: var(--gray-700);" onclick="document.getElementById('leaveModal').style.display='none'">Cancel</button>
+                    <button type="submit" class="btn-action btn-update" style="flex: 1; justify-content: center;">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- EDIT PROFILE MODAL -->
+    <div id="editProfileModal" class="receipt-modal">
+        <div class="receipt-card" style="width: 500px; max-height: 90vh; overflow-y: auto;">
+            <div style="text-align: center; margin-bottom: 24px;">
+                <h3 style="font-size: 20px; font-weight: 800; color: var(--gray-900);">Edit Profile</h3>
+                <p style="font-size: 13px; color: var(--gray-500);">Update your personal and vehicle details</p>
+            </div>
+            <form action="/delivery/profile/update" method="POST">
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 12px; font-weight: 700; color: var(--gray-500); margin-bottom: 8px;">FULL NAME</label>
+                    <input type="text" name="fullName" value="${user.fullName}" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--gray-200);" required>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 12px; font-weight: 700; color: var(--gray-500); margin-bottom: 8px;">EMAIL ADDRESS</label>
+                    <input type="email" name="email" value="${user.email}" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--gray-200);" required>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 12px; font-weight: 700; color: var(--gray-500); margin-bottom: 8px;">PHONE NUMBER</label>
+                    <input type="text" name="phone" value="${user.phone}" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--gray-200);">
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 12px; font-weight: 700; color: var(--gray-500); margin-bottom: 8px;">VEHICLE TYPE</label>
+                    <input type="text" name="vehicleType" value="${user.vehicleType}" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--gray-200);" placeholder="e.g. Motorcycle, Van">
+                </div>
+                
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--gray-100);">
+                
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 12px; font-weight: 700; color: var(--gray-500); margin-bottom: 8px;">CHANGE PASSWORD (LEAVE BLANK TO KEEP CURRENT)</label>
+                    <input type="password" name="newPassword" placeholder="New Password" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--gray-200); margin-bottom: 10px;">
+                    <input type="password" name="confirmPassword" placeholder="Confirm New Password" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--gray-200);">
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" class="btn-action" style="flex: 1; justify-content: center; background: var(--gray-100); color: var(--gray-700);" onclick="document.getElementById('editProfileModal').style.display='none'">Cancel</button>
+                    <button type="submit" class="btn-action btn-update" style="flex: 1; justify-content: center;">Save Changes</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- RECEIPT MODAL -->

@@ -1545,13 +1545,13 @@ img {
   margin-top: 50px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 40px;
+  gap: 30px;
 }
 
 .feature-card {
   background: white;
   border-radius: 24px;
-  padding: 32px;
+  padding: 0;
   border: 1px solid rgba(0, 0, 0, 0.04);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -1559,6 +1559,7 @@ img {
   flex-direction: column;
   position: relative;
   overflow: hidden;
+  text-align: center;
 }
 
 .feature-card:hover {
@@ -1567,36 +1568,40 @@ img {
   border-color: rgba(37, 99, 235, 0.1);
 }
 
-.feature-card .icon {
-  font-size: 32px;
-  margin-bottom: 24px;
-  background: #f8fafc;
-  width: 64px;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 20px;
-  transition: all 0.3s ease;
+.feature-image-top {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
 }
 
-.feature-card:hover .icon {
-  background: var(--primary);
-  color: white;
-  transform: scale(1.1) rotate(5deg);
+.feature-image-top img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.feature-card:hover .feature-image-top img {
+  transform: scale(1.1);
+}
+
+.feature-content {
+  padding: 16px 20px 12px 20px;
 }
 
 .feature-card h3 {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   margin-bottom: 12px;
-  color: var(--gray-900);
+  color: #0f172a;
+  line-height: 1.2;
 }
 
 .feature-card p {
-  color: var(--gray-500);
-  font-size: 14px;
+  color: #64748b;
+  font-size: 15px;
   line-height: 1.6;
+  margin: 0;
 }
 
 @media (max-width: 900px) {

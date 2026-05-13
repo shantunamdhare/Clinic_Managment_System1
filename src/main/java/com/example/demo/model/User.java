@@ -32,6 +32,7 @@ public class User {
     private String specialization;
     private Integer experience;
     private String licenseId;
+    private Double consultationFee;
     
     // Receptionist / General Staff fields
     private String govIdNumber;
@@ -264,6 +265,22 @@ public class User {
         this.gender = gender;
     }
 
+    public String getGovIdNumber() {
+        return govIdNumber;
+    }
+
+    public void setGovIdNumber(String govIdNumber) {
+        this.govIdNumber = govIdNumber;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     public String getStaffId() {
         return staffId;
     }
@@ -278,5 +295,13 @@ public class User {
 
     public void setHospitalName(String hospitalName) {
         this.hospitalName = hospitalName;
+    }
+
+    public Double getConsultationFee() {
+        return consultationFee;
+    }
+
+    public void setConsultationFee(Double consultationFee) {
+        this.consultationFee = consultationFee;
     }
 }

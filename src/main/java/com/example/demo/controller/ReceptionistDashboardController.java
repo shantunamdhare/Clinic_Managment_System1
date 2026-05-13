@@ -20,6 +20,9 @@ public class ReceptionistDashboardController {
     @Autowired
     private ReceptionistService receptionistService;
 
+    @Autowired
+    private com.example.demo.repository.LeaveRequestRepository leaveRequestRepository;
+
     @GetMapping("/dashboard")
     public String dashboard(Model model, HttpSession session) {
         User user = (User) session.getAttribute("user");
@@ -38,6 +41,7 @@ public class ReceptionistDashboardController {
         model.addAttribute("attendance", receptionistService.getTodayAttendance(user));
         model.addAttribute("shifts", receptionistService.getMyShifts(user));
         model.addAttribute("performance", receptionistService.getMyPerformance(user));
+        model.addAttribute("leaveRequests", leaveRequestRepository.findByUserOrderBySubmittedAtDesc(user));
         
         return "receptionist-dashboard";
     }
@@ -107,6 +111,8 @@ public class ReceptionistDashboardController {
         }
         model.addAttribute("user", user);
         model.addAttribute("patients", receptionistService.getAllPatients());
+        model.addAttribute("doctors", receptionistService.getAllDoctors());
+        model.addAttribute("departments", receptionistService.getAllDepartments());
         return "patients";
     }
 
@@ -127,6 +133,7 @@ public class ReceptionistDashboardController {
         
         model.addAttribute("user", user);
         model.addAttribute("doctors", doctors);
+        model.addAttribute("departments", receptionistService.getAllDepartments());
         model.addAttribute("doctorQueues", doctorQueues);
         return "queue";
     }
@@ -136,6 +143,8 @@ public class ReceptionistDashboardController {
         User user = (User) session.getAttribute("user");
         if (user == null || !"RECEPTIONIST".equalsIgnoreCase(user.getRole())) return "redirect:/";
         model.addAttribute("user", user);
+        model.addAttribute("doctors", receptionistService.getAllDoctors());
+        model.addAttribute("departments", receptionistService.getAllDepartments());
         return "calendar";
     }
 
@@ -145,6 +154,8 @@ public class ReceptionistDashboardController {
         if (user == null || !"RECEPTIONIST".equalsIgnoreCase(user.getRole())) return "redirect:/";
         model.addAttribute("user", user);
         model.addAttribute("stats", receptionistService.getDashboardStats());
+        model.addAttribute("doctors", receptionistService.getAllDoctors());
+        model.addAttribute("departments", receptionistService.getAllDepartments());
         return "reports";
     }
 
@@ -206,6 +217,8 @@ public class ReceptionistDashboardController {
         User user = (User) session.getAttribute("user");
         if (user == null || !"RECEPTIONIST".equalsIgnoreCase(user.getRole())) return "redirect:/";
         model.addAttribute("user", user);
+        model.addAttribute("doctors", receptionistService.getAllDoctors());
+        model.addAttribute("departments", receptionistService.getAllDepartments());
         return "profile";
     }
 
@@ -222,5 +235,25 @@ public class ReceptionistDashboardController {
         session.setAttribute("user", currentUser);
         
         return "redirect:/receptionist/profile?success=true";
+    }
+
+    @PostMapping("/leave/apply")
+    public String applyLeave(@RequestParam String reason, 
+                           @RequestParam String startDate, 
+                           @RequestParam String endDate, 
+                           @RequestParam(required = false, defaultValue = "Full Day") String leaveType,
+                           HttpSession session, 
+                           org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/";
+
+        try {
+            LeaveRequest lr = new LeaveRequest(user, reason, LocalDate.parse(startDate), LocalDate.parse(endDate), leaveType);
+            leaveRequestRepository.save(lr);
+            ra.addFlashAttribute("successMessage", "Leave request submitted successfully!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Error submitting leave request: " + e.getMessage());
+        }
+        return "redirect:/receptionist/dashboard";
     }
 }

@@ -148,7 +148,17 @@
                             <div class="col-md-4">
                                 <div class="form-group mb-4">
                                     <label class="form-label-custom"><i class="fas fa-hand-holding-usd text-success me-1"></i> Consultation Fee (₹)</label>
-                                    <input type="number" name="consultationFee" class="form-control-custom" placeholder="e.g. 500" min="0" step="10" value="500">
+                                    <input type="number" name="consultationFee" class="form-control-custom" 
+                                           value="${doctor.consultationFee != null && doctor.consultationFee > 0 ? doctor.consultationFee : ''}" 
+                                           ${doctor.consultationFee != null && doctor.consultationFee > 0 ? 'readonly' : ''} 
+                                           style="${doctor.consultationFee != null && doctor.consultationFee > 0 ? 'background-color: #f8fafc; cursor: not-allowed;' : ''} color: #64748b; font-weight: 700;"
+                                           placeholder="Enter Fee Manually" required>
+                                    <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">
+                                        <c:choose>
+                                            <c:when test="${doctor.consultationFee != null && doctor.consultationFee > 0}">* Fixed by Admin</c:when>
+                                            <c:otherwise><span class="text-warning">* Not fixed by Admin. Please enter manually.</span></c:otherwise>
+                                        </c:choose>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-8">

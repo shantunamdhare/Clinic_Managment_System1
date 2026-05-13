@@ -260,6 +260,8 @@
         <a href="/doctor/availability" class="nav-link-item ${pageContext.request.requestURI.contains('availability') ? 'active' : ''}">
             <i class="fas fa-clock"></i> Availability
         </a>
+
+        <div class="nav-label">Logout</div>
     </nav>
     <div class="sidebar-footer">
         <a href="/logout" class="btn-logout">
@@ -289,8 +291,14 @@
         <c:if test="${not empty success}">
             <div class="alert-custom alert-success"><i class="fas fa-check-circle"></i> ${success}</div>
         </c:if>
+        <c:if test="${not empty successMessage}">
+            <div class="alert-custom alert-success"><i class="fas fa-check-circle"></i> ${successMessage}</div>
+        </c:if>
         <c:if test="${not empty error}">
             <div class="alert-custom alert-error"><i class="fas fa-exclamation-circle"></i> ${error}</div>
+        </c:if>
+        <c:if test="${not empty errorMessage}">
+            <div class="alert-custom alert-error"><i class="fas fa-exclamation-circle"></i> ${errorMessage}</div>
         </c:if>
 
         <!-- ======== DASHBOARD OVERVIEW ======== -->
@@ -343,8 +351,10 @@
             </div>
         </div>
 
+
     </div>
 </div>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 </body>

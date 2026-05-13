@@ -281,10 +281,6 @@
                     <span class="material-symbols-outlined">schedule</span>
                     Shift Schedule
                 </a>
-                <a href="#" class="nav-item" id="nav-performance" onclick="switchTab(event, 'performance')">
-                    <span class="material-symbols-outlined">trending_up</span>
-                    Performance
-                </a>
                 <a href="#" class="nav-item" id="nav-leave" onclick="switchTab(event, 'leave')">
                     <span class="material-symbols-outlined">running_with_errors</span>
                     Leave Request
@@ -601,6 +597,7 @@
                             <table class="data-table">
                                 <thead>
                                     <tr>
+                                        <th>Leave Type</th>
                                         <th>Reason</th>
                                         <th>Start Date</th>
                                         <th>End Date</th>
@@ -611,6 +608,7 @@
                                 <tbody>
                                     <c:forEach var="lr" items="${myLeaveRequests}">
                                         <tr>
+                                            <td><span style="font-weight: 700; color: var(--staff-primary);">${lr.leaveType != null ? lr.leaveType : 'Full Day'}</span></td>
                                             <td style="font-weight: 500;">${lr.reason}</td>
                                             <td>${lr.startDate}</td>
                                             <td>${lr.endDate}</td>
@@ -626,30 +624,11 @@
                                     </c:forEach>
                                     <c:if test="${empty myLeaveRequests}">
                                         <tr>
-                                            <td colspan="5" style="text-align: center; padding: 40px; color: var(--gray-400);">No leave requests found.</td>
+                                            <td colspan="6" style="text-align: center; padding: 40px; color: var(--gray-400);">No leave requests found.</td>
                                         </tr>
                                     </c:if>
                                 </tbody>
                             </table>
-                        </div>
-                    </div>
-                </div>
-                <div id="performance" class="tab-content">
-                    <div class="page-header">
-                        <h1 class="page-title">Performance Analytics</h1>
-                    </div>
-                    <div class="section-card">
-                        <div class="section-header">
-                            <h2 class="section-title">Genuine Progress</h2>
-                        </div>
-                        <div style="padding: 40px; text-align: center;">
-                            <div style="width: 200px; height: 200px; border-radius: 50%; border: 15px solid #F3F4F6; border-top-color: var(--staff-primary); margin: 0 auto; display: flex; align-items: center; justify-content: center; position: relative;">
-                                <div>
-                                    <div style="font-size: 42px; font-weight: 800; color: var(--gray-900);">4.8</div>
-                                    <div style="font-size: 14px; font-weight: 600; color: var(--gray-500);">Current Rating</div>
-                                </div>
-                            </div>
-                            <p style="margin-top: 20px; color: var(--gray-600);">Performance metrics are calculated based on your attendance and task completion.</p>
                         </div>
                     </div>
                 </div>
@@ -663,6 +642,10 @@
                                 <h1 style="font-size: 32px; font-weight: 800; margin-bottom: 5px;">${user.fullName}</h1>
                                 <p style="font-size: 18px; opacity: 0.9; font-weight: 500;">${user.role} Account</p>
                             </div>
+                            <button class="btn-primary staff-bg-gradient" style="margin-left:auto; border:none; color:white; padding:12px 24px; border-radius:12px; font-weight:700; cursor:pointer;" onclick="openModal('editProfileModal')">
+                                <span class="material-symbols-outlined" style="vertical-align:middle; margin-right:8px;">edit</span>
+                                Edit Profile
+                            </button>
                         </div>
                         
                         <div class="profile-info-grid">
@@ -729,6 +712,52 @@
         </div>
     </div>
 
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal">
+        <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Profile</h3>
+                <span class="material-symbols-outlined close-modal" onclick="closeModal('editProfileModal')">close</span>
+            </div>
+            <form action="/staff/profile/update" method="post">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="fullName" value="${user.fullName}" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" name="email" value="${user.email}" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" name="phone" value="${user.phone}" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Hospital/Clinic Name</label>
+                    <input type="text" name="hospitalName" value="${user.hospitalName}" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Staff Employee ID</label>
+                    <input type="text" name="staffId" value="${user.staffId}" class="form-input">
+                </div>
+                
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--gray-100);">
+                
+                <div class="form-group">
+                    <label>Change Password (Leave blank to keep current)</label>
+                    <input type="password" name="newPassword" placeholder="New Password" class="form-input" style="margin-bottom: 10px;">
+                    <input type="password" name="confirmPassword" placeholder="Confirm New Password" class="form-input">
+                </div>
+
+                <div style="margin-top: 25px;">
+                    <button type="submit" class="btn-primary staff-bg-gradient" style="width: 100%; justify-content: center;">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Update Attendance Modal (Check-Out) -->
     <div id="updateModal" class="modal">
         <div class="modal-content">
@@ -763,6 +792,13 @@
                 <span class="material-symbols-outlined close-modal" onclick="closeModal('leaveModal')">close</span>
             </div>
             <form action="/staff/apply-leave" method="post">
+                <div class="form-group">
+                    <label>Leave Type</label>
+                    <select name="leaveType" class="form-input" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--gray-200); background: white;">
+                        <option value="Full Day">Full Day</option>
+                        <option value="Half Day">Half Day</option>
+                    </select>
+                </div>
                 <div class="form-group">
                     <label>Reason for Leave</label>
                     <textarea name="reason" class="form-input" required style="width: 100%; height: 100px; border-radius: 8px; border: 1px solid var(--gray-200); padding: 10px; font-family: inherit; font-size: 14px;"></textarea>

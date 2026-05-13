@@ -16,7 +16,7 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
     List<Prescription> findByVisit_Patient(Patient patient);
     List<Prescription> findByPatient(Patient patient);
     List<Prescription> findByStatus(String status);
-    List<Prescription> findByDoctorOrderByCreatedAtDesc(com.example.demo.model.User doctor);
+    List<Prescription> findByDoctorOrderByCreatedAtDesc(User doctor);
     List<Prescription> findByPatient_ContactNumberOrderByCreatedAtDesc(String contactNumber);
     List<Prescription> findByStatusInOrderByCreatedAtDesc(List<String> statuses);
 }

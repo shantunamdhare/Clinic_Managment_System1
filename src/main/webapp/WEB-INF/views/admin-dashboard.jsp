@@ -57,8 +57,10 @@
         .top-bar-right { display:flex; align-items:center; gap:16px; }
         .admin-badge {
             background:linear-gradient(135deg,#10b981,#34d399); color:#fff; padding:8px 18px;
-            border-radius:20px; font-size:13px; font-weight:700;
+            border-radius:20px; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.3s;
+            box-shadow: 0 4px 10px rgba(16,185,129,0.2);
         }
+        .admin-badge:hover { transform: scale(1.05); box-shadow: 0 6px 15px rgba(16,185,129,0.3); }
         .date-badge { color:#94a3b8; font-size:13px; font-weight:500; }
 
         /* Stats Grid */
@@ -205,10 +207,12 @@
         .modal {
             display: none; position: fixed; z-index: 1000; left: 0; top: 0;
             width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            overflow-y: auto; padding: 20px 0;
         }
         .modal-content {
-            background: #1a1a2e; margin: 10% auto; padding: 30px; border-radius: 16px;
+            background: #1a1a2e; margin: 2% auto; padding: 30px; border-radius: 16px;
             width: 400px; border: 1px solid rgba(108,99,255,0.2); box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            position: relative;
         }
         .modal-header { margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
         .modal-header h3 { font-size: 18px; color: #f1f5f9; }
@@ -249,6 +253,9 @@
             </a>
             <a class="nav-item" href="javascript:void(0)" onclick="showSection('staff-requests-section', this)">
                 <span class="nav-icon">&#x1F4DD;</span> Staff Requests
+                <c:if test="${pendingLeaveCount > 0}">
+                    <span style="background:#ef4444; color:#fff; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:auto;">${pendingLeaveCount}</span>
+                </c:if>
             </a>
             <a class="nav-item" href="javascript:void(0)" onclick="showSection('visitors-messages-section', this)">
                 <span class="nav-icon">&#x1F4E8;</span> Visitors Messages
@@ -284,9 +291,20 @@
             <h1>Welcome, <span>${user.fullName}</span></h1>
             <div class="top-bar-right">
                 <span class="date-badge">&#x1F4C5; <%= new java.text.SimpleDateFormat("EEEE, MMMM dd, yyyy").format(new java.util.Date()) %></span>
-                <span class="admin-badge">&#x1F6E1; Administrator</span>
+                <span class="admin-badge" onclick="openAdminProfileModal()">&#x1F6E1; Administrator</span>
             </div>
         </div>
+
+        <c:if test="${not empty successMessage}">
+            <div style="background:#dcfce7; color:#166534; padding:12px 20px; border-radius:12px; margin-bottom:20px; border:1px solid #bbf7d0; font-size:14px; font-weight:600; display:flex; align-items:center; gap:10px;">
+                <span>✅</span> ${successMessage}
+            </div>
+        </c:if>
+        <c:if test="${not empty errorMessage}">
+            <div style="background:#fee2e2; color:#991b1b; padding:12px 20px; border-radius:12px; margin-bottom:20px; border:1px solid #fecaca; font-size:14px; font-weight:600; display:flex; align-items:center; gap:10px;">
+                <span>⚠️</span> ${errorMessage}
+            </div>
+        </c:if>
 
         <!-- Dashboard Section (Default) -->
         <div id="dashboard-section" class="content-section active">
@@ -401,7 +419,7 @@
                                                 <span class="badge badge-pending" style="font-size:10px;">Pending</span>
                                             </div>
                                             <div style="font-size:13px; color:#475569; line-height:1.5;">${req.reason}</div>
-                                            <div style="font-size:11px; color:#94a3b8; margin-top:10px; font-weight:600;">&#x1F4C5; ${req.startDate} to ${req.endDate}</div>
+                                            <div style="font-size:11px; color:#94a3b8; margin-top:10px; font-weight:600;">&#x1F4C5; ${req.startDate} to ${req.endDate} &bull; <span style="color:#10b981;">${req.leaveType != null ? req.leaveType : 'Full Day'}</span></div>
                                         </div>
                                     </c:if>
                                 </c:forEach>
@@ -443,47 +461,54 @@
             </div>
         </div>
 
-        <!-- Doctors Section -->
         <div id="doctors-section" class="content-section">
             <div class="section-title">
-                <span class="title-icon">&#x1FA7A;</span> Doctor Availability Today
+                <span class="title-icon">&#x1FA7A;</span> Doctor Schedule & Availability
             </div>
             <div class="card">
                 <div class="card-header">
-                    <h3>&#x1FA7A; Doctors Schedule</h3>
+                    <h3>&#x1FA7A; Upcoming Schedules</h3>
+                    <span class="date-badge">Showing next 30 days</span>
                 </div>
                 <c:choose>
-                    <c:when test="${not empty todayAvailability}">
-                        <c:forEach var="slot" items="${todayAvailability}">
-                            <div class="avail-slot">
-                                <div>
-                                    <div class="doc-name">Dr. ${slot.doctor.fullName}</div>
-                                    <div class="doc-time">${slot.doctor.specialization != null ? slot.doctor.specialization : 'General'}</div>
+                    <c:when test="${not empty doctors}">
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <c:forEach var="doc" items="${doctors}">
+                                <div style="padding: 20px; border-radius: 16px; background: rgba(16,185,129,0.03); border: 1px solid rgba(16,185,129,0.1);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(16,185,129,0.1); padding-bottom: 10px;">
+                                        <div>
+                                            <div style="font-size: 16px; font-weight: 800; color: #064e3b;">Dr. ${doc.fullName}</div>
+                                            <div style="font-size: 12px; color: #64748b; font-weight: 600;">${doc.specialization != null ? doc.specialization : 'General Practitioner'}</div>
+                                        </div>
+                                        <div style="text-align: right; font-size: 11px; color: #94a3b8;">${doc.phone != null ? doc.phone : 'No contact'}</div>
+                                    </div>
+                                    
+                                    <c:set var="hasSlots" value="false" />
+                                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                        <c:forEach var="slot" items="${todayAvailability}">
+                                             <c:if test="${slot.doctor.id eq doc.id}">
+                                                <c:set var="hasSlots" value="true" />
+                                                <div style="padding: 8px 14px; background: #ffffff; border: 1px solid #dcfce7; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; align-items: center; gap: 10px;">
+                                                    <div style="font-size: 12px; font-weight: 700; color: #10b981;">${slot.availableDate}</div>
+                                                    <div style="width: 1px; height: 12px; background: #e2e8f0;"></div>
+                                                    <div style="font-size: 11px; color: #64748b; font-weight: 600;">${slot.startTime} - ${slot.endTime}</div>
+                                                </div>
+                                            </c:if>
+                                        </c:forEach>
+                                        
+                                        <c:if test="${not hasSlots}">
+                                            <div style="font-size: 12px; color: #94a3b8; font-style: italic; padding: 5px 0;">No upcoming slots scheduled</div>
+                                        </c:if>
+                                    </div>
                                 </div>
-                                <div class="doc-time">${slot.startTime} - ${slot.endTime}</div>
-                            </div>
-                        </c:forEach>
+                            </c:forEach>
+                        </div>
                     </c:when>
                     <c:otherwise>
-                        <c:choose>
-                            <c:when test="${not empty doctors}">
-                                <c:forEach var="doc" items="${doctors}">
-                                    <div class="avail-slot" style="border-color:rgba(100,116,139,0.15); background:rgba(100,116,139,0.06);">
-                                        <div>
-                                            <div class="doc-name" style="color:#94a3b8;">Dr. ${doc.fullName}</div>
-                                            <div class="doc-time">${doc.specialization != null ? doc.specialization : 'General'} &bull; ${doc.phone != null ? doc.phone : 'N/A'}</div>
-                                        </div>
-                                        <span class="badge badge-pending">No Slots Set</span>
-                                    </div>
-                                </c:forEach>
-                            </c:when>
-                            <c:otherwise>
-                                <div class="empty-state">
-                                    <div class="empty-icon">&#x1FA7A;</div>
-                                    <p>No doctors registered yet</p>
-                                </div>
-                            </c:otherwise>
-                        </c:choose>
+                        <div class="empty-state">
+                            <div class="empty-icon">&#x1FA7A;</div>
+                            <p>No doctors registered yet</p>
+                        </div>
                     </c:otherwise>
                 </c:choose>
             </div>
@@ -860,9 +885,16 @@
                                         <td><span class="badge" style="background:rgba(108,99,255,0.05); color:#6366f1; border:1px solid rgba(108,99,255,0.1); font-weight:600;">${u.shiftTiming != null ? u.shiftTiming : 'Not Assigned'}</span></td>
                                         <td style="text-align:right; padding-right:20px;">
                                             <div style="display:flex; gap:8px; justify-content:flex-end;">
-                                                <button onclick="openAttendanceModal('${u.id}', '${u.fullName}', '${u.attendanceStatus}')" title="Mark Attendance" style="background:#f0fdf4; border:1px solid #dcfce7; padding:8px; border-radius:8px; color:#16a34a; cursor:pointer; transition:0.2s;">&#x2705;</button>
-                                                <button onclick="openShiftModal('${u.id}', '${u.fullName}')" title="Assign Shift" style="background:#f5f3ff; border:1px solid #ddd6fe; padding:8px; border-radius:8px; color:#7c3aed; cursor:pointer; transition:0.2s;">&#x231B;</button>
-                                                <button onclick="openReportModal('${u.id}', '${u.fullName}')" title="View Report" style="background:#eff6ff; border:1px solid #dbeafe; padding:8px; border-radius:8px; color:#2563eb; cursor:pointer; transition:0.2s;">📊</button>
+                                                <c:if test="${u.role != 'Doctor'}">
+                                                    <button onclick="openAttendanceModal('${u.id}', '${u.fullName}', '${u.attendanceStatus}')" title="Mark Attendance" style="background:#f0fdf4; border:1px solid #dcfce7; padding:8px; border-radius:8px; color:#16a34a; cursor:pointer; transition:0.2s;">&#x2705;</button>
+                                                    <button onclick="openShiftModal('${u.id}', '${u.fullName}')" title="Assign Shift" style="background:#f5f3ff; border:1px solid #ddd6fe; padding:8px; border-radius:8px; color:#7c3aed; cursor:pointer; transition:0.2s;">&#x231B;</button>
+                                                </c:if>
+                                                <c:if test="${u.role == 'Doctor'}">
+                                                    <button onclick="openFeeModal('${u.id}', '${u.fullName}', '${u.consultationFee}')" title="Fix Consultation Fee" style="background:#fff7ed; border:1px solid #ffedd5; padding:8px; border-radius:8px; color:#c2410c; cursor:pointer; transition:0.2s;">&#x1F4B5;</button>
+                                                </c:if>
+                                                <c:if test="${u.role != 'Doctor'}">
+                                                    <button onclick="openReportModal('${u.id}', '${u.fullName}')" title="View Report" style="background:#eff6ff; border:1px solid #dbeafe; padding:8px; border-radius:8px; color:#2563eb; cursor:pointer; transition:0.2s;">📊</button>
+                                                </c:if>
                                             </div>
                                         </td>
                                     </tr>
@@ -947,13 +979,14 @@
                     <c:when test="${not empty leaveRequests}">
                         <table class="data-table">
                             <thead>
-                                <tr><th>Staff Name</th><th>Role</th><th>Reason</th><th>Period</th><th>Status</th><th>Action</th></tr>
+                                <tr><th>Staff Name</th><th>Role</th><th>Leave Type</th><th>Reason</th><th>Period</th><th>Status</th><th>Action</th></tr>
                             </thead>
                             <tbody>
                                 <c:forEach var="req" items="${leaveRequests}">
                                     <tr>
                                         <td style="font-weight:600; color: #10b981;">${req.user.fullName}</td>
                                         <td><span class="badge badge-role">${req.user.role}</span></td>
+                                        <td><span class="badge" style="background:rgba(16,185,129,0.1); color:#065f46; border:1px solid rgba(16,185,129,0.2);">${req.leaveType != null ? req.leaveType : 'Full Day'}</span></td>
                                         <td style="max-width:200px; white-space:normal; color: #334155;">${req.reason}</td>
                                         <td style="color: #475569;">${req.startDate} to ${req.endDate}</td>
                                         <td>
@@ -1170,6 +1203,63 @@
     </div>
 </div>
 
+<!-- Fee Modal -->
+<div id="feeModal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-header"><h3>Fix Consultation Fee: <span id="feeStaffName"></span></h3></div>
+        <form action="/admin/update-consultation-fee" method="POST">
+            <input type="hidden" name="userId" id="feeUserId">
+            <div class="form-group">
+                <label>Consultation Fee (₹)</label>
+                <input type="number" name="fee" id="feeInput" required min="0" step="0.01" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; box-sizing: border-box;">
+            </div>
+            <p style="font-size: 12px; color: #64748b; margin-top: 5px;">This fee will be constant and shown on patient dashboard & prescriptions.</p>
+            <button type="submit" class="modal-btn" style="background: #c2410c; margin-top: 20px;">Save Fee</button>
+            <button type="button" onclick="closeModal('feeModal')" style="background:transparent; color:#64748b; border:none; width:100%; margin-top:10px; cursor:pointer;">Cancel</button>
+        </form>
+    </div>
+</div>
+
+<!-- Admin Profile Modal -->
+<div id="adminProfileModal" class="modal">
+    <div class="modal-content" style="max-width: 450px; background: #fff; color: #1e293b;">
+        <div class="modal-header" style="border-bottom: 1px solid #f1f5f9;">
+            <h3 style="color: #064e3b; display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 24px;">👤</span> My Admin Profile
+            </h3>
+        </div>
+        <form action="/admin/update-profile" method="POST">
+            <div class="form-group">
+                <label style="color: #64748b; font-weight: 600;">Full Name</label>
+                <input type="text" name="fullName" value="${user.fullName}" required style="background: #f8fafc; border: 1px solid #e2e8f0; color: #1e293b;">
+            </div>
+            <div class="form-group">
+                <label style="color: #64748b; font-weight: 600;">Email Address</label>
+                <input type="email" name="email" value="${user.email}" required style="background: #f8fafc; border: 1px solid #e2e8f0; color: #1e293b;">
+            </div>
+            <div class="form-group">
+                <label style="color: #64748b; font-weight: 600;">Phone Number</label>
+                <input type="text" name="phone" value="${user.phone}" style="background: #f8fafc; border: 1px solid #e2e8f0; color: #1e293b;">
+            </div>
+            
+            <div style="margin: 20px 0; padding: 15px; background: #f0fdf4; border-radius: 12px; border: 1px solid #dcfce7;">
+                <h4 style="font-size: 13px; color: #166534; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Update Security</h4>
+                <div class="form-group">
+                    <label style="color: #64748b; font-size: 11px;">Current Password</label>
+                    <input type="password" name="currentPassword" placeholder="Required for password change only" style="background: #fff; border: 1px solid #e2e8f0; color: #1e293b;">
+                </div>
+                <div class="form-group">
+                    <label style="color: #64748b; font-size: 11px;">New Password</label>
+                    <input type="password" name="newPassword" placeholder="Minimum 8 characters" style="background: #fff; border: 1px solid #e2e8f0; color: #1e293b;">
+                </div>
+            </div>
+
+            <button type="submit" class="modal-btn" style="background: linear-gradient(135deg,#10b981,#059669);">Save Profile Details</button>
+            <button type="button" onclick="closeModal('adminProfileModal')" style="background:transparent; color:#94a3b8; border:none; width:100%; margin-top:10px; cursor:pointer; font-weight: 600;">Discard Changes</button>
+        </form>
+    </div>
+</div>
+
 
 
 <script>
@@ -1276,6 +1366,17 @@ function openShiftModal(id, name) {
     document.getElementById('shiftUserId').value = id;
     document.getElementById('shiftName').innerText = name;
     document.getElementById('shiftModal').style.display = 'block';
+}
+
+function openFeeModal(id, name, currentFee) {
+    document.getElementById('feeUserId').value = id;
+    document.getElementById('feeStaffName').innerText = name;
+    document.getElementById('feeInput').value = currentFee && currentFee !== 'null' ? currentFee : '';
+    document.getElementById('feeModal').style.display = 'block';
+}
+
+function openAdminProfileModal() {
+    document.getElementById('adminProfileModal').style.display = 'block';
 }
 
 function closeModal(id) {

@@ -5,9 +5,11 @@ import com.example.demo.repository.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.example.demo.service.EmailService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,6 +26,9 @@ public class MainController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     @Autowired
     private PatientRepository patientRepository;
@@ -115,6 +120,7 @@ public class MainController {
             @RequestParam(required = false) String staffPhone,
             @RequestParam(required = false) String staffId,
             @RequestParam(required = false) String hospitalName,
+            @RequestParam(required = false) String govIdNumber,
             RedirectAttributes redirectAttributes) {
 
         if (!password.equals(confirmPassword)) {
@@ -135,7 +141,14 @@ public class MainController {
         user.setGender(gender);
         
         // Role specific mapping
-        if ("Doctor".equalsIgnoreCase(role)) {
+        user.setPhone(phone);
+        
+        // Role specific mapping
+        if ("Admin".equalsIgnoreCase(role)) {
+            user.setStaffId(adminId);
+            user.setHospitalName(clinicName);
+            user.setPhone(phone);
+        } else if ("Doctor".equalsIgnoreCase(role)) {
             user.setPhone(phone);
             user.setSpecialization(specialization);
             user.setExperience(experience);
@@ -145,35 +158,119 @@ public class MainController {
             user.setLabAddress(labAddress);
             user.setLabId(labId);
             user.setLabType(labType);
+            user.setPhone(phone);
         } else if ("Receptionist".equalsIgnoreCase(role) || "RECEPTIONIST".equalsIgnoreCase(role)) {
             user.setPhone(phone);
+            user.setGovIdNumber(govIdNumber);
+            user.setAddress(address);
         } else if ("Delivery".equalsIgnoreCase(role)) {
             user.setPhone(deliveryPhone);
             user.setVehicleType(vehicleType);
         } else if ("Patient".equalsIgnoreCase(role)) {
             user.setPhone(phone);
-            // Also save to Patient entity for clinical records
-            Patient p = new Patient();
-            p.setName(fullName);
-            p.setAge(age);
-            p.setGender(gender);
-            p.setContactNumber(phone);
-            p.setPatientId("PID-" + (1000 + patientRepository.count()));
-            p.setDateOfBirth(LocalDate.now().minusYears(age != null ? age : 0));
-            patientRepository.save(p);
+            user.setAddress(address);
         } else if ("Pharmacy".equalsIgnoreCase(role)) {
             user.setPharmacyName(pharmacyName);
             user.setPharmacyAddress(pharmacyAddress);
             user.setPharmacyLicense(pharmacyLicense);
+            user.setPhone(phone);
         } else if ("Staff".equalsIgnoreCase(role)) {
-            user.setPhone(staffPhone);
+            user.setPhone(staffPhone != null ? staffPhone : phone);
             user.setStaffId(staffId);
             user.setHospitalName(hospitalName);
         }
+        
+        // Store in session for OTP verification
+        HttpSession session = (HttpSession) ((org.springframework.web.context.request.ServletRequestAttributes) org.springframework.web.context.request.RequestContextHolder.getRequestAttributes()).getRequest().getSession();
+        session.setAttribute("tempUser", user);
+        
+        // Store additional patient info if needed
+        if ("Patient".equalsIgnoreCase(role)) {
+            Map<String, Object> patientInfo = new HashMap<>();
+            patientInfo.put("age", age);
+            patientInfo.put("gender", gender);
+            session.setAttribute("patientInfo", patientInfo);
+        }
 
-        userRepository.save(user);
-        redirectAttributes.addFlashAttribute("registerSuccess", "Registration successful! Please login.");
-        return "redirect:/";
+        String otp = emailService.generateOTP();
+        session.setAttribute("regOTP", otp);
+        session.setAttribute("tempEmail", email);
+        
+        try {
+            emailService.sendOTP(email, otp);
+            return "redirect:/otp-verification";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("registerError", "Error sending OTP: " + e.getMessage());
+            return "redirect:/#register-section";
+        }
+    }
+
+    @GetMapping("/otp-verification")
+    public String showOtpPage(HttpSession session, Model model) {
+        String email = (String) session.getAttribute("tempEmail");
+        if (email == null) return "redirect:/";
+        model.addAttribute("tempEmail", email);
+        return "otp-verification";
+    }
+
+    @PostMapping("/verify-otp")
+    public String verifyOtp(@RequestParam String otp, HttpSession session, RedirectAttributes redirectAttributes) {
+        String sessionOtp = (String) session.getAttribute("regOTP");
+        User user = (User) session.getAttribute("tempUser");
+
+        if (sessionOtp != null && sessionOtp.equals(otp)) {
+            // Save user
+            userRepository.save(user);
+
+            // If patient, save to patient repository
+            if ("Patient".equalsIgnoreCase(user.getRole())) {
+                Map<String, Object> patientInfo = (Map<String, Object>) session.getAttribute("patientInfo");
+                Patient p = new Patient();
+                p.setName(user.getFullName());
+                p.setAge((Integer) patientInfo.get("age"));
+                p.setGender((String) patientInfo.get("gender"));
+                p.setContactNumber(user.getPhone());
+                p.setPatientId("PID-" + (1000 + patientRepository.count()));
+                p.setDateOfBirth(LocalDate.now().minusYears(p.getAge() != null ? p.getAge() : 0));
+                patientRepository.save(p);
+            }
+
+            // Send Welcome Email
+            try {
+                emailService.sendWelcomeEmail(user.getEmail(), user.getFullName(), user.getRole());
+            } catch (Exception e) {
+                // Log error but don't stop the flow since user is already saved
+                System.err.println("Failed to send welcome email: " + e.getMessage());
+            }
+
+            session.removeAttribute("regOTP");
+            session.removeAttribute("tempUser");
+            session.removeAttribute("tempEmail");
+            session.removeAttribute("patientInfo");
+
+            redirectAttributes.addFlashAttribute("registerSuccess", "Registration successful! Please login.");
+            return "redirect:/";
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Invalid OTP. Please try again.");
+            return "redirect:/otp-verification";
+        }
+    }
+
+    @GetMapping("/resend-otp")
+    public String resendOtp(HttpSession session, RedirectAttributes redirectAttributes) {
+        String email = (String) session.getAttribute("tempEmail");
+        if (email == null) return "redirect:/";
+
+        String newOtp = emailService.generateOTP();
+        session.setAttribute("regOTP", newOtp);
+        
+        try {
+            emailService.sendOTP(email, newOtp);
+            redirectAttributes.addFlashAttribute("success", "OTP resent successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error sending OTP: " + e.getMessage());
+        }
+        return "redirect:/otp-verification";
     }
 
     // ========================
@@ -261,11 +358,11 @@ public class MainController {
         model.addAttribute("totalDelivery", userRepository.countByRole("Delivery"));
         model.addAttribute("totalUsers", userRepository.count());
 
-        // Doctor availability today
-        model.addAttribute("todayAvailability", availabilityRepository.findByAvailableDateOrderByStartTimeAsc(today));
+        // Doctor availability (all upcoming)
+        model.addAttribute("todayAvailability", availabilityRepository.findByAvailableDateGreaterThanEqualOrderByAvailableDateAscStartTimeAsc(today));
 
         // Doctors list
-        model.addAttribute("doctors", userRepository.findByRole("Doctor"));
+        model.addAttribute("doctors", userRepository.findByRoleIgnoreCase("Doctor"));
 
         // All staff
         model.addAttribute("allUsers", userRepository.findAll());
@@ -305,17 +402,32 @@ public class MainController {
                     return map;
                 })
                 .collect(java.util.stream.Collectors.toList());
+        model.addAttribute("pendingBills", pendingBills);
+
         // Visitor messages
         model.addAttribute("visitorMessages", visitorMessageRepository.findAllByOrderBySubmittedAtDesc());
 
         // Staff Leave Requests
-        model.addAttribute("leaveRequests", leaveRequestRepository.findAllByOrderBySubmittedAtDesc());
+        List<LeaveRequest> allLeaveRequests = leaveRequestRepository.findAllByOrderBySubmittedAtDesc();
+        model.addAttribute("leaveRequests", allLeaveRequests);
+        model.addAttribute("pendingLeaveCount", allLeaveRequests.stream().filter(r -> "Pending".equals(r.getStatus())).count());
 
         // Newsletter Subscriptions
         model.addAttribute("newsletterSubscriptions", newsletterRepository.findAllByOrderBySubscribedAtDesc());
         model.addAttribute("totalSubscribers", newsletterRepository.count());
 
         return "admin-dashboard";
+    }
+
+    @PostMapping("/admin/update-consultation-fee")
+    public String updateConsultationFee(@RequestParam Long userId, @RequestParam Double fee, RedirectAttributes ra) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user != null && "Doctor".equalsIgnoreCase(user.getRole())) {
+            user.setConsultationFee(fee);
+            userRepository.save(user);
+            ra.addFlashAttribute("successMessage", "Consultation fee for " + user.getFullName() + " updated to ₹" + fee);
+        }
+        return "redirect:/admin-dashboard#staff-section";
     }
 
     @PostMapping("/newsletter/subscribe")
@@ -480,6 +592,66 @@ public class MainController {
         return "patient-dashboard";
     }
 
+    @PostMapping("/patient/profile/update")
+    public String updatePatientProfile(
+            @RequestParam String fullName,
+            @RequestParam Integer age,
+            @RequestParam String gender,
+            @RequestParam String phone,
+            @RequestParam(required = false) String bloodGroup,
+            @RequestParam(required = false) String newPassword,
+            @RequestParam(required = false) String confirmPassword,
+            HttpSession session, RedirectAttributes ra) {
+        
+        User sessionUser = (User) session.getAttribute("user");
+        if (sessionUser == null || !"Patient".equalsIgnoreCase(sessionUser.getRole())) return "redirect:/";
+        
+        // Refresh from DB
+        final User user = userRepository.findById(sessionUser.getId()).orElse(sessionUser);
+        
+        // Find associated Patient record (Robust identification)
+        Patient patient = null;
+        if (user.getPhone() != null && !user.getPhone().isBlank()) {
+            patient = patientRepository.findByContactNumber(user.getPhone());
+        }
+        if (patient == null) {
+            patient = patientRepository.findAll().stream()
+                    .filter(p -> p.getName() != null && p.getName().equalsIgnoreCase(user.getFullName()))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        // Update User info
+        user.setFullName(fullName);
+        user.setPhone(phone);
+        user.setGender(gender); // Sync gender to user as well
+        
+        // Password update if provided
+        if (newPassword != null && !newPassword.isBlank()) {
+            if (!newPassword.equals(confirmPassword)) {
+                ra.addFlashAttribute("errorMessage", "Passwords do not match!");
+                return "redirect:/patient-dashboard";
+            }
+            user.setPassword(passwordEncoder.encode(newPassword));
+        }
+        
+        userRepository.save(user);
+        session.setAttribute("user", user);
+
+        // Update Patient info
+        if (patient != null) {
+            patient.setName(fullName);
+            patient.setAge(age);
+            patient.setGender(gender);
+            patient.setContactNumber(phone);
+            patient.setBloodGroup(bloodGroup);
+            patientRepository.save(patient);
+        }
+
+        ra.addFlashAttribute("successMessage", "Profile updated successfully!");
+        return "redirect:/patient-dashboard";
+    }
+
     @PostMapping("/patient/book-appointment")
     public String bookAppointment(
             @RequestParam Long doctorId,
@@ -489,7 +661,7 @@ public class MainController {
             HttpSession session,
             RedirectAttributes redirectAttributes) {
         
-        User user = (User) session.getAttribute("user");
+        final User user = (User) session.getAttribute("user");
         if (user == null || !"Patient".equalsIgnoreCase(user.getRole())) return "redirect:/";
 
         try {
@@ -529,6 +701,78 @@ public class MainController {
         }
         
         return "redirect:/patient-dashboard";
+    }
+
+    @PostMapping("/staff/profile/update")
+    public String updateStaffProfile(
+            @RequestParam String fullName,
+            @RequestParam String email,
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) String hospitalName,
+            @RequestParam(required = false) String staffId,
+            @RequestParam(required = false) String newPassword,
+            @RequestParam(required = false) String confirmPassword,
+            HttpSession session, RedirectAttributes ra) {
+        
+        User user = (User) session.getAttribute("user");
+        if (user == null || !"Staff".equalsIgnoreCase(user.getRole())) return "redirect:/";
+        
+        user = userRepository.findById(user.getId()).orElse(user);
+        
+        user.setFullName(fullName);
+        user.setEmail(email);
+        user.setPhone(phone);
+        user.setHospitalName(hospitalName);
+        user.setStaffId(staffId);
+        
+        if (newPassword != null && !newPassword.isBlank()) {
+            if (!newPassword.equals(confirmPassword)) {
+                ra.addFlashAttribute("errorMessage", "Passwords do not match!");
+                return "redirect:/staff-dashboard";
+            }
+            user.setPassword(passwordEncoder.encode(newPassword));
+        }
+        
+        userRepository.save(user);
+        session.setAttribute("user", user);
+        
+        ra.addFlashAttribute("successMessage", "Profile updated successfully!");
+        return "redirect:/staff-dashboard";
+    }
+
+    @PostMapping("/delivery/profile/update")
+    public String updateDeliveryProfile(
+            @RequestParam String fullName,
+            @RequestParam String email,
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) String vehicleType,
+            @RequestParam(required = false) String newPassword,
+            @RequestParam(required = false) String confirmPassword,
+            HttpSession session, RedirectAttributes ra) {
+        
+        User user = (User) session.getAttribute("user");
+        if (user == null || !"Delivery".equalsIgnoreCase(user.getRole())) return "redirect:/";
+        
+        user = userRepository.findById(user.getId()).orElse(user);
+        
+        user.setFullName(fullName);
+        user.setEmail(email);
+        user.setPhone(phone);
+        user.setVehicleType(vehicleType);
+        
+        if (newPassword != null && !newPassword.isBlank()) {
+            if (!newPassword.equals(confirmPassword)) {
+                ra.addFlashAttribute("errorMessage", "Passwords do not match!");
+                return "redirect:/delivery-dashboard";
+            }
+            user.setPassword(passwordEncoder.encode(newPassword));
+        }
+        
+        userRepository.save(user);
+        session.setAttribute("user", user);
+        
+        ra.addFlashAttribute("successMessage", "Profile updated successfully!");
+        return "redirect:/delivery-dashboard";
     }
 
     @GetMapping("/lab-dashboard")
@@ -573,6 +817,7 @@ public class MainController {
         model.addAttribute("deliveryPartners", userRepository.findByRoleIgnoreCase("Delivery"));
         model.addAttribute("allTests", labTestRepo.findAll());
         model.addAttribute("shifts", staffShiftRepo.findByUser(user));
+        model.addAttribute("leaveRequests", leaveRequestRepository.findByUserOrderBySubmittedAtDesc(user));
         List<Attendance> userAttendance = attendanceRepo.findByUser(user);
         model.addAttribute("attendanceRecords", userAttendance);
         
@@ -582,6 +827,83 @@ public class MainController {
         model.addAttribute("todayAttendanceExists", todayAttendanceExists);
         
         return "lab-dashboard";
+    }
+    @PostMapping("/lab/profile/update")
+    public String updateLabProfile(@ModelAttribute User updatedUser, HttpSession session, RedirectAttributes ra) {
+        User currentUser = (User) session.getAttribute("user");
+        if (currentUser == null || !"Lab".equalsIgnoreCase(currentUser.getRole())) return "redirect:/";
+        
+        currentUser.setFullName(updatedUser.getFullName());
+        currentUser.setEmail(updatedUser.getEmail());
+        currentUser.setPhone(updatedUser.getPhone());
+        currentUser.setLabName(updatedUser.getLabName());
+        currentUser.setLabAddress(updatedUser.getLabAddress());
+        currentUser.setLabId(updatedUser.getLabId());
+        
+        userRepository.save(currentUser);
+        session.setAttribute("user", currentUser);
+        
+        ra.addFlashAttribute("successMessage", "Profile updated successfully!");
+        return "redirect:/lab-dashboard";
+    }
+
+    @PostMapping("/lab/leave/apply")
+    public String applyLabLeave(@RequestParam String reason, 
+                               @RequestParam String startDate, 
+                               @RequestParam String endDate, 
+                               @RequestParam(required = false, defaultValue = "Full Day") String leaveType,
+                               HttpSession session, 
+                               RedirectAttributes ra) {
+        User user = (User) session.getAttribute("user");
+        if (user == null || !"Lab".equalsIgnoreCase(user.getRole())) return "redirect:/";
+
+        try {
+            LeaveRequest lr = new LeaveRequest(user, reason, LocalDate.parse(startDate), LocalDate.parse(endDate), leaveType);
+            leaveRequestRepository.save(lr);
+            ra.addFlashAttribute("successMessage", "Leave request submitted successfully!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Error submitting leave request: " + e.getMessage());
+        }
+
+        return "redirect:/lab-dashboard";
+    }
+
+    @PostMapping("/change-password")
+    public String changePassword(
+            @RequestParam String currentPassword,
+            @RequestParam String newPassword,
+            @RequestParam String confirmPassword,
+            HttpSession session,
+            RedirectAttributes ra) {
+        
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/";
+        
+        // Reload user to ensure we have the latest password from DB
+        user = userRepository.findById(user.getId()).orElse(user);
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            ra.addFlashAttribute("errorMessage", "Current password is incorrect!");
+        } else if (!newPassword.equals(confirmPassword)) {
+            ra.addFlashAttribute("errorMessage", "New passwords do not match!");
+        } else {
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+            session.setAttribute("user", user);
+            ra.addFlashAttribute("successMessage", "Password updated successfully!");
+        }
+
+        // Redirect based on role
+        String role = user.getRole().toLowerCase();
+        if ("lab".equals(role)) return "redirect:/lab-dashboard";
+        if ("receptionist".equals(role)) return "redirect:/receptionist/dashboard";
+        if ("doctor".equals(role)) return "redirect:/doctor-dashboard";
+        if ("pharmacy".equals(role)) return "redirect:/pharmacy-dashboard";
+        if ("delivery".equals(role)) return "redirect:/delivery-dashboard";
+        if ("admin".equals(role)) return "redirect:/admin-dashboard";
+        if ("patient".equals(role)) return "redirect:/patient-dashboard";
+        
+        return "redirect:/";
     }
 
 
@@ -599,6 +921,7 @@ public class MainController {
                 .toList();
         
         model.addAttribute("tasks", myTasks); 
+        model.addAttribute("leaveRequests", leaveRequestRepository.findByUserOrderBySubmittedAtDesc(user));
         return "delivery-dashboard";
     }
 
@@ -1040,6 +1363,39 @@ public class MainController {
         return "redirect:/admin-dashboard";
     }
 
+    @PostMapping("/admin/update-profile")
+    public String updateAdminProfile(
+            @RequestParam String fullName,
+            @RequestParam String email,
+            @RequestParam String phone,
+            @RequestParam(required = false) String currentPassword,
+            @RequestParam(required = false) String newPassword,
+            HttpSession session,
+            RedirectAttributes ra) {
+        
+        User admin = (User) session.getAttribute("user");
+        if (admin == null || !"Admin".equalsIgnoreCase(admin.getRole())) return "redirect:/";
+
+        admin.setFullName(fullName);
+        admin.setEmail(email);
+        admin.setPhone(phone);
+
+        if (currentPassword != null && !currentPassword.isEmpty() && newPassword != null && !newPassword.isEmpty()) {
+            if (passwordEncoder.matches(currentPassword, admin.getPassword())) {
+                admin.setPassword(passwordEncoder.encode(newPassword));
+                ra.addFlashAttribute("successMessage", "Profile and password updated successfully!");
+            } else {
+                ra.addFlashAttribute("errorMessage", "Current password incorrect! Other details updated.");
+            }
+        } else {
+            ra.addFlashAttribute("successMessage", "Profile details updated successfully!");
+        }
+
+        userRepository.save(admin);
+        session.setAttribute("user", admin);
+        return "redirect:/admin-dashboard";
+    }
+
     @PostMapping("/admin/update-performance")
     public String updatePerformance(
             @RequestParam Long userId,
@@ -1096,13 +1452,14 @@ public class MainController {
             @RequestParam String reason,
             @RequestParam String startDate,
             @RequestParam String endDate,
+            @RequestParam(required = false, defaultValue = "Full Day") String leaveType,
             HttpSession session,
             RedirectAttributes ra) {
         User user = (User) session.getAttribute("user");
         if (user == null) return "redirect:/";
 
         try {
-            LeaveRequest lr = new LeaveRequest(user, reason, LocalDate.parse(startDate), LocalDate.parse(endDate));
+            LeaveRequest lr = new LeaveRequest(user, reason, LocalDate.parse(startDate), LocalDate.parse(endDate), leaveType);
             leaveRequestRepository.save(lr);
             ra.addFlashAttribute("successMessage", "Leave request submitted successfully!");
         } catch (Exception e) {
@@ -1120,7 +1477,7 @@ public class MainController {
             leaveRequestRepository.save(lr);
             ra.addFlashAttribute("successMessage", "Leave request approved!");
         }
-        return "redirect:/admin-dashboard";
+        return "redirect:/admin-dashboard#staff-requests-section";
     }
 
     @PostMapping("/admin/reject-leave")
@@ -1132,7 +1489,27 @@ public class MainController {
             leaveRequestRepository.save(lr);
             ra.addFlashAttribute("successMessage", "Leave request rejected!");
         }
-        return "redirect:/admin-dashboard";
+        return "redirect:/admin-dashboard#staff-requests-section";
+    }
+
+    @PostMapping("/delivery/leave/apply")
+    public String applyDeliveryLeave(@RequestParam String startDate,
+                                     @RequestParam String endDate,
+                                     @RequestParam String reason,
+                                     @RequestParam(required = false, defaultValue = "Full Day") String leaveType,
+                                     HttpSession session,
+                                     RedirectAttributes ra) {
+        User user = (User) session.getAttribute("user");
+        if (user == null || !"Delivery".equalsIgnoreCase(user.getRole())) return "redirect:/";
+        
+        try {
+            LeaveRequest lr = new LeaveRequest(user, reason, LocalDate.parse(startDate), LocalDate.parse(endDate), leaveType);
+            leaveRequestRepository.save(lr);
+            ra.addFlashAttribute("successMessage", "Leave request submitted successfully!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Error submitting leave: " + e.getMessage());
+        }
+        return "redirect:/delivery-dashboard";
     }
 }
 

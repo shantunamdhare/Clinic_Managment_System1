@@ -32,6 +32,8 @@ public class LeaveRequest {
 
     private String adminRemarks;
 
+    private String leaveType; // Full Day, Half Day
+
     public LeaveRequest() {
         this.submittedAt = LocalDateTime.now();
     }
@@ -43,6 +45,17 @@ public class LeaveRequest {
         this.endDate = endDate;
         this.status = "Pending";
         this.submittedAt = LocalDateTime.now();
+        this.leaveType = "Full Day"; // Default
+    }
+
+    public LeaveRequest(User user, String reason, LocalDate startDate, LocalDate endDate, String leaveType) {
+        this.user = user;
+        this.reason = reason;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.status = "Pending";
+        this.submittedAt = LocalDateTime.now();
+        this.leaveType = leaveType;
     }
 
     public Long getId() {
@@ -107,5 +120,13 @@ public class LeaveRequest {
 
     public void setAdminRemarks(String adminRemarks) {
         this.adminRemarks = adminRemarks;
+    }
+
+    public String getLeaveType() {
+        return leaveType;
+    }
+
+    public void setLeaveType(String leaveType) {
+        this.leaveType = leaveType;
     }
 }

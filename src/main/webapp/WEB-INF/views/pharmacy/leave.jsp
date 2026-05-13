@@ -118,6 +118,13 @@
                         <div class="card-body">
                             <form action="/pharmacy/leave/submit" method="post">
                                 <div class="mb-3">
+                                    <label class="form-label fw-bold small text-muted">LEAVE TYPE</label>
+                                    <select name="leaveType" class="form-select rounded-12 p-3" required>
+                                        <option value="Full Day">Full Day</option>
+                                        <option value="Half Day">Half Day</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
                                     <label class="form-label fw-bold small text-muted">START DATE</label>
                                     <input type="date" name="startDate" class="form-control rounded-12 p-3" required min="<%= java.time.LocalDate.now() %>">
                                 </div>
@@ -153,7 +160,7 @@
                                                 ${req.startDate} <i class="fas fa-long-arrow-alt-right mx-1 text-muted"></i> ${req.endDate}
                                             </div>
                                             <div class="text-muted" style="font-size: 11px;">
-                                                Submitted on: ${req.submittedAt}
+                                                Type: <span class="fw-bold text-primary">${req.leaveType != null ? req.leaveType : 'Full Day'}</span> | Submitted on: ${req.submittedAt}
                                             </div>
                                         </div>
                                         <span class="leave-status-badge status-${req.status.toLowerCase()}">

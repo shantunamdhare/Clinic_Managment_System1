@@ -146,6 +146,15 @@
         input[type="radio"]:checked + div {
             border-color: #2563eb;
         }
+
+        /* Hide Scrollbar for Sidebar */
+        .sidebar-nav::-webkit-scrollbar {
+            display: none;
+        }
+        .sidebar-nav {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     </style>
 </head>
 <body>
@@ -203,9 +212,9 @@
                     <span class="material-symbols-outlined">schedule</span>
                     Shift Schedule
                 </a>
-                <a href="#" class="nav-item" onclick="event.preventDefault(); showSection('performance-section', event)">
-                    <span class="material-symbols-outlined">analytics</span>
-                    Performance
+                <a href="#" class="nav-item" onclick="event.preventDefault(); showSection('leave-section', event); document.getElementById('leaveApplyModal').style.display='flex'">
+                    <span class="material-symbols-outlined">event_busy</span>
+                    Leave Request
                 </a>
                 <a href="#" class="nav-item" onclick="event.preventDefault(); showSection('profile-section', event)">
                     <span class="material-symbols-outlined">person</span>
@@ -251,27 +260,25 @@
                         </div>
                     </div>
                     
-                    <div class="user-profile" onclick="showSection('profile-section', event)" style="cursor: pointer;">
-                        <img src="/img/lab_tech_avatar.png" alt="Lab Technician Profile">
-                        <div class="user-info">
-                            <span class="user-name">${not empty user.fullName ? user.fullName : 'Dr. Sarah Jenkins'}</span>
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <span class="user-role">${not empty user.labName ? user.labName : 'Senior Lab Technician'}</span>
+                    <div class="user-profile" onclick="showSection('profile-section', event)" style="cursor: pointer; padding: 4px 16px; border-radius: 12px; transition: background 0.2s; border: 1px solid transparent;" onmouseover="this.style.background='var(--gray-50)'; this.style.borderColor='var(--gray-200)';" onmouseout="this.style.background='transparent'; this.style.borderColor='transparent';">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${user.fullName}" alt="Profile" style="width: 40px; height: 40px; border-radius: 10px; border: 2px solid var(--primary-light);">
+                        <div class="user-info" style="margin-left: 12px;">
+                            <span class="user-name" style="font-size: 15px; font-weight: 800; color: var(--gray-900); display: block; line-height: 1.2;">${not empty user.fullName ? user.fullName : 'Technician'}</span>
+                            <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
+                                <span class="user-role" style="font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">Lab Personnel</span>
+                                <span style="color: var(--gray-300);">|</span>
+                                <span style="font-size: 11px; color: var(--gray-600); font-weight: 600;">${not empty user.labName ? user.labName : 'Main Lab'}</span>
                                 <c:if test="${not empty user.labId}">
-                                    <span style="background: var(--primary-light); color: var(--primary); padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700;">${user.labId}</span>
+                                    <span style="background: var(--primary-50); color: var(--primary); padding: 1px 6px; border-radius: 6px; font-size: 10px; font-weight: 800; border: 1px solid var(--primary-100);">${user.labId}</span>
                                 </c:if>
                             </div>
-                            <c:if test="${not empty user.labAddress}">
-                                <div style="font-size: 11px; color: var(--gray-500); margin-top: 2px;">
-                                    <span class="material-symbols-outlined" style="font-size: 12px; vertical-align: middle;">location_on</span>
-                                    ${user.labAddress}
-                                </div>
-                            </c:if>
                         </div>
                     </div>
                     
-                    <a href="/" class="action-btn" title="Logout" style="margin-left: 12px; border-left: 1px solid var(--gray-200); padding-left: 20px;">
-                        <span class="material-symbols-outlined">logout</span>
+                    <div style="width: 1px; height: 32px; background: var(--gray-200); margin: 0 8px;"></div>
+                    
+                    <a href="/" class="action-btn" title="Logout" style="color: var(--error); transition: all 0.2s;" onmouseover="this.style.color='var(--error-dark)'; this.style.transform='translateX(3px)';" onmouseout="this.style.color='var(--error)'; this.style.transform='translateX(0)';">
+                        <span class="material-symbols-outlined" style="font-size: 24px;">logout</span>
                     </a>
                 </div>
             </header>
@@ -286,9 +293,16 @@
                     </div>
                 </c:if>
 
-                <div class="page-header">
+                <c:if test="${not empty errorMessage}">
+                    <div class="alert-error" style="background: var(--error-50); color: var(--error-700); padding: 16px; border-radius: var(--radius-md); margin-bottom: 24px; border: 1px solid var(--error-200); display: flex; align-items: center; gap: 12px;">
+                        <span class="material-symbols-outlined">error</span>
+                        ${errorMessage}
+                    </div>
+                </c:if>
+
+                <div class="page-header" id="global-page-header">
                     <h1 class="page-title">Lab Dashboard</h1>
-                    <button class="btn-primary" onclick="openNewRequestModal()">
+                    <button class="btn-primary" id="globalNewRequestBtn" onclick="openNewRequestModal()">
                         <span class="material-symbols-outlined">add</span>
                         New Test Request
                     </button>
@@ -1195,6 +1209,87 @@
                     </div>
                 </div>
 
+                <!-- LEAVE REQUEST SECTION -->
+                <div id="leave-section" class="dashboard-section" style="display: none;">
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+                        <button class="btn-primary" style="background: #f59e0b;" onclick="document.getElementById('leaveApplyModal').style.display='flex'">
+                            <span class="material-symbols-outlined">add</span>
+                            Apply for Leave
+                        </button>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon-wrapper stat-blue">
+                                <span class="material-symbols-outlined">pending</span>
+                            </div>
+                            <div class="stat-content">
+                                <h3>${not empty leaveRequests ? leaveRequests.stream().filter(r -> r.status == 'Pending').count() : 0}</h3>
+                                <p>Pending Requests</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon-wrapper stat-green">
+                                <span class="material-symbols-outlined">check_circle</span>
+                            </div>
+                            <div class="stat-content">
+                                <h3>${not empty leaveRequests ? leaveRequests.stream().filter(r -> r.status == 'Approved').count() : 0}</h3>
+                                <p>Approved Leaves</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h2 class="section-title">My Leave History</h2>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Applied On</th>
+                                    <th>Type</th>
+                                    <th>Reason</th>
+                                    <th>Duration</th>
+                                    <th>Status</th>
+                                    <th>Admin Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="lr" items="${leaveRequests}">
+                                    <tr>
+                                        <td>${lr.submittedAt.toLocalDate()}</td>
+                                        <td><span class="status-badge" style="background: rgba(79, 70, 229, 0.1); color: #4f46e5; border: none; font-weight: 700;">${lr.leaveType != null ? lr.leaveType : 'Full Day'}</span></td>
+                                        <td><span style="font-weight: 600; color: var(--gray-900);">${lr.reason}</span></td>
+                                        <td>
+                                            <div style="font-size: 13px;">
+                                                <span style="color: var(--gray-500);">From:</span> ${lr.startDate}<br>
+                                                <span style="color: var(--gray-500);">To:</span> ${lr.endDate}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge ${lr.status == 'Pending' ? 'status-pending' : (lr.status == 'Approved' ? 'status-completed' : 'status-pending')}" 
+                                                  style="${lr.status == 'Rejected' ? 'background: #FEE2E2; color: #991B1B;' : ''}">
+                                                ${lr.status}
+                                            </span>
+                                        </td>
+                                        <td style="font-size: 12px; color: var(--gray-500); font-style: italic;">
+                                            ${not empty lr.adminRemarks ? lr.adminRemarks : 'No remarks yet'}
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                                <c:if test="${empty leaveRequests}">
+                                    <tr>
+                                        <td colspan="6" style="text-align: center; padding: 40px; color: var(--gray-400);">
+                                            <span class="material-symbols-outlined" style="font-size: 48px; display: block; margin-bottom: 12px;">event_busy</span>
+                                            No leave requests found
+                                        </td>
+                                    </tr>
+                                </c:if>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- PROFILE SECTION -->
                 <div id="profile-section" class="dashboard-section" style="display: none;">
                     <div class="section-card" style="max-width: 900px; margin: 0 auto; overflow: hidden;">
@@ -1218,78 +1313,81 @@
                         </div>
 
                         <div style="padding: 80px 40px 40px 40px;">
-                            <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px;">
-                                <div>
-                                    <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
-                                        <span class="material-symbols-outlined" style="color: var(--primary);">person</span>
-                                        Personal Information
-                                    </h3>
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-                                        <div class="profile-field">
-                                            <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; margin-bottom: 6px;">Full Legal Name</label>
-                                            <p style="font-weight: 700; color: var(--gray-900); margin: 0;">${user.fullName}</p>
-                                        </div>
-                                        <div class="profile-field">
-                                            <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; margin-bottom: 6px;">Email Address</label>
-                                            <p style="font-weight: 700; color: var(--gray-900); margin: 0;">${user.email}</p>
-                                        </div>
-                                        <div class="profile-field">
-                                            <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; margin-bottom: 6px;">Phone Number</label>
-                                            <p style="font-weight: 700; color: var(--gray-900); margin: 0;">${not empty user.phone ? user.phone : 'Not Linked'}</p>
-                                        </div>
-                                        <div class="profile-field">
-                                            <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; margin-bottom: 6px;">Account Status</label>
-                                            <span class="status-badge" style="background: var(--success-50); color: var(--success-700); font-weight: 800;">ACTIVE</span>
-                                        </div>
-                                    </div>
-
-                                    <div style="margin-top: 40px; padding: 24px; background: var(--primary-50); border-radius: 16px; border: 1px solid var(--primary-100);">
-                                        <h4 style="margin: 0 0 12px 0; color: var(--primary-800); display: flex; align-items: center; gap: 8px;">
-                                            <span class="material-symbols-outlined" style="font-size: 20px;">security</span>
-                                            Security & Access
-                                        </h4>
-                                        <p style="font-size: 13px; color: var(--primary-700); line-height: 1.6; margin: 0 0 20px 0;">
-                                            Your account has high-level access to sensitive patient lab data. Ensure you maintain confidentiality and follow clinic security protocols.
-                                        </p>
-                                        <button class="btn-primary" style="font-size: 12px; padding: 10px 20px;" onclick="alert('Password reset link has been sent to your email.')">Change Password</button>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
-                                        <span class="material-symbols-outlined" style="color: var(--primary);">domain</span>
-                                        Workplace Details
-                                    </h3>
-                                    <div style="background: white; border: 1px solid var(--gray-200); border-radius: 20px; padding: 24px; box-shadow: var(--shadow-sm);">
-                                        <div style="margin-bottom: 20px;">
-                                            <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; margin-bottom: 8px;">Primary Laboratory</label>
-                                            <div style="display: flex; align-items: center; gap: 12px;">
-                                                <div style="background: var(--primary-light); color: var(--primary); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-                                                    <span class="material-symbols-outlined">home_health</span>
-                                                </div>
-                                                <div>
-                                                    <p style="font-weight: 800; color: var(--gray-900); margin: 0;">${user.labName}</p>
-                                                    <p style="font-size: 12px; color: var(--gray-500); margin: 0;">ID: ${user.labId}</p>
+                            <form action="/lab/profile/update" method="POST">
+                                <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px;">
+                                    <div>
+                                        <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
+                                            <span class="material-symbols-outlined" style="color: var(--primary);">person</span>
+                                            Personal Information
+                                        </h3>
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                                            <div class="profile-field">
+                                                <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; margin-bottom: 6px;">Full Legal Name</label>
+                                                <input type="text" name="fullName" value="${user.fullName}" class="form-select" style="padding-left:12px; background: white; font-weight: 700; color: var(--gray-900);" required>
+                                            </div>
+                                            <div class="profile-field">
+                                                <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; margin-bottom: 6px;">Email Address</label>
+                                                <input type="email" name="email" value="${user.email}" class="form-select" style="padding-left:12px; background: white; font-weight: 700; color: var(--gray-900);" required>
+                                            </div>
+                                            <div class="profile-field">
+                                                <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; margin-bottom: 6px;">Phone Number</label>
+                                                <input type="text" name="phone" value="${user.phone}" class="form-select" style="padding-left:12px; background: white; font-weight: 700; color: var(--gray-900);" placeholder="Not Linked">
+                                            </div>
+                                            <div class="profile-field">
+                                                <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; margin-bottom: 6px;">Account Status</label>
+                                                <div style="padding-top: 8px;">
+                                                    <span class="status-badge" style="background: var(--success-50); color: var(--success-700); font-weight: 800;">ACTIVE</span>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div style="margin-bottom: 20px;">
-                                            <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; margin-bottom: 8px;">Location</label>
-                                            <p style="font-size: 13px; font-weight: 600; color: var(--gray-700); margin: 0;">
-                                                <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle; color: var(--primary);">location_on</span>
-                                                ${user.labAddress}
+
+                                        <div style="margin-top: 40px; padding: 24px; background: var(--primary-50); border-radius: 16px; border: 1px solid var(--primary-100);">
+                                            <h4 style="margin: 0 0 12px 0; color: var(--primary-800); display: flex; align-items: center; gap: 8px;">
+                                                <span class="material-symbols-outlined" style="font-size: 20px;">security</span>
+                                                Security & Access
+                                            </h4>
+                                            <p style="font-size: 13px; color: var(--primary-700); line-height: 1.6; margin: 0 0 20px 0;">
+                                                Your account has high-level access to sensitive patient lab data. Ensure you maintain confidentiality.
                                             </p>
+                                            <div style="display: flex; gap: 12px;">
+                                                <button type="button" class="btn-primary" style="font-size: 12px; padding: 10px 20px;" data-bs-toggle="modal" data-bs-target="#passwordModal" onclick="event.preventDefault(); document.getElementById('passwordModal').style.display='flex'">Change Password</button>
+                                                <button type="submit" class="btn-primary" style="font-size: 12px; padding: 10px 24px; background: var(--success);">Save Changes</button>
+                                            </div>
                                         </div>
-                                        <div style="padding-top: 20px; border-top: 1px solid var(--gray-100);">
-                                            <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; margin-bottom: 8px;">Account Type</label>
-                                            <div style="display: flex; align-items: center; gap: 8px; background: var(--gray-50); padding: 8px 12px; border-radius: 10px;">
-                                                <span class="material-symbols-outlined" style="font-size: 18px; color: var(--gray-600);">badge</span>
-                                                <span style="font-weight: 700; font-size: 13px; color: var(--gray-700);">${user.role} Dashboard Access</span>
+                                    </div>
+
+                                    <div>
+                                        <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
+                                            <span class="material-symbols-outlined" style="color: var(--primary);">domain</span>
+                                            Workplace Details
+                                        </h3>
+                                        <div style="background: white; border: 1px solid var(--gray-200); border-radius: 20px; padding: 24px; box-shadow: var(--shadow-sm);">
+                                            <div style="margin-bottom: 20px;">
+                                                <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; margin-bottom: 8px;">Primary Laboratory</label>
+                                                <input type="text" name="labName" value="${user.labName}" class="form-select" style="padding-left:12px; background: white; font-weight: 800; color: var(--gray-900); border-radius: 10px;" required>
+                                                <div style="margin-top: 8px; font-size: 12px; color: var(--gray-500); display: flex; align-items: center; gap: 8px;">
+                                                    <span>Lab ID:</span>
+                                                    <input type="text" name="labId" value="${user.labId}" style="border: none; background: transparent; font-weight: 700; color: var(--primary); outline: none; width: 100px;">
+                                                </div>
+                                            </div>
+                                            <div style="margin-bottom: 20px;">
+                                                <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; margin-bottom: 8px;">Location / Address</label>
+                                                <div style="position: relative;">
+                                                    <span class="material-symbols-outlined" style="font-size: 16px; position: absolute; left: 10px; top: 14px; color: var(--primary);">location_on</span>
+                                                    <input type="text" name="labAddress" value="${user.labAddress}" class="form-select" style="padding-left:32px; background: white; font-size: 13px; font-weight: 600; color: var(--gray-700); border-radius: 10px;" required>
+                                                </div>
+                                            </div>
+                                            <div style="padding-top: 20px; border-top: 1px solid var(--gray-100);">
+                                                <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; margin-bottom: 8px;">Account Type</label>
+                                                <div style="display: flex; align-items: center; gap: 8px; background: var(--gray-50); padding: 8px 12px; border-radius: 10px;">
+                                                    <span class="material-symbols-outlined" style="font-size: 18px; color: var(--gray-600);">badge</span>
+                                                    <span style="font-weight: 700; font-size: 13px; color: var(--gray-700);">${user.role} Dashboard Access</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -1316,7 +1414,7 @@
     <!-- ==================== JAVASCRIPT ==================== -->
     <!-- EDIT PATIENT MODAL -->
     <div id="editModal" class="modal" style="display:none; position:fixed; z-index:2000; left:0; top:0; width:100%; height:100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
-        <div class="section-card" style="width: 100%; max-width: 500px; margin: auto; position: relative;">
+        <div class="section-card" style="width: 100%; max-width: 500px; margin: auto; position: relative; max-height: 90vh; overflow-y: auto;">
             <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
                 <h2 class="section-title">Edit Patient Record</h2>
                 <button onclick="closeModal()" style="background:none; border:none; cursor:pointer;"><span class="material-symbols-outlined">close</span></button>
@@ -1360,7 +1458,7 @@
 
     <!-- NEW TEST REQUEST MODAL -->
     <div id="newRequestModal" class="modal" style="display:none; position:fixed; z-index:2000; left:0; top:0; width:100%; height:100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); align-items: center; justify-content: center;">
-        <div class="section-card" style="width: 100%; max-width: 600px; margin: auto; position: relative; border-radius: 20px; overflow: hidden; animation: slideUp 0.3s ease;">
+        <div class="section-card" style="width: 100%; max-width: 600px; margin: auto; position: relative; border-radius: 20px; overflow-x: hidden; overflow-y: auto; animation: slideUp 0.3s ease; max-height: 90vh;">
             <div class="section-header" style="background: var(--primary); color: white; padding: 24px; display: flex; justify-content: space-between; align-items: center;">
                 <h2 style="font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; margin: 0;">
                     <span class="material-symbols-outlined">experiment</span>
@@ -1445,6 +1543,84 @@
         <div class="modal-container" style="background: #ffffff; width: 100%; max-width: 850px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; display: flex; flex-direction: column; border: 1px solid rgba(255, 255, 255, 0.1);">
             <div id="modalContentInjected">
                 <!-- Content will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- CHANGE PASSWORD MODAL -->
+    <div id="passwordModal" class="modal" style="display:none; position:fixed; z-index:3000; left:0; top:0; width:100%; height:100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); align-items: center; justify-content: center;">
+        <div class="section-card" style="width: 100%; max-width: 450px; border-radius: 20px; overflow-x: hidden; overflow-y: auto; animation: slideUp 0.3s ease; max-height: 90vh;">
+            <div class="section-header" style="background: #1e293b; color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; margin: 0;">
+                    <span class="material-symbols-outlined">lock_reset</span>
+                    Update Password
+                </h3>
+                <button onclick="document.getElementById('passwordModal').style.display='none'" style="background:none; border:none; color:white; cursor:pointer;"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div style="padding: 24px;">
+                <form action="/change-password" method="POST">
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label style="display:block; margin-bottom: 8px; font-weight:600; color: var(--gray-700);">Current Password</label>
+                        <input type="password" name="currentPassword" class="form-select" style="padding-left:12px; border-radius: 10px;" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label style="display:block; margin-bottom: 8px; font-weight:600; color: var(--gray-700);">New Password</label>
+                        <input type="password" name="newPassword" class="form-select" style="padding-left:12px; border-radius: 10px;" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label style="display:block; margin-bottom: 8px; font-weight:600; color: var(--gray-700);">Confirm New Password</label>
+                        <input type="password" name="confirmPassword" class="form-select" style="padding-left:12px; border-radius: 10px;" required>
+                    </div>
+                    <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                        <button type="button" class="btn-secondary" onclick="document.getElementById('passwordModal').style.display='none'" style="border-radius: 10px;">Cancel</button>
+                        <button type="submit" class="btn-primary" style="border-radius: 10px; background: #1e293b;">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- LEAVE APPLY MODAL -->
+    <div id="leaveApplyModal" class="modal" style="display:none; position:fixed; z-index:3000; left:0; top:0; width:100%; height:100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); align-items: center; justify-content: center;">
+        <div class="section-card" style="width: 100%; max-width: 500px; border-radius: 20px; overflow-x: hidden; overflow-y: auto; animation: slideUp 0.3s ease; max-height: 90vh; border: none; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);">
+            <div class="section-header" style="background: #f59e0b; color: white; padding: 24px; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 12px; margin: 0;">
+                    <span class="material-symbols-outlined" style="font-size: 24px;">calendar_month</span>
+                    Request Leave / Half Day
+                </h3>
+                <button onclick="document.getElementById('leaveApplyModal').style.display='none'" style="background:rgba(255,255,255,0.2); border:none; color:white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor:pointer; transition: background 0.2s;"><span class="material-symbols-outlined" style="font-size: 20px;">close</span></button>
+            </div>
+            <div style="padding: 32px;">
+                <form action="/lab/leave/apply" method="POST">
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label style="display:block; margin-bottom: 10px; font-weight:700; color: var(--gray-700); font-size: 15px;">Leave Type</label>
+                        <select name="leaveType" class="form-select" style="padding-left:16px; border-radius: 12px; height: 50px; background-color: #f9fafb; border: 1px solid #e5e7eb; font-weight: 600;" required>
+                            <option value="Full Day">Full Day</option>
+                            <option value="Half Day">Half Day</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label style="display:block; margin-bottom: 10px; font-weight:700; color: var(--gray-700); font-size: 15px;">Reason</label>
+                        <textarea name="reason" class="form-select" style="padding: 16px; border-radius: 12px; height: 120px; resize: none; background-color: #f9fafb; border: 1px solid #e5e7eb; line-height: 1.6;" placeholder="Explain your reason for leave..." required></textarea>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 32px;">
+                        <div class="form-group">
+                            <label style="display:block; margin-bottom: 10px; font-weight:700; color: var(--gray-700); font-size: 15px;">Start Date</label>
+                            <input type="date" name="startDate" class="form-select" style="padding-left:16px; border-radius: 12px; height: 50px; background-color: #f9fafb; border: 1px solid #e5e7eb; font-weight: 600;" required>
+                        </div>
+                        <div class="form-group">
+                            <label style="display:block; margin-bottom: 10px; font-weight:700; color: var(--gray-700); font-size: 15px;">End Date</label>
+                            <input type="date" name="endDate" class="form-select" style="padding-left:16px; border-radius: 12px; height: 50px; background-color: #f9fafb; border: 1px solid #e5e7eb; font-weight: 600;" required>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 16px; justify-content: flex-end; align-items: center;">
+                        <button type="button" class="btn-secondary" onclick="document.getElementById('leaveApplyModal').style.display='none'" style="border-radius: 12px; padding: 12px 24px; font-weight: 700; border: none; background: #f3f4f6; color: #4b5563;">Cancel</button>
+                        <button type="submit" class="btn-primary" style="border-radius: 12px; padding: 12px 32px; background: #f59e0b; border: none; color: white; font-weight: 800; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); transition: all 0.2s;">Submit Request</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -1655,12 +1831,19 @@
                     'doctor-requests-section': 'Incoming Doctor Prescriptions',
                     'attendance-section': 'Attendance Tracking',
                     'shifts-section': 'My Shift Schedule',
-                    'performance-section': 'Performance Analytics'
+                    'performance-section': 'Performance Analytics',
+                    'leave-section': 'Leave Management'
                 };
                 
                 const titleElement = document.querySelector('.page-title');
                 if (titleElement && (titleMap[target.id] || titleMap[sectionId])) {
                     titleElement.innerText = titleMap[target.id] || titleMap[sectionId];
+                }
+
+                // Global Button Visibility
+                const globalBtn = document.getElementById('globalNewRequestBtn');
+                if (globalBtn) {
+                    globalBtn.style.display = (target.id === 'overview-section' || target.id === 'requests-section') ? 'flex' : 'none';
                 }
 
                 // Handle manual selection visibility for reports

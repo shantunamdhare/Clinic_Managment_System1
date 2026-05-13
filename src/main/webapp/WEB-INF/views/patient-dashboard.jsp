@@ -110,7 +110,13 @@
         .modal-content {
             background:#fff; border-radius:24px; padding:32px; width:100%; max-width:450px;
             animation: modalSlide 0.3s ease;
+            max-height: 90vh; overflow-y: auto;
         }
+        /* Custom scrollbar for modal */
+        .modal-content::-webkit-scrollbar { width: 6px; }
+        .modal-content::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        .modal-content::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .modal-content::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         @keyframes modalSlide { from { transform:translateY(20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
         .modal-header { margin-bottom:24px; }
         .modal-header h3 { font-size:20px; font-weight:800; color:#1e293b; }
@@ -172,7 +178,7 @@
             </c:if>
 
             <header class="top-bar">
-                <div class="user-profile-summary">
+                <div class="user-profile-summary" style="cursor:pointer; transition: opacity 0.2s;" onclick="openModal('editProfileModal')" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
                     <div class="user-avatar">${user.fullName.substring(0,1)}</div>
                     <div class="user-info">
                         <h1>Hello, ${user.fullName}</h1>
@@ -214,6 +220,7 @@
                     <div class="card">
                         <div class="card-header">
                             <h3>&#x1F4CB; Patient Profile</h3>
+                            <button class="btn-primary" style="padding:6px 14px; font-size:12px; background:#f1f5f9; color:#475569; border:1px solid #e2e8f0;" onclick="openModal('editProfileModal')">&#x270F;&#xFE0F; Edit Profile</button>
                         </div>
                         <div style="padding:10px; display:grid; grid-template-columns:1fr 1fr; gap:20px;">
                             <div><p style="font-size:12px; color:#64748b; font-weight:700;">PATIENT ID</p><p style="font-weight:600;">${patientDetails.patientId}</p></div>
@@ -361,6 +368,61 @@
         </main>
     </div>
 
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Update Profile</h3></div>
+            <form action="/patient/profile/update" method="POST">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="fullName" value="${user.fullName}" class="form-input" required style="width:100%; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
+                </div>
+                <div class="form-row" style="display:flex; gap:10px; margin-bottom:15px;">
+                    <div style="flex:1;">
+                        <label>Age</label>
+                        <input type="number" name="age" value="${patientDetails.age}" class="form-input" required style="width:100%; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
+                    </div>
+                    <div style="flex:1;">
+                        <label>Gender</label>
+                        <select name="gender" class="form-select" required style="width:100%; padding:10px; border-radius:8px; border:1px solid #e2e8f0; appearance:auto;">
+                            <option value="Male" ${patientDetails.gender == 'Male' ? 'selected' : ''}>Male</option>
+                            <option value="Female" ${patientDetails.gender == 'Female' ? 'selected' : ''}>Female</option>
+                            <option value="Other" ${patientDetails.gender == 'Other' ? 'selected' : ''}>Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Contact Number</label>
+                    <input type="text" name="phone" value="${user.phone}" class="form-input" required style="width:100%; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
+                </div>
+                <div class="form-group">
+                    <label>Blood Group</label>
+                    <select name="bloodGroup" class="form-select" style="width:100%; padding:10px; border-radius:8px; border:1px solid #e2e8f0; appearance:auto;">
+                        <option value="A+" ${patientDetails.bloodGroup == 'A+' ? 'selected' : ''}>A+</option>
+                        <option value="A-" ${patientDetails.bloodGroup == 'A-' ? 'selected' : ''}>A-</option>
+                        <option value="B+" ${patientDetails.bloodGroup == 'B+' ? 'selected' : ''}>B+</option>
+                        <option value="B-" ${patientDetails.bloodGroup == 'B-' ? 'selected' : ''}>B-</option>
+                        <option value="O+" ${patientDetails.bloodGroup == 'O+' ? 'selected' : ''}>O+</option>
+                        <option value="O-" ${patientDetails.bloodGroup == 'O-' ? 'selected' : ''}>O-</option>
+                        <option value="AB+" ${patientDetails.bloodGroup == 'AB+' ? 'selected' : ''}>AB+</option>
+                        <option value="AB-" ${patientDetails.bloodGroup == 'AB-' ? 'selected' : ''}>AB-</option>
+                    </select>
+                </div>
+                
+                <hr style="margin:20px 0; border:0; border-top:1px solid #e2e8f0;">
+                
+                <div class="form-group">
+                    <label>Change Password (Leave blank to keep current)</label>
+                    <input type="password" name="newPassword" placeholder="New Password" class="form-input" style="width:100%; padding:10px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:10px;">
+                    <input type="password" name="confirmPassword" placeholder="Confirm New Password" class="form-input" style="width:100%; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
+                </div>
+
+                <button type="submit" class="btn-primary" style="width:100%; margin-top:10px;">Save Profile Changes</button>
+                <button type="button" onclick="closeModal('editProfileModal')" style="background:transparent; color:#64748b; border:none; width:100%; margin-top:10px; cursor:pointer; font-weight:600;">Cancel</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Booking Modal -->
     <div id="bookingModal" class="modal">
         <div class="modal-content">
@@ -371,7 +433,7 @@
                     <select name="doctorId" class="form-select" required style="width:100%; padding:10px; border-radius:8px; border:1px solid #e2e8f0; appearance:auto;">
                         <option value="" disabled selected>Choose a Doctor</option>
                         <c:forEach var="doc" items="${doctors}">
-                            <option value="${doc.id}">Dr. ${doc.fullName} (${doc.specialization})</option>
+                            <option value="${doc.id}">Dr. ${doc.fullName} (${doc.specialization}) - ₹${doc.consultationFee != null ? doc.consultationFee : '500'}</option>
                         </c:forEach>
                     </select>
                 </div>

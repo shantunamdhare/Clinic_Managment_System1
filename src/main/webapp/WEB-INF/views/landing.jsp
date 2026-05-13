@@ -104,6 +104,24 @@
             color: #9ca3af !important;
             cursor: pointer !important;
         }
+        .password-toggle {
+            position: absolute !important;
+            right: 15px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            cursor: pointer !important;
+            color: #9ca3af !important;
+            font-size: 18px !important;
+            z-index: 10 !important;
+            transition: color 0.2s !important;
+        }
+        .password-toggle:hover {
+            color: #7c3aed !important;
+        }
+        .form-group {
+            position: relative !important;
+            margin-bottom: 16px !important;
+        }
 
         /* Footer Modals Styling */
         #privacy-toggle:checked ~ #privacy-modal,
@@ -300,6 +318,17 @@
                             <h3>Welcome Back!</h3>
                             <p class="subtitle">Login to access your dashboard</p>
 
+                            <c:if test="${not empty loginError}">
+                                <div class="alert-msg error-msg" style="background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                                    <span>⚠️</span> ${loginError}
+                                </div>
+                            </c:if>
+                            <c:if test="${not empty registerSuccess}">
+                                <div class="alert-msg success-msg" style="background: #dcfce7; color: #166534; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                                    <span>✅</span> ${registerSuccess}
+                                </div>
+                            </c:if>
+
                             <form action="/login" method="post">
                                 <div class="form-group">
                                     <span class="input-icon">&#x2709;</span>
@@ -307,7 +336,8 @@
                                 </div>
                                 <div class="form-group">
                                     <span class="input-icon">&#x1F512;</span>
-                                    <input type="password" name="password" class="form-input" placeholder="Enter your password" required>
+                                    <input type="password" name="password" id="loginPassword" class="form-input" placeholder="Enter your password" required>
+                                    <span class="password-toggle" onclick="togglePassword('loginPassword')">&#x1F441;</span>
                                 </div>
                                 <div class="form-group">
                                     <span class="input-icon">&#x1F464;</span>
@@ -335,6 +365,12 @@
                         <div class="tab-content register-content">
                             <h3>Create Account</h3>
                             <p class="subtitle">Join our medical community</p>
+
+                            <c:if test="${not empty registerError}">
+                                <div class="alert-msg error-msg" style="background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                                    <span>⚠️</span> ${registerError}
+                                </div>
+                            </c:if>
 
                             <form action="/register" method="post" onsubmit="this.querySelector('.btn-register').classList.add('loading')">
                                 <div class="form-group">
@@ -499,10 +535,6 @@
                                  <!-- Staff specific fields -->
                                  <div id="staffFields" style="display: none; background: rgba(37,99,235,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed rgba(37,99,235,0.3);">
                                      <p style="font-size: 0.8rem; color: #2563eb; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Staff Details</p>
-                                     <div class="form-group" style="margin-bottom: 10px;">
-                                         <span class="input-icon">&#x260E;</span>
-                                         <input type="text" name="staffPhone" id="staffPhone" class="form-input" placeholder="Contact Number">
-                                     </div>
                                      <div class="form-group" style="margin-bottom: 10px;">
                                          <span class="input-icon">&#x1F464;</span>
                                          <input type="text" name="staffId" id="staffId" class="form-input" placeholder="Staff Role (e.g. Nurse, Technician)" required>
@@ -1145,7 +1177,6 @@
             if(deliveryPhone) deliveryPhone.required = false;
             if(vehicleType) vehicleType.required = false;
 
-            if(staffPhone) staffPhone.required = false;
             if(staffId) staffId.required = false;
             if(hospName) hospName.required = false;
 
@@ -1186,10 +1217,23 @@
             } else if (roleSelect.value === "Staff") {
                 if(staffFields) {
                     staffFields.style.display = "block";
-                    if(staffPhone) staffPhone.required = true;
+                    if(regPhone) regPhone.required = true;
                     if(staffId) staffId.required = true;
                     if(hospName) hospName.required = true;
                 }
+            }
+        }
+
+        function togglePassword(inputId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = event.currentTarget;
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.style.color = '#7c3aed';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.style.color = '#9ca3af';
             }
         }
         function subscribeNewsletter() {

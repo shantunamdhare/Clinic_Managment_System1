@@ -208,11 +208,12 @@
         </a>
             <div class="nav flex-column mt-4">
                 <a href="${pageContext.request.contextPath}/receptionist/dashboard" class="nav-link-item ${pageContext.request.requestURI.contains('dashboard') ? 'active' : ''}"><i class="fas fa-th-large"></i> <span>Dashboard</span></a>
-                <a href="${pageContext.request.contextPath}/receptionist/patients" class="nav-link-item"><i class="fas fa-users"></i> <span>Patients</span></a>
-                <a href="#" class="nav-link-item" data-bs-toggle="modal" data-bs-target="#registrationModal"><i class="fas fa-user-plus"></i> <span>Register Patient</span></a>
-                <a href="#" class="nav-link-item" data-bs-toggle="modal" data-bs-target="#bookingModal"><i class="fas fa-calendar-check"></i> <span>Book Appointment</span></a>
-                
-                <div class="nav-label">Management</div>
+            <a href="${pageContext.request.contextPath}/receptionist/patients" class="nav-link-item ${pageContext.request.requestURI.contains('patients') ? 'active' : ''}"><i class="fas fa-users"></i> <span>Patients</span></a>
+            <a href="#" class="nav-link-item" data-bs-toggle="modal" data-bs-target="#registrationModal"><i class="fas fa-user-plus"></i> <span>Register Patient</span></a>
+            <a href="#" class="nav-link-item" data-bs-toggle="modal" data-bs-target="#bookingModal"><i class="fas fa-calendar-check"></i> <span>Book Appointment</span></a>
+            <a href="#" class="nav-link-item" data-bs-toggle="modal" data-bs-target="#leaveModal"><i class="fas fa-calendar-minus"></i> <span>Leave Request</span></a>
+            
+            <div class="nav-label" style="padding: 8px 20px 4px; color: var(--text-muted-custom); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;">Management</div>
                 <a href="${pageContext.request.contextPath}/receptionist/queue" class="nav-link-item ${pageContext.request.requestURI.contains('queue') ? 'active' : ''}"><i class="fas fa-users"></i> <span>Queue Status</span></a>
                 <a href="${pageContext.request.contextPath}/receptionist/calendar" class="nav-link-item ${pageContext.request.requestURI.contains('calendar') ? 'active' : ''}"><i class="fas fa-calendar-alt"></i> <span>Calendar</span></a>
                 <a href="${pageContext.request.contextPath}/receptionist/profile" class="nav-link-item ${pageContext.request.requestURI.contains('profile') ? 'active' : ''}"><i class="fas fa-user-circle"></i> <span>My Profile</span></a>
@@ -240,6 +241,19 @@
         </div>
 
         <div class="content-area">
+            <c:if test="${not empty successMessage}">
+                <div class="alert alert-success border-0 shadow-sm mb-4 alert-dismissible fade show" style="border-radius: 12px;">
+                    <i class="fas fa-check-circle me-2"></i> ${successMessage}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            </c:if>
+            <c:if test="${not empty errorMessage}">
+                <div class="alert alert-danger border-0 shadow-sm mb-4 alert-dismissible fade show" style="border-radius: 12px;">
+                    <i class="fas fa-exclamation-circle me-2"></i> ${errorMessage}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            </c:if>
+            
             <!-- Dashboard Statistics -->
             <div class="row g-4 mb-4">
                 <div class="col-md-3">
@@ -394,9 +408,57 @@
                                 </c:choose>
                             </div>
                         </div>
+
+                        <!-- Leave Requests History -->
+                        <div class="row mt-4 pt-4 border-top">
+                            <div class="col-12">
+                                <h6 class="fw-bold small text-muted mb-3 d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-calendar-minus me-2"></i> My Leave Requests</span>
+                                    <button class="btn btn-sm btn-outline-primary py-1 px-3" style="border-radius: 8px; font-size: 0.7rem;" data-bs-toggle="modal" data-bs-target="#leaveModal">
+                                        <i class="fas fa-plus me-1"></i> New Request
+                                    </button>
+                                </h6>
+                                <c:choose>
+                                    <c:when test="${not empty leaveRequests}">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm align-middle mb-0">
+                                                <thead class="text-muted" style="font-size: 0.7rem; text-transform: uppercase;">
+                                                    <tr>
+                                                        <th>Reason</th>
+                                                        <th>Period</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="small">
+                                                    <c:forEach var="lr" items="${leaveRequests}">
+                                                        <tr>
+                                                            <td>${lr.reason}</td>
+                                                            <td class="text-nowrap">${lr.startDate} to ${lr.endDate}</td>
+                                                            <td>
+                                                                <span class="badge ${lr.status == 'Approved' ? 'bg-success' : (lr.status == 'Rejected' ? 'bg-danger' : 'bg-warning')}">
+                                                                    ${lr.status}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    </c:forEach>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="text-center py-3 bg-light rounded-4">
+                                            <p class="text-muted small mb-0">No leave requests found</p>
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+            
+            <div class="row">
+                <div class="col-lg-8">
                     <div class="panel h-100">
                         <div class="panel-title"><i class="fas fa-list"></i> Today's Appointments</div>
                         <div class="table-responsive">
@@ -563,6 +625,47 @@
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-success px-4" onclick="submitBooking()">Confirm Booking</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leave Request Modal -->
+    <div class="modal fade" id="leaveModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-calendar-minus me-2"></i>Request Leave / Half Day</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form action="${pageContext.request.contextPath}/receptionist/leave/apply" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Leave Type</label>
+                            <select class="form-select" name="leaveType" required>
+                                <option value="Full Day">Full Day</option>
+                                <option value="Half Day">Half Day</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Reason</label>
+                            <textarea class="form-control" name="reason" rows="3" placeholder="Explain your reason for leave..." required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" class="form-control" name="startDate" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">End Date</label>
+                                <input type="date" class="form-control" name="endDate" required>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-warning px-4 fw-bold">Submit Request</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

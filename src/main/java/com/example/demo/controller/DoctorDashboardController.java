@@ -30,9 +30,9 @@ public class DoctorDashboardController {
     @Autowired private AvailabilityRepository availabilityRepo;
     @Autowired private UserRepository userRepository;
     @Autowired private MedicineRepository medicineRepo;
-    @Autowired private PrescriptionItemRepository prescriptionItemRepo;
     @Autowired private NotificationRepository notificationRepo;
     @Autowired private PrescriptionPdfService pdfService;
+    @Autowired private LeaveRequestRepository leaveRequestRepository;
 
     @GetMapping("/prescriptions/download/{id}")
     public org.springframework.http.ResponseEntity<org.springframework.core.io.InputStreamResource> downloadPdf(@PathVariable Long id) {
@@ -92,6 +92,7 @@ public class DoctorDashboardController {
         model.addAttribute("totalPatients", totalPatients);
         model.addAttribute("todayAppointments", todayAppointments);
         model.addAttribute("pendingLabReports", pendingLabReports);
+        model.addAttribute("leaveRequests", leaveRequestRepository.findByUserOrderBySubmittedAtDesc(doctor));
         return "doctor-dashboard";
     }
 
@@ -317,9 +318,12 @@ public class DoctorDashboardController {
                                        @RequestParam(required = false) Double consultationFee,
                                        HttpSession session,
                                        RedirectAttributes ra) {
-        User doctor = getLoggedInDoctor(session);
-        if (doctor == null) return "redirect:/";
-
+        User doctorSession = getLoggedInDoctor(session);
+        if (doctorSession == null) return "redirect:/";
+        
+        // Refresh from DB to ensure we have the latest data (especially the fixed consultation fee)
+        User doctor = userRepository.findById(doctorSession.getId()).orElse(doctorSession);
+        
         if (patientId == null) {
             ra.addFlashAttribute("error", "Please select a patient.");
             return "redirect:/doctor/prescriptions" + (visitId != null ? "?visitId=" + visitId : "");
@@ -336,7 +340,10 @@ public class DoctorDashboardController {
         p.setDoctor(doctor);
         p.setStatus(status);
         p.setNotes(notes);
-        p.setConsultationFee(consultationFee);
+        
+        // Use the consultation fee fixed by the Admin
+        p.setConsultationFee(doctor.getConsultationFee() != null ? doctor.getConsultationFee() : 500.0);
+        
         if (visitId != null) {
             visitRepo.findById(visitId).ifPresent(p::setVisit);
         }
@@ -570,5 +577,25 @@ public class DoctorDashboardController {
         availabilityRepo.deleteById(id);
         ra.addFlashAttribute("success", "Slot deleted.");
         return "redirect:/doctor/availability";
+    }
+
+    @PostMapping("/leave/apply")
+    public String applyLeave(@RequestParam String startDate,
+                             @RequestParam String endDate,
+                             @RequestParam String reason,
+                             @RequestParam(required = false, defaultValue = "Full Day") String leaveType,
+                             HttpSession session,
+                             RedirectAttributes ra) {
+        User doctor = getLoggedInDoctor(session);
+        if (doctor == null) return "redirect:/";
+        
+        try {
+            LeaveRequest lr = new LeaveRequest(doctor, reason, LocalDate.parse(startDate), LocalDate.parse(endDate), leaveType);
+            leaveRequestRepository.save(lr);
+            ra.addFlashAttribute("success", "Leave request submitted successfully!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Error submitting leave: " + e.getMessage());
+        }
+        return "redirect:/doctor/dashboard";
     }
 }

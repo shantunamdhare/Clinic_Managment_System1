@@ -6,10 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class ReceptionistService {
@@ -22,9 +20,6 @@ public class ReceptionistService {
 
     @Autowired
     private DepartmentRepository departmentRepository;
-
-    @Autowired
-    private ScheduleRepository scheduleRepository;
 
     @Autowired
     private UserRepository userRepository;

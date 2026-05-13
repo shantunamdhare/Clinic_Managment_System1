@@ -47,9 +47,6 @@ public class PharmacyController {
     private InvoicePdfService invoicePdfService;
 
     @Autowired
-    private PrescriptionRepository prescriptionRepository;
-
-    @Autowired
     private MedicineRepository medicineRepository;
 
     @Autowired
@@ -340,7 +337,6 @@ public class PharmacyController {
         return "redirect:/pharmacy/inventory";
     }
     @GetMapping("/pharmacy/profile")
-    @SuppressWarnings("unused")
     public String profile(Model model, HttpSession session) {
         User user = (User) session.getAttribute("user");
         if (user == null || !"Pharmacy".equals(user.getRole())) return "redirect:/";
@@ -387,6 +383,7 @@ public class PharmacyController {
     public String submitLeave(@RequestParam String startDate,
                               @RequestParam String endDate,
                               @RequestParam String reason,
+                              @RequestParam(required = false, defaultValue = "Full Day") String leaveType,
                               HttpSession session,
                               RedirectAttributes ra) {
         User user = (User) session.getAttribute("user");
@@ -398,6 +395,7 @@ public class PharmacyController {
             lr.setStartDate(LocalDate.parse(startDate));
             lr.setEndDate(LocalDate.parse(endDate));
             lr.setReason(reason);
+            lr.setLeaveType(leaveType);
             lr.setStatus("Pending");
             leaveRequestRepository.save(lr);
             ra.addFlashAttribute("successMessage", "Leave request submitted successfully!");

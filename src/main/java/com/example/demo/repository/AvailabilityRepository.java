@@ -19,4 +19,7 @@ public interface AvailabilityRepository extends JpaRepository<Availability, Long
 
     // Admin dashboard: doctors available today
     List<Availability> findByAvailableDateOrderByStartTimeAsc(LocalDate date);
+
+    // Fetch all upcoming availability slots
+    List<Availability> findByAvailableDateGreaterThanEqualOrderByAvailableDateAscStartTimeAsc(LocalDate date);
 }

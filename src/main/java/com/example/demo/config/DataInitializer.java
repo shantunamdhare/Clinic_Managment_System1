@@ -8,17 +8,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Configuration
 public class DataInitializer {
 
     @Bean
-    public CommandLineRunner initData(
+    CommandLineRunner initData(
             PatientRepository patientRepository,
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
@@ -43,54 +40,17 @@ public class DataInitializer {
             NoShowRecordRepository noShowRepo) {
         
         return args -> {
-            // --- Comprehensive Database Cleanup (to avoid foreign key violations) ---
-            System.out.println(">> Performing pre-initialization database cleanup...");
+            System.out.println(">> Database initialization starting...");
             
-            // 1. Delete dependent child records first
-            notificationRepo.deleteAll();
-            attendanceRepo.deleteAll();
-            shiftRepo.deleteAll();
-            leaveRequestRepository.deleteAll();
-            availabilityRepo.deleteAll();
-            scheduleRepo.deleteAll();
-            legacyAttendanceRepo.deleteAll();
-            legacyShiftRepo.deleteAll();
-            performanceRepo.deleteAll();
-            noShowRepo.deleteAll();
+            // Cleanup removed to ensure permanent storage as requested.
             
-            // 2. Delete main entity records
-            labReportRepository.deleteAll();
-            labRequestRepository.deleteAll();
-            prescriptionRepository.deleteAll();
-            visitRepository.deleteAll();
-            appointmentRepository.deleteAll();
-            invoiceRepo.deleteAll();
-            patientRepository.deleteAll();
-            
-            System.out.println(">> Database cleanup complete.");
-
             // 1. Initialize Users / Roles
             seedUser(userRepository, passwordEncoder, "admin@gmail.com", "admin123", "Admin", "System Admin");
-
-            // --- Database Cleanup: Remove unwanted seed users from previous runs ---
-            List<String> usersToDelete = List.of(
-                "doctor@gmail.com", "receptionist@gmail.com", "pharmacy@gmail.com", 
-                "delivery@gmail.com", "recep@gmail.com", "pharmacist@gmail.com",
-                "rahul.staff@gmail.com"
-            );
-            for (String email : usersToDelete) {
-                userRepository.findByEmail(email).ifPresent(u -> {
-                    // Delete associated records first to avoid constraint violations
-                    shiftRepo.deleteAll(shiftRepo.findByUser(u));
-                    attendanceRepo.deleteAll(attendanceRepo.findByStaff(u));
-                    notificationRepo.deleteAll(notificationRepo.findByUserOrderByCreatedAtDesc(u));
-                    leaveRequestRepository.deleteAll(leaveRequestRepository.findByUserOrderBySubmittedAtDesc(u));
-                    // Also delete prescriptions where this user is the doctor
-                    prescriptionRepository.deleteAll(prescriptionRepository.findByDoctorOrderByCreatedAtDesc(u));
-                    userRepository.delete(u);
-                    System.out.println(">> Deleted unwanted user: " + email);
-                });
-            }
+            
+            // Seed default users only if they don't exist
+            seedUser(userRepository, passwordEncoder, "doctor@gmail.com", "1234", "Doctor", "Dr. Sameer");
+            seedUser(userRepository, passwordEncoder, "recep@gmail.com", "1234", "Receptionist", "Receptionist User");
+            seedUser(userRepository, passwordEncoder, "pharmacist@gmail.com", "1234", "Pharmacy", "Pharmacist User");
 
             // Lab User with specific details
             if (userRepository.findByEmail("shyam@gmail.com").isEmpty()) {

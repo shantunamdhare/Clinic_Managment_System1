@@ -56,9 +56,19 @@
                 <i class="fas fa-check-circle"></i> ${success}
             </div>
         </c:if>
+        <c:if test="${not empty successMessage}">
+            <div class="alert-custom alert-success">
+                <i class="fas fa-check-circle"></i> ${successMessage}
+            </div>
+        </c:if>
         <c:if test="${not empty error}">
             <div class="alert-custom alert-error">
                 <i class="fas fa-exclamation-circle"></i> ${error}
+            </div>
+        </c:if>
+        <c:if test="${not empty errorMessage}">
+            <div class="alert-custom alert-error">
+                <i class="fas fa-exclamation-circle"></i> ${errorMessage}
             </div>
         </c:if>
 
@@ -111,13 +121,48 @@
 
                         <hr class="my-4" style="border-color: #e2e8f0;">
 
-                        <div class="d-flex justify-content-end">
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-outline-primary" style="border-radius: 8px; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                <i class="fas fa-key me-1"></i> Change Password
+                            </button>
                             <button type="submit" class="btn-primary-custom">
                                 <i class="fas fa-save me-1"></i> Save Changes
                             </button>
                         </div>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold"><i class="fas fa-lock me-2"></i>Change Password</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form action="/change-password" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label-custom">Current Password</label>
+                        <input type="password" name="currentPassword" class="form-control-custom" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-custom">New Password</label>
+                        <input type="password" name="newPassword" class="form-control-custom" required minlength="8">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-custom">Confirm New Password</label>
+                        <input type="password" name="confirmPassword" class="form-control-custom" required minlength="8">
+                    </div>
+                    <div class="text-end mt-4">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn-primary-custom px-4">Update Password</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
