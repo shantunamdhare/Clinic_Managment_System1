@@ -118,6 +118,77 @@
             border-color: var(--primary) !important;
             box-shadow: 0 0 0 4px var(--primary-light) !important;
         }
+    /* ---- Mobile Responsive Updates ---- */
+.sidebar-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 998;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+.sidebar-toggle-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--gray-700);
+    cursor: pointer;
+    padding: 4px;
+}
+
+@media(max-width: 768px) {
+    .sidebar-toggle-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .sidebar { 
+        transform: translateX(-100%); 
+        transition: transform 0.3s ease-in-out;
+        width: 280px !important;
+        z-index: 999;
+        display: flex !important; flex-direction: column !important;
+    }
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    .main-content { 
+        margin-left: 0 !important; 
+    }
+    .main-header {
+        padding: 12px 16px !important;
+        gap: 12px;
+    }
+    .header-search {
+        display: none !important;
+    }
+    .user-info {
+        display: none !important;
+    }
+    .user-profile {
+        padding-left: 0 !important;
+        border-left: none !important;
+    }
+    .dashboard-stats {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 16px !important;
+    }
+    .table-responsive {
+        overflow-x: auto;
+    }
+    table {
+        min-width: 800px;
+    }
+    .quick-status-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
     </style>
 </head>
 <body>
@@ -501,5 +572,39 @@
             setInterval(checkNewPrescriptions, 30000);
         });
     </script>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<script>
+    function toggleSidebar() {
+        const sb = document.querySelector('.sidebar');
+        if(sb) sb.classList.toggle('active');
+        const overlay = document.getElementById('sidebarOverlay');
+        if(overlay) overlay.classList.toggle('active');
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const header = document.querySelector('.main-header');
+        if(header && !document.getElementById('sidebarToggleBtn')) {
+            const toggleBtn = document.createElement('button');
+            toggleBtn.id = 'sidebarToggleBtn';
+            toggleBtn.className = 'sidebar-toggle-btn';
+            toggleBtn.innerHTML = '<i class="fas fa-bars" style="font-size: 24px;"></i>';
+            toggleBtn.onclick = toggleSidebar;
+            header.insertBefore(toggleBtn, header.firstChild);
+        }
+
+        document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                if(window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+        
+        const overlay = document.getElementById('sidebarOverlay');
+        if(overlay) {
+            overlay.onclick = toggleSidebar;
+        }
+    });
+</script>
 </body>
 </html>

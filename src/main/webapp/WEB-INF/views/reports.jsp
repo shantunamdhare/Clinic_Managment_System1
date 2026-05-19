@@ -88,11 +88,44 @@
         }
         .btn-logout-sidebar:hover { background: rgba(248,113,113,0.1); }
 
-        @media(max-width: 992px) {
-            .sidebar { width: 80px; }
-            .sidebar-brand h4, .sidebar-brand small, .sidebar-user .name, .sidebar-user .role, .nav-link-item span, .nav-label { display: none; }
-            .main-content { margin-left: 80px; }
-        }
+        
+    /* ---- Mobile Responsive Updates ---- */
+.sidebar-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 998;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+@media(max-width: 768px) {
+    .sidebar { 
+        transform: translateX(-100%); 
+        transition: transform 0.3s ease-in-out;
+        width: 280px !important;
+        z-index: 999;
+        display: flex !important; flex-direction: column !important;
+    }
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    .main-content { 
+        margin-left: 0 !important; padding: 15px !important; }
+    .topbar {
+        padding: 12px 16px;
+    }
+    .content-area {
+        padding: 16px;
+    }
+    .sidebar-brand h4, .sidebar-brand small, .sidebar-user .name, .sidebar-user .role, .nav-link-item span, .nav-label { display: block !important; }
+    .nav-link-item { justify-content: flex-start !important; padding: 10px 20px !important; }
+}
     </style>
 </head>
 <body>
@@ -376,5 +409,55 @@
             });
         }
     </script>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const topbar = document.querySelector('.topbar');
+        if(topbar && !document.getElementById('sidebarToggleBtn')) {
+            const h5 = topbar.querySelector('h5');
+            if (h5) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'd-flex align-items-center gap-2';
+                const toggleBtn = document.createElement('button');
+                toggleBtn.id = 'sidebarToggleBtn';
+                toggleBtn.className = 'btn btn-light d-md-none';
+                toggleBtn.style.padding = '4px 8px';
+                toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                toggleBtn.onclick = function() {
+                    const sb = document.querySelector('.sidebar');
+                    if(sb) sb.classList.toggle('active');
+                    const overlay = document.getElementById('sidebarOverlay');
+                    if(overlay) overlay.classList.toggle('active');
+                };
+                wrapper.appendChild(toggleBtn);
+                h5.parentNode.insertBefore(wrapper, h5);
+                wrapper.appendChild(h5);
+                h5.style.margin = '0';
+            }
+        } else if (!topbar && !document.getElementById('sidebarToggleBtn')) {
+            const main = document.querySelector('.main-content');
+            if(main) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'd-md-none mb-3 d-flex align-items-center';
+                wrapper.innerHTML = '<button id="sidebarToggleBtn" class="btn btn-light me-2" style="padding:4px 8px;"><i class="fas fa-bars"></i></button><h5 class="m-0">Menu</h5>';
+                wrapper.querySelector('button').onclick = function() {
+                    const sb = document.querySelector('.sidebar');
+                    if(sb) sb.classList.toggle('active');
+                    const overlay = document.getElementById('sidebarOverlay');
+                    if(overlay) overlay.classList.toggle('active');
+                };
+                main.insertBefore(wrapper, main.firstChild);
+            }
+        }
+        const overlay = document.getElementById('sidebarOverlay');
+        if(overlay) {
+            overlay.onclick = function() {
+                const sb = document.querySelector('.sidebar');
+                if(sb) sb.classList.remove('active');
+                overlay.classList.remove('active');
+            };
+        }
+    });
+</script>
 </body>
 </html>

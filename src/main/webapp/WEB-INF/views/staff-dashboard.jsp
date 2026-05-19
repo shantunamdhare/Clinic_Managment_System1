@@ -258,6 +258,98 @@
             font-weight: 700;
             color: var(--gray-900);
         }
+    /* ---- Mobile Responsive Updates ---- */
+.sidebar-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 998;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+.sidebar-toggle-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--gray-700);
+    cursor: pointer;
+    padding: 4px;
+}
+
+@media(max-width: 768px) {
+    .sidebar-toggle-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .sidebar { 
+        transform: translateX(-100%); 
+        transition: transform 0.3s ease-in-out;
+        width: 280px !important;
+        z-index: 999;
+        display: flex !important; flex-direction: column !important;
+    }
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    .main-content { 
+        margin-left: 0 !important; 
+    }
+    .dashboard-container {
+        padding: 16px !important;
+    }
+    .topbar {
+        padding: 12px 16px;
+        gap: 12px;
+    }
+    .topbar-search {
+        display: none !important;
+    }
+    .user-info {
+        display: none !important;
+    }
+    .user-profile {
+        padding-left: 0 !important;
+        border-left: none !important;
+    }
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    .page-title {
+        font-size: 20px !important;
+    }
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 16px !important;
+    }
+    .dashboard-grid-2-1 {
+        grid-template-columns: 1fr !important;
+    }
+    .section-card {
+        overflow-x: auto;
+    }
+    .data-table {
+        min-width: 800px;
+    }
+    .profile-info-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    .profile-header button {
+        margin: 0 auto !important;
+    }
+}
     </style>
 </head>
 <body>
@@ -403,7 +495,7 @@
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+                    <div class="dashboard-grid-2-1" style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
                         <!-- Recent Shifts -->
                         <div class="section-card">
                             <div class="section-header">
@@ -870,5 +962,39 @@
             }
         }
     </script>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<script>
+    function toggleSidebar() {
+        const sb = document.querySelector('.sidebar');
+        if(sb) sb.classList.toggle('active');
+        const overlay = document.getElementById('sidebarOverlay');
+        if(overlay) overlay.classList.toggle('active');
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const topbar = document.querySelector('.topbar');
+        if(topbar && !document.getElementById('sidebarToggleBtn')) {
+            const toggleBtn = document.createElement('button');
+            toggleBtn.id = 'sidebarToggleBtn';
+            toggleBtn.className = 'sidebar-toggle-btn';
+            toggleBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 28px;">menu</span>';
+            toggleBtn.onclick = toggleSidebar;
+            topbar.insertBefore(toggleBtn, topbar.firstChild);
+        }
+
+        document.querySelectorAll('.sidebar-nav .nav-item').forEach(link => {
+            link.addEventListener('click', () => {
+                if(window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+        
+        const overlay = document.getElementById('sidebarOverlay');
+        if(overlay) {
+            overlay.onclick = toggleSidebar;
+        }
+    });
+</script>
 </body>
 </html>

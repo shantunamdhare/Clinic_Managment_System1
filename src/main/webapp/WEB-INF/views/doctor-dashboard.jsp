@@ -201,10 +201,53 @@
         .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
         .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
-        @media(max-width: 768px) {
-            .sidebar { width: 100%; height: auto; position: relative; }
-            .main-content { margin-left: 0; }
-        }
+        
+    /* ---- Mobile Responsive Updates ---- */
+.sidebar-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 998;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+@media(max-width: 768px) {
+    .sidebar { 
+        transform: translateX(-100%); 
+        transition: transform 0.3s ease-in-out;
+        width: 280px;
+        z-index: 999;
+    }
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    .main-content { 
+        margin-left: 0; 
+    }
+    .topbar {
+        padding: 12px 16px;
+    }
+    .content-area {
+        padding: 16px;
+    }
+    .stat-card {
+        padding: 16px;
+        gap: 12px;
+    }
+    .stat-icon {
+        width: 48px; height: 48px; font-size: 1.25rem;
+    }
+    .stat-value { font-size: 1.5rem; }
+    .panel {
+        padding: 16px;
+    }
+}
     </style>
 </head>
 <body>
@@ -357,5 +400,39 @@
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const topbar = document.querySelector('.topbar');
+        if(topbar && !document.getElementById('sidebarToggleBtn')) {
+            const h5 = topbar.querySelector('h5');
+            if (h5) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'd-flex align-items-center gap-2';
+                const toggleBtn = document.createElement('button');
+                toggleBtn.id = 'sidebarToggleBtn';
+                toggleBtn.className = 'btn btn-light d-md-none';
+                toggleBtn.style.padding = '4px 8px';
+                toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                toggleBtn.onclick = function() {
+                    document.querySelector('.sidebar').classList.toggle('active');
+                    document.getElementById('sidebarOverlay').classList.toggle('active');
+                };
+                wrapper.appendChild(toggleBtn);
+                h5.parentNode.insertBefore(wrapper, h5);
+                wrapper.appendChild(h5);
+                h5.style.margin = '0';
+            }
+        }
+        const overlay = document.getElementById('sidebarOverlay');
+        if(overlay) {
+            overlay.onclick = function() {
+                document.querySelector('.sidebar').classList.remove('active');
+                overlay.classList.remove('active');
+            };
+        }
+    });
+</script>
 </body>
 </html>
+

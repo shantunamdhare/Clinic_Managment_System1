@@ -123,16 +123,46 @@
         .form-group { margin-bottom:16px; }
         .form-group label { display:block; font-size:13px; font-weight:700; color:#64748b; margin-bottom:8px; }
 
+        .sidebar-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 90;
+            display: none; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.active { display: block; opacity: 1; }
+        .sidebar-toggle-btn {
+            display: none; background: none; border: none; font-size: 24px; color: #1e293b; cursor: pointer; padding: 0 16px 0 0; margin: 0; line-height: 1;
+        }
+
         @media (max-width: 1024px) {
             .sidebar { width:80px; }
+            .sidebar-brand h2 { font-size: 14px; text-align: center; margin-bottom: 10px; }
             .sidebar-brand span, .nav-item span { display:none; }
-            .main-content { margin-left:80px; }
+            .sidebar-brand { padding: 0 10px 20px; }
+            .main-content { margin-left:80px; padding:24px; }
             .stats-row { grid-template-columns:1fr; }
+            div[style*="grid-template-columns: 2fr 1fr"] { grid-template-columns:1fr !important; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); width: 280px; z-index: 100; transition: transform 0.3s ease; }
+            .sidebar.active { transform: translateX(0); }
+            .sidebar-brand h2 { font-size:22px; text-align:left; margin-bottom: 0; }
+            .sidebar-brand span, .nav-item span { display:inline; }
+            .sidebar-brand { padding: 0 24px 28px; }
+            .main-content { margin-left:0; padding:16px; }
+            .sidebar-toggle-btn { display: inline-block; }
+            .top-bar { flex-direction: column; align-items: flex-start; gap: 16px; }
+            .top-actions { width: 100%; }
+            .top-actions .btn-primary { width: 100%; text-align: center; }
+            .data-table { display: block; overflow-x: auto; white-space: nowrap; }
+            .card { padding: 16px; }
+            div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns:1fr !important; }
         }
     </style>
 </head>
 <body>
     <div class="dashboard-layout">
+        <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-brand">
@@ -178,12 +208,15 @@
             </c:if>
 
             <header class="top-bar">
-                <div class="user-profile-summary" style="cursor:pointer; transition: opacity 0.2s;" onclick="openModal('editProfileModal')" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                <div style="display:flex; align-items:center;">
+                    <button class="sidebar-toggle-btn" onclick="toggleSidebar()">&#9776;</button>
+                    <div class="user-profile-summary" style="cursor:pointer; transition: opacity 0.2s;" onclick="openModal('editProfileModal')" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
                     <div class="user-avatar">${user.fullName.substring(0,1)}</div>
                     <div class="user-info">
                         <h1>Hello, ${user.fullName}</h1>
                         <p>ID: ${patientDetails.patientId} &bull; Blood Group: ${not empty patientDetails.bloodGroup ? patientDetails.bloodGroup : 'N/A'}</p>
                     </div>
+                </div>
                 </div>
                 <div class="top-actions">
                     <button class="btn-primary" onclick="showSection('appointments', document.querySelectorAll('.nav-item')[4])">&#x1F4C5; Book Appointment</button>
@@ -488,6 +521,16 @@
 
             // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Close sidebar on mobile after navigating
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
+        }
+
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('active');
+            document.querySelector('.sidebar-overlay').classList.toggle('active');
         }
 
         function openModal(id) {

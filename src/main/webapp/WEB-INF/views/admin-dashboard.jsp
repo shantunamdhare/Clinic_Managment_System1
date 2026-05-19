@@ -234,6 +234,84 @@
 
         @media(max-width:1200px) { .stats-row { grid-template-columns:repeat(2,1fr); } .cards-triple { grid-template-columns:1fr; } }
         @media(max-width:900px) { .admin-sidebar { display:none; } .admin-main { margin-left:0; } .cards-row { grid-template-columns:1fr; } }
+    /* ---- Mobile Responsive Updates ---- */
+.sidebar-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 998;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+.sidebar-toggle-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: #334155;
+    cursor: pointer;
+    padding: 4px;
+    font-size: 24px;
+}
+
+@media(max-width: 900px) {
+    .sidebar-toggle-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .admin-sidebar { 
+        display: flex !important;
+        transform: translateX(-100%); 
+        transition: transform 0.3s ease-in-out;
+        width: 280px !important;
+        z-index: 999;
+    }
+    .admin-sidebar.active {
+        transform: translateX(0);
+    }
+    .admin-main { 
+        margin-left: 0 !important; 
+        padding: 16px !important;
+    }
+    .top-bar {
+        padding-bottom: 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    .top-bar h1 {
+        font-size: 22px !important;
+    }
+    .top-bar-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .date-badge {
+        display: none !important;
+    }
+    .stats-row {
+        grid-template-columns: 1fr !important;
+    }
+    .cards-row {
+        grid-template-columns: 1fr !important;
+    }
+    .cards-triple {
+        grid-template-columns: 1fr !important;
+    }
+    .card {
+        padding: 20px !important;
+        overflow-x: auto;
+    }
+    .data-table {
+        min-width: 800px;
+    }
+}
     </style>
 </head>
 <body>
@@ -1405,6 +1483,52 @@ window.addEventListener('load', function() {
         }
     }
 });
+</script>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<script>
+    function toggleSidebar() {
+        const sb = document.querySelector('.admin-sidebar');
+        if(sb) sb.classList.toggle('active');
+        const overlay = document.getElementById('sidebarOverlay');
+        if(overlay) overlay.classList.toggle('active');
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const header = document.querySelector('.top-bar');
+        if(header && !document.getElementById('sidebarToggleBtn')) {
+            const toggleBtn = document.createElement('button');
+            toggleBtn.id = 'sidebarToggleBtn';
+            toggleBtn.className = 'sidebar-toggle-btn';
+            toggleBtn.innerHTML = '&#9776;'; // Hamburger icon
+            toggleBtn.onclick = toggleSidebar;
+            
+            // Insert toggle button before h1
+            const h1 = header.querySelector('h1');
+            if (h1) {
+                const wrapper = document.createElement('div');
+                wrapper.style.display = 'flex';
+                wrapper.style.alignItems = 'center';
+                wrapper.style.gap = '12px';
+                h1.parentNode.insertBefore(wrapper, h1);
+                wrapper.appendChild(toggleBtn);
+                wrapper.appendChild(h1);
+                h1.style.margin = '0';
+            }
+        }
+
+        document.querySelectorAll('.sidebar-nav .nav-item').forEach(link => {
+            link.addEventListener('click', () => {
+                if(window.innerWidth <= 900) {
+                    toggleSidebar();
+                }
+            });
+        });
+        
+        const overlay = document.getElementById('sidebarOverlay');
+        if(overlay) {
+            overlay.onclick = toggleSidebar;
+        }
+    });
 </script>
 </body>
 </html>

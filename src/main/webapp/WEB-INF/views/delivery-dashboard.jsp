@@ -437,6 +437,92 @@
             margin-bottom: 16px;
             display: inline-block;
         }
+    /* ---- Mobile Responsive Updates ---- */
+.sidebar-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 998;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+.sidebar-toggle-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--gray-700);
+    cursor: pointer;
+    padding: 4px;
+}
+
+@media(max-width: 768px) {
+    .sidebar-toggle-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .sidebar { 
+        transform: translateX(-100%); 
+        transition: transform 0.3s ease-in-out;
+        width: 280px !important;
+        z-index: 999;
+        display: flex !important; flex-direction: column !important;
+    }
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    .main-content { 
+        margin-left: 0 !important; 
+        padding: 16px !important;
+    }
+    .top-header {
+        padding: 12px 0;
+        gap: 12px;
+        margin-bottom: 24px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    #page-subtitle {
+        display: none !important;
+    }
+    .header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .user-info {
+        display: none !important;
+    }
+    .user-profile {
+        padding-left: 0 !important;
+        border-left: none !important;
+    }
+    .welcome-section h1 {
+        font-size: 20px !important;
+    }
+    #stats-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+    .section-card {
+        overflow-x: auto;
+    }
+    table {
+        min-width: 800px;
+    }
+    .profile-info-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+    }
+}
     </style>
 </head>
 <body>
@@ -1016,5 +1102,47 @@
             }
         }
     </script>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<script>
+    function toggleSidebar() {
+        const sb = document.querySelector('.sidebar');
+        if(sb) sb.classList.toggle('active');
+        const overlay = document.getElementById('sidebarOverlay');
+        if(overlay) overlay.classList.toggle('active');
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const header = document.querySelector('.top-header');
+        if(header && !document.getElementById('sidebarToggleBtn')) {
+            const toggleBtn = document.createElement('button');
+            toggleBtn.id = 'sidebarToggleBtn';
+            toggleBtn.className = 'sidebar-toggle-btn';
+            toggleBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 28px;">menu</span>';
+            toggleBtn.onclick = toggleSidebar;
+            
+            // Insert toggle button before the welcome section
+            const welcomeSection = header.querySelector('.welcome-section');
+            if (welcomeSection) {
+                welcomeSection.style.display = 'flex';
+                welcomeSection.style.alignItems = 'center';
+                welcomeSection.style.gap = '12px';
+                welcomeSection.insertBefore(toggleBtn, welcomeSection.firstChild);
+            }
+        }
+
+        document.querySelectorAll('.sidebar-nav .nav-item').forEach(link => {
+            link.addEventListener('click', () => {
+                if(window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+        
+        const overlay = document.getElementById('sidebarOverlay');
+        if(overlay) {
+            overlay.onclick = toggleSidebar;
+        }
+    });
+</script>
 </body>
 </html>

@@ -140,5 +140,38 @@
     </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const topbar = document.querySelector('.topbar');
+        if(topbar && !document.getElementById('sidebarToggleBtn')) {
+            const h5 = topbar.querySelector('h5');
+            if (h5) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'd-flex align-items-center gap-2';
+                const toggleBtn = document.createElement('button');
+                toggleBtn.id = 'sidebarToggleBtn';
+                toggleBtn.className = 'btn btn-light d-md-none';
+                toggleBtn.style.padding = '4px 8px';
+                toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                toggleBtn.onclick = function() {
+                    document.querySelector('.sidebar').classList.toggle('active');
+                    document.getElementById('sidebarOverlay').classList.toggle('active');
+                };
+                wrapper.appendChild(toggleBtn);
+                h5.parentNode.insertBefore(wrapper, h5);
+                wrapper.appendChild(h5);
+                h5.style.margin = '0';
+            }
+        }
+        const overlay = document.getElementById('sidebarOverlay');
+        if(overlay) {
+            overlay.onclick = function() {
+                document.querySelector('.sidebar').classList.remove('active');
+                overlay.classList.remove('active');
+            };
+        }
+    });
+</script>
 </body>
 </html>
