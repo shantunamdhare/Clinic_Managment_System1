@@ -142,7 +142,8 @@ public class PharmacyService {
         List<Medicine> expiring = getExpiringMedicines();
         
         List<User> recipients = userRepository.findAll().stream()
-                .filter(u -> "Admin".equalsIgnoreCase(u.getRole()) || "Pharmacy".equalsIgnoreCase(u.getRole()))
+                .filter(u -> ("Admin".equalsIgnoreCase(u.getRole()) && (u.getHospitalName() == null || u.getHospitalName().trim().isEmpty())) 
+                          || "Pharmacy".equalsIgnoreCase(u.getRole()))
                 .collect(java.util.stream.Collectors.toList());
 
         for (Medicine med : lowStock) {

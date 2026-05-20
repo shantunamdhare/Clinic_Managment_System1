@@ -94,6 +94,14 @@ public class MainController {
     }
 
     // ========================
+    // Admin Login Page
+    // ========================
+    @GetMapping("/admin-login")
+    public String adminLoginPage() {
+        return "admin-login";
+    }
+
+    // ========================
     // User Registration
     // ========================
     @PostMapping("/register")
@@ -330,22 +338,42 @@ public class MainController {
         pharmacyService.checkAndGenerateAlerts();
         
         model.addAttribute("user", user);
+        String clinicName = user.getHospitalName();
 
         LocalDate today = LocalDate.now();
         LocalDate monthStart = today.withDayOfMonth(1);
 
-        // Patient stats
-        long totalPatients = patientRepository.count();
-        model.addAttribute("totalPatients", totalPatients);
+        // Filter Users
+        List<User> allClinicUsers = userRepository.findAll().stream()
+                .filter(u -> clinicName == null || clinicName.trim().isEmpty() || clinicName.equalsIgnoreCase(u.getHospitalName()))
+                .collect(java.util.stream.Collectors.toList());
 
-        // Appointment stats
-        long totalAppointments = appointmentRepository.count();
-        long todayAppointments = appointmentRepository.countByAppointmentDate(today);
-        long monthAppointments = appointmentRepository.countByAppointmentDateBetween(monthStart, today);
-        long pendingAppointments = appointmentRepository.countByStatus("Pending");
-        long completedAppointments = appointmentRepository.countByStatus("Completed");
-        long cancelledAppointments = appointmentRepository.countByStatus("Cancelled");
+        List<User> doctors = allClinicUsers.stream().filter(u -> "Doctor".equalsIgnoreCase(u.getRole())).collect(java.util.stream.Collectors.toList());
+
+        // Staff stats
+        model.addAttribute("totalDoctors", doctors.size());
+        model.addAttribute("totalStaff", allClinicUsers.stream().filter(u -> "Staff".equalsIgnoreCase(u.getRole())).count());
+        model.addAttribute("totalReceptionists", allClinicUsers.stream().filter(u -> "Receptionist".equalsIgnoreCase(u.getRole()) || "RECEPTIONIST".equalsIgnoreCase(u.getRole())).count());
+        model.addAttribute("totalLabUsers", allClinicUsers.stream().filter(u -> "Lab".equalsIgnoreCase(u.getRole())).count());
+        model.addAttribute("totalPharmacy", allClinicUsers.stream().filter(u -> "Pharmacy".equalsIgnoreCase(u.getRole())).count());
+        model.addAttribute("totalDelivery", allClinicUsers.stream().filter(u -> "Delivery".equalsIgnoreCase(u.getRole())).count());
+        model.addAttribute("totalUsers", allClinicUsers.size());
         
+        model.addAttribute("doctors", doctors);
+        model.addAttribute("allUsers", allClinicUsers);
+
+        // Filter Appointments
+        List<Appointment> allClinicAppointments = appointmentRepository.findAll().stream()
+                .filter(a -> a.getDoctor() != null && (clinicName == null || clinicName.equalsIgnoreCase(a.getDoctor().getHospitalName())))
+                .collect(java.util.stream.Collectors.toList());
+
+        long totalAppointments = allClinicAppointments.size();
+        long todayAppointments = allClinicAppointments.stream().filter(a -> a.getAppointmentDate() != null && a.getAppointmentDate().isEqual(today)).count();
+        long monthAppointments = allClinicAppointments.stream().filter(a -> a.getAppointmentDate() != null && !a.getAppointmentDate().isBefore(monthStart) && !a.getAppointmentDate().isAfter(today)).count();
+        long pendingAppointments = allClinicAppointments.stream().filter(a -> "Pending".equalsIgnoreCase(a.getStatus())).count();
+        long completedAppointments = allClinicAppointments.stream().filter(a -> "Completed".equalsIgnoreCase(a.getStatus())).count();
+        long cancelledAppointments = allClinicAppointments.stream().filter(a -> "Cancelled".equalsIgnoreCase(a.getStatus())).count();
+
         model.addAttribute("totalAppointments", totalAppointments);
         model.addAttribute("todayAppointments", todayAppointments);
         model.addAttribute("monthAppointments", monthAppointments);
@@ -353,51 +381,44 @@ public class MainController {
         model.addAttribute("completedAppointments", completedAppointments);
         model.addAttribute("cancelledAppointments", cancelledAppointments);
 
-        // User / Staff stats
-        model.addAttribute("totalDoctors", userRepository.countByRole("Doctor"));
-        model.addAttribute("totalStaff", userRepository.countByRole("Staff"));
-        model.addAttribute("totalReceptionists", userRepository.countByRole("Receptionist"));
-        model.addAttribute("totalLabUsers", userRepository.countByRole("Lab"));
-        model.addAttribute("totalPharmacy", userRepository.countByRole("Pharmacy"));
-        model.addAttribute("totalDelivery", userRepository.countByRole("Delivery"));
-        model.addAttribute("totalUsers", userRepository.count());
+        // Patient stats (unique patients in clinic appointments)
+        long totalPatients = allClinicAppointments.stream().map(Appointment::getPatient).distinct().count();
+        if (totalPatients == 0 && clinicName == null) totalPatients = patientRepository.count();
+        model.addAttribute("totalPatients", totalPatients);
 
-        // Doctor availability (all upcoming)
-        model.addAttribute("todayAvailability", availabilityRepository.findByAvailableDateGreaterThanEqualOrderByAvailableDateAscStartTimeAsc(today));
-
-        // Doctors list
-        model.addAttribute("doctors", userRepository.findByRoleIgnoreCase("Doctor"));
-
-        // All staff
-        model.addAttribute("allUsers", userRepository.findAll());
-        model.addAttribute("allAttendances", attendanceRepo.findAll());
+        // Doctor availability (all upcoming for clinic doctors)
+        List<com.example.demo.model.Availability> clinicAvailabilities = availabilityRepository.findByAvailableDateGreaterThanEqualOrderByAvailableDateAscStartTimeAsc(today).stream()
+                .filter(av -> av.getDoctor() != null && (clinicName == null || clinicName.equalsIgnoreCase(av.getDoctor().getHospitalName())))
+                .collect(java.util.stream.Collectors.toList());
+        model.addAttribute("todayAvailability", clinicAvailabilities);
 
         // Recent appointments
-        model.addAttribute("recentAppointments", appointmentRepository.findTop10ByOrderByAppointmentDateDescAppointmentTimeDesc());
-
-        // Today's appointments
-        model.addAttribute("todayAppointmentsList", appointmentRepository.findByAppointmentDateOrderByAppointmentTimeAsc(today));
-
-        // Visits count
-        model.addAttribute("totalVisits", visitRepository.count());
-
-        // Real System Alerts from Notifications for this Admin
-        model.addAttribute("systemAlerts", notificationRepo.findByUserAndIsReadFalseOrderByCreatedAtDesc(user));
-
-        // Real Low Stocks from PharmacyService
-        List<Map<String, String>> lowStocks = pharmacyService.getLowStockMedicines().stream()
-                .map(m -> {
-                    Map<String, String> map = new HashMap<>();
-                    map.put("item", m.getName());
-                    map.put("count", m.getStockLevel().toString());
-                    map.put("status", m.getStockLevel() <= 5 ? "Critical" : "Warning");
-                    return map;
-                })
+        List<Appointment> recentAppointments = allClinicAppointments.stream()
+                .sorted(java.util.Comparator.comparing(Appointment::getAppointmentDate, java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder()))
+                .thenComparing(Appointment::getAppointmentTime, java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())))
+                .limit(10)
                 .collect(java.util.stream.Collectors.toList());
+        model.addAttribute("recentAppointments", recentAppointments);
+
+        // Real Low Stocks from PharmacyService (Global only)
+        List<Map<String, String>> lowStocks = new java.util.ArrayList<>();
+        if (clinicName == null || clinicName.trim().isEmpty()) {
+            lowStocks = pharmacyService.getLowStockMedicines().stream()
+                    .map(m -> {
+                        Map<String, String> map = new HashMap<>();
+                        map.put("item", m.getName());
+                        map.put("count", m.getStockLevel().toString());
+                        map.put("status", m.getStockLevel() <= 5 ? "Critical" : "Warning");
+                        return map;
+                    })
+                    .collect(java.util.stream.Collectors.toList());
+        }
         model.addAttribute("lowStocks", lowStocks);
 
-        // Real Pending Bills from PharmacyService
+        // Real Pending Bills from PharmacyService (Filtered by clinic patients)
+        java.util.Set<Long> clinicPatientIds = allClinicAppointments.stream().map(a -> a.getPatient().getId()).collect(java.util.stream.Collectors.toSet());
         List<Map<String, String>> pendingBills = pharmacyService.getPendingPayments().stream()
+                .filter(i -> clinicName == null || clinicName.trim().isEmpty() || clinicPatientIds.contains(i.getPatient().getId()))
                 .map(i -> {
                     Map<String, String> map = new HashMap<>();
                     map.put("patient", i.getPatient().getName());
@@ -408,17 +429,36 @@ public class MainController {
                 .collect(java.util.stream.Collectors.toList());
         model.addAttribute("pendingBills", pendingBills);
 
-        // Visitor messages
+        // Clean up wrong inventory alerts for clinic admins
+        if (clinicName != null && !clinicName.trim().isEmpty()) {
+            List<Notification> wrongAlerts = notificationRepo.findByUserAndIsReadFalseOrderByCreatedAtDesc(user).stream()
+                .filter(n -> n.getMessage().contains("Stock") || n.getMessage().contains("Expiry"))
+                .collect(java.util.stream.Collectors.toList());
+            if (!wrongAlerts.isEmpty()) {
+                notificationRepo.deleteAll(wrongAlerts);
+            }
+        }
+
+        // System Alerts for this Admin
+        model.addAttribute("systemAlerts", notificationRepo.findByUserAndIsReadFalseOrderByCreatedAtDesc(user));
+
+        // Visitor messages (Global or filterable if needed, assuming global here)
         model.addAttribute("visitorMessages", visitorMessageRepository.findAllByOrderBySubmittedAtDesc());
 
-        // Staff Leave Requests
-        List<LeaveRequest> allLeaveRequests = leaveRequestRepository.findAllByOrderBySubmittedAtDesc();
+        // Staff Leave Requests for clinic staff
+        List<LeaveRequest> allLeaveRequests = leaveRequestRepository.findAllByOrderBySubmittedAtDesc().stream()
+                .filter(r -> r.getUser() != null && (clinicName == null || clinicName.equalsIgnoreCase(r.getUser().getHospitalName())))
+                .collect(java.util.stream.Collectors.toList());
         model.addAttribute("leaveRequests", allLeaveRequests);
         model.addAttribute("pendingLeaveCount", allLeaveRequests.stream().filter(r -> "Pending".equals(r.getStatus())).count());
 
-        // Newsletter Subscriptions
-        model.addAttribute("newsletterSubscriptions", newsletterRepository.findAllByOrderBySubscribedAtDesc());
-        model.addAttribute("totalSubscribers", newsletterRepository.count());
+        // Newsletter Subscriptions (Global only)
+        List<Newsletter> subscriptions = (clinicName == null || clinicName.trim().isEmpty()) 
+            ? newsletterRepository.findAllByOrderBySubscribedAtDesc() 
+            : new java.util.ArrayList<>();
+        model.addAttribute("newsletterSubscriptions", subscriptions);
+        model.addAttribute("totalSubscribers", subscriptions.size());
+        model.addAttribute("totalVisits", visitRepository.count()); // Can be filtered later if needed
 
         return "admin-dashboard";
     }

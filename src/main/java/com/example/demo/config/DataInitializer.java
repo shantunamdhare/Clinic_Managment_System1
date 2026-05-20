@@ -45,6 +45,7 @@ public class DataInitializer {
             // Cleanup removed to ensure permanent storage as requested.
             
             // 1. Initialize Users / Roles
+            seedUser(userRepository, passwordEncoder, "superadmin@gmail.com", "super123", "Super Admin", "System Super Admin");
             seedUser(userRepository, passwordEncoder, "admin@gmail.com", "admin123", "Admin", "System Admin");
             
             // Seed default users only if they don't exist

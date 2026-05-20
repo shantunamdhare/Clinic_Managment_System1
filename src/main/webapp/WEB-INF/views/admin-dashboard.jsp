@@ -366,7 +366,7 @@
     <main class="admin-main">
         <!-- Top Bar -->
         <div class="top-bar">
-            <h1>Welcome, <span>${user.fullName}</span></h1>
+            <h1>Welcome, <span>${user.fullName}</span> <small style="font-size:16px; color:#64748b; font-weight:600;">(${user.hospitalName != null ? user.hospitalName : 'System Admin'})</small></h1>
             <div class="top-bar-right">
                 <span class="date-badge">&#x1F4C5; <%= new java.text.SimpleDateFormat("EEEE, MMMM dd, yyyy").format(new java.util.Date()) %></span>
                 <span class="admin-badge" onclick="openAdminProfileModal()">&#x1F6E1; Administrator</span>

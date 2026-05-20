@@ -343,7 +343,6 @@
                                     <span class="input-icon">&#x1F464;</span>
                                     <select name="role" class="form-select" required>
                                         <option value="" disabled selected>Select Your Role</option>
-                                        <option value="Admin">Admin</option>
                                         <option value="Doctor">Doctor</option>
                                         <option value="Receptionist">Receptionist</option>
                                         <option value="Patient">Patient</option>
@@ -399,7 +398,6 @@
                                     <span class="input-icon">&#x1F464;</span>
                                     <select name="role" id="registerRoleSelect" class="form-select" required onchange="toggleRoleFields()">
                                         <option value="" disabled selected>Select Your Role</option>
-                                        <option value="Admin">Admin</option>
                                         <option value="Doctor">Doctor</option>
                                         <option value="Receptionist">Receptionist</option>
                                         <option value="Patient">Patient</option>
@@ -410,18 +408,7 @@
                                     </select>
                                 </div>
                                 
-                                <!-- Admin specific fields -->
-                                <div id="adminFields" style="display:none; background: rgba(108,99,255,0.03); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px dashed rgba(108,99,255,0.3);">
-                                    <p style="font-size: 0.8rem; color: #6C63FF; margin-top: 0; margin-bottom: 10px; font-weight: 600;">Admin Professional Details</p>
-                                    <div class="form-group" style="margin-bottom: 10px;">
-                                        <span class="input-icon">&#x1F1EE;&#x1F1E9;</span>
-                                        <input type="text" name="adminId" id="adminId" class="form-input" placeholder="Admin ID (e.g. ADM-101)">
-                                    </div>
-                                    <div class="form-group" style="margin-bottom: 0;">
-                                        <span class="input-icon">&#x1F3E5;</span>
-                                        <input type="text" name="clinicName" id="clinicName" class="form-input" placeholder="Clinic/Hospital Name">
-                                    </div>
-                                </div>
+
 
                                 <!-- Patient specific fields -->
                                 <div id="patientFields" style="display:none; background: rgba(124,77,255,0.03); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px dashed rgba(124,77,255,0.3); backdrop-filter: blur(5px);">
@@ -1112,14 +1099,11 @@
 
         function toggleRoleFields() {
             var roleSelect = document.getElementById("registerRoleSelect");
-            var adminFields = document.getElementById("adminFields");
             var patientFields = document.getElementById("patientFields");
             var doctorFields = document.getElementById("doctorFields");
             var labFields = document.getElementById("labFields");
             var deliveryFields = document.getElementById("deliveryFields");
             
-            var adminId = document.getElementById("adminId");
-            var clinicName = document.getElementById("clinicName");
             var regPhone = document.getElementById("regPhone");
             var patientAge = document.getElementById("patientAge");
             var patientGender = document.getElementById("patientGender");
@@ -1146,7 +1130,6 @@
             var recAddr = document.getElementById("receptionistAddress");
 
             // Reset visibility
-            if(adminFields) adminFields.style.display = "none";
             if(patientFields) patientFields.style.display = "none";
             if(doctorFields) doctorFields.style.display = "none";
             if(labFields) labFields.style.display = "none";
@@ -1156,8 +1139,6 @@
             if(staffFields) staffFields.style.display = "none";
             
             // Reset required status
-            if(adminId) adminId.required = false;
-            if(clinicName) clinicName.required = false;
             if(regPhone) regPhone.required = false;
             if(patientAge) patientAge.required = false;
             if(patientGender) patientGender.required = false;
@@ -1181,11 +1162,7 @@
             if(hospName) hospName.required = false;
 
             // Show and set required based on role
-            if (roleSelect.value === "Admin") {
-                if(adminFields) adminFields.style.display = "block";
-                if(adminId) adminId.required = true;
-                if(clinicName) clinicName.required = true;
-            } else if (roleSelect.value === "Patient") {
+            if (roleSelect.value === "Patient") {
                 if(patientFields) patientFields.style.display = "block";
                 if(regPhone) regPhone.required = true;
                 if(patientAge) patientAge.required = true;
